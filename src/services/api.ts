@@ -1,7 +1,8 @@
 /// <reference types="vite/client" />
 import axios from 'axios';
 
-export const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+const rawApiUrl = (import.meta.env.VITE_API_URL || 'http://localhost:3000/api').trim().replace(/\/+$/, '');
+export const BASE_URL = rawApiUrl.endsWith('/api') ? rawApiUrl : `${rawApiUrl}/api`;
 
 const api = axios.create({
   baseURL: BASE_URL,
