@@ -122,14 +122,28 @@
 
 
 /* Custom css  */
-.box1{
+.box1 {
   box-shadow: -10px 10px rgba(rgb(255, 254, 254))
 }
 
 
-/* Write css for set the width of scrollbar */
+/* Hide scrollbar for Chrome, Safari and Opera */
 ::-webkit-scrollbar {
-  width: 10px;
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox and add mobile touch optimizations */
+* {
+  -ms-overflow-style: none;
+  /* IE and Edge */
+  scrollbar-width: none;
+  /* Firefox */
+}
+
+html,
+body {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 
 
@@ -152,4 +166,46 @@ button:hover {
 
 html {
   scroll-behavior: smooth;
+}
+
+@theme {
+  --animate-fade-in-up: fade-in-up 0.4s ease-out forwards;
+  --animate-slide-in-right: slide-in-right 0.4s ease-out forwards;
+  --animate-bounce-soft: bounce-soft 2s infinite ease-in-out;
+
+  @keyframes fade-in-up {
+    0% {
+      opacity: 0;
+      transform: translateY(15px);
+    }
+
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slide-in-right {
+    0% {
+      opacity: 0;
+      transform: translateX(20px);
+    }
+
+    100% {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes bounce-soft {
+
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+
+    50% {
+      transform: translateY(-5px);
+    }
+  }
 }

@@ -39,5 +39,4 @@ const orderSlice = createSlice({
   }
 });
 
-export const { addItem, incrementItem, decrementItem, toggleIron } = orderSlice.actions;
 export default orderSlice.reducer;

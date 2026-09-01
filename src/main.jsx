@@ -6,7 +6,7 @@ import { Provider } from 'react-redux';
 import store from './Redux/store';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
-import toast, { Toaster } from 'react-hot-toast';
+import { Toaster } from 'react-hot-toast';
 
 function SkeletonFallback() {
   return (

@@ -9,9 +9,9 @@ const pricingPlans = [
     title: "Onetime Package",
     description: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Nostrum quae voluptas",
     features: [
-      { name: "Free Delivery", included: false },
+      { name: "Doorstep Pickup", included: false },
       { name: "Professional Staff", included: true },
-      { name: "Free Delivery", included: false },
+      { name: "Express Service", included: false },
       { name: "Laundry Service", included: true },
       { name: "Pickup Service", included: false },
     ],
@@ -22,7 +22,7 @@ const pricingPlans = [
     title: "Standard Package",
     description: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Nostrum quae voluptas",
     features: [
-      { name: "Free Delivery", included: true },
+      { name: "Doorstep Delivery", included: true },
       { name: "Professional Staff", included: true },
       { name: "Laundry Service", included: true },
       { name: "Pickup Service", included: false },
@@ -34,7 +34,7 @@ const pricingPlans = [
     title: "Premium Package",
     description: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Nostrum quae voluptas",
     features: [
-      { name: "Free Delivery", included: true },
+      { name: "Doorstep Delivery", included: true },
       { name: "Professional Staff", included: true },
       { name: "Laundry Service", included: true },
       { name: "Pickup Service", included: true },

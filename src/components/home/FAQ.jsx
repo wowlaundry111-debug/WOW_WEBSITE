@@ -13,7 +13,7 @@ const contactDetails = [
     {
         icon: <IoMailUnread size={28} />, 
         title: "Email", 
-        details: ["baliram10000@gmail.com"],
+        details: ["wowlaundry@gmail.com"],
         border: true
     },
     {
@@ -31,30 +31,40 @@ const contactDetails = [
 
 function FAQ() {
     return (
-        <div className='px-4 md:px-10 lg:px-20 py-10 mt-20 flex flex-col md:flex-row justify-between gap-10'>
+        <div className='px-4 md:px-10 lg:px-20 py-16 mt-20 flex flex-col md:flex-row justify-between gap-10 bg-white font-outfit selection:bg-black selection:text-[#B0FF49]'>
             <div className='w-full lg:w-[45%]'>
-                <div className='text-3xl md:text-5xl lilita-one-regular'>Contact <span className='text-blue-500'>Us</span></div>
-                <div className='bg-blue-100 rounded-4xl p-3 md:p-8 mt-10 flex flex-col'>
+                <div className="inline-block bg-[#B0FF49] border-2 border-black px-6 py-2 rounded-2xl shadow-[4px_4px_0px_rgba(0,0,0,1)] mb-8 transform -rotate-1">
+                    <div className='text-4xl md:text-5xl lilita-one-regular text-black uppercase tracking-wider'>Contact <span className='text-[#0D8DE3]'>Us</span></div>
+                </div>
+                
+                <div className='bg-[#0D8DE3] rounded-3xl md:rounded-[40px] border-2 border-black p-6 md:p-10 mt-6 flex flex-col shadow-[8px_8px_0px_rgba(0,0,0,1)] relative'>
+                    {/* Decorative element */}
+                    <div className="absolute top-8 -right-8 w-16 h-16 bg-white border-2 border-black rounded-full shadow-[2px_2px_0px_rgba(0,0,0,1)] flex items-center justify-center font-black text-3xl transform rotate-12">
+                        📞
+                    </div>
+
                     {contactDetails.map((item, index) => (
                         <div 
                             key={index} 
-                            className={`flex items-center gap-8 py-3 ${item.border ? 'border-y-2 border-blue-300 border-dashed' : ''}`}
+                            className={`flex items-center gap-6 py-6 ${item.border ? 'border-y-4 border-black border-dashed' : ''} group`}
                         >
-                            <div className='p-3 md:p-5 rounded-full bg-stone-50 w-fit text-blue-500'>
+                            <div className='p-4 md:p-5 rounded-2xl bg-black border-2 border-black w-fit text-[#B0FF49] shadow-[4px_4px_0px_rgba(255,255,255,1)] group-hover:-translate-y-1 group-hover:-translate-x-1 transition-transform'>
                                 {item.icon}
                             </div>
                             <div>
-                                <div className='text-lg poppins-medium'>{item.title}</div>
+                                <div className='text-xl font-black text-white uppercase tracking-widest bg-black inline-block px-2 py-0.5 rounded-lg border-2 border-black mb-2'>{item.title}</div>
                                 {item.details.map((detail, i) => (
-                                    <div key={i} className='poppins-regular text-stone-800 text-sm md:text-lg'>{detail}</div>
+                                    <div key={i} className='font-bold text-white text-base md:text-lg uppercase tracking-wider'>{detail}</div>
                                 ))}
                             </div>
                         </div>
                     ))}
                 </div>
             </div>
-            <div className='flex-1 flex justify-center items-end'>
-                <img src={contactImage} alt="contact image" className='w-[30rem]' />
+            
+            <div className='flex-1 flex justify-center items-end relative'>
+                <div className="absolute bottom-10 right-10 w-64 h-64 bg-[#B0FF49] rounded-full border-2 border-black shadow-[4px_4px_0px_rgba(0,0,0,1)] -z-10 blur-sm opacity-50"></div>
+                <img src={contactImage} alt="contact image" className='w-[30rem] filter drop-shadow-2xl hover:scale-105 transition-transform duration-500' />
             </div>
         </div>
     );

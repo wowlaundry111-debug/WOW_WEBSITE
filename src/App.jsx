@@ -6,13 +6,33 @@ import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 
 const Home = lazy(() => import('./pages/Home'));
-const Order = lazy(() => import('./pages/Order'));
-const Normal = lazy(() => import('./components/order/Normal'));
-const DryClean = lazy(() => import('./components/order/DryClean'));
-const EasyWash = lazy(() => import('./components/order/EasyWash'));
-const Blanket = lazy(() => import('./components/order/Blanket'));
-const Bag = lazy(() => import('./components/order/Bag'));
-const Shoes = lazy(() => import('./components/order/Shoes'));
+const Login = lazy(() => import('./pages/auth/Login'));
+const Register = lazy(() => import('./pages/auth/Register'));
+const ShopSelect = lazy(() => import('./pages/customer/ShopSelect'));
+const CustomerHome = lazy(() => import('./pages/customer/CustomerHome'));
+const CategoryItems = lazy(() => import('./pages/customer/CategoryItems'));
+const Cart = lazy(() => import('./pages/customer/Cart'));
+const OrderHistory = lazy(() => import('./pages/customer/OrderHistory'));
+const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
+const DeliveryDashboard = lazy(() => import('./pages/delivery/DeliveryDashboard'));
+
+import { Navigate, Outlet } from 'react-router-dom';
+
+const ProtectedCustomerRoute = () => {
+  const { currentUser, currentTenantId } = useAppStore();
+  if (!currentUser) return <Navigate to="/login" replace />;
+  if (currentUser.role !== 'Customer') return <Navigate to="/" replace />;
+  if (!currentTenantId) return <Navigate to="/shop-select" replace />;
+  return <Outlet />;
+};
+
+const ProtectedShopSelectRoute = () => {
+  const currentUser = useAppStore((state) => state.currentUser);
+  if (!currentUser) return <Navigate to="/login" replace />;
+  if (currentUser.role === 'SuperAdmin' || currentUser.role === 'ShopAdmin') return <Navigate to="/admin" replace />;
+  if (currentUser.role === 'Delivery') return <Navigate to="/delivery" replace />;
+  return <ShopSelect />;
+};
 
 function SkeletonFallback() {
   return (
@@ -28,21 +48,34 @@ function SkeletonFallback() {
   );
 }
 
+import SocketManager from './components/SocketManager';
+import { useAppStore } from './store/useAppStore';
+
 function App() {
+  const initializeAppData = useAppStore((state) => state.initializeAppData);
+
+  React.useEffect(() => {
+    initializeAppData();
+  }, [initializeAppData]);
+
   return (
     <>
+      <SocketManager />
       <BrowserRouter>
         <Suspense fallback={<SkeletonFallback />}>
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route path="/order" element={<Order />}>
-              <Route index element={<Normal />} />
-              <Route path="dry-clean" element={<DryClean />} />
-              <Route path="easy-wash" element={<EasyWash />} />
-              <Route path="blanket" element={<Blanket />} />
-              <Route path="bag" element={<Bag />} />
-              <Route path="shoes" element={<Shoes />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/shop-select" element={<ProtectedShopSelectRoute />} />
+            <Route element={<ProtectedCustomerRoute />}>
+              <Route path="/order" element={<CustomerHome />} />
+              <Route path="/order/:categoryId" element={<CategoryItems />} />
+              <Route path="/cart" element={<Cart />} />
+              <Route path="/order-history" element={<OrderHistory />} />
             </Route>
+            <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/delivery" element={<DeliveryDashboard />} />
           </Routes>
         </Suspense>
       </BrowserRouter>
