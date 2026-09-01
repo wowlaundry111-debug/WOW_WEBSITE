@@ -76,7 +76,10 @@ export interface Item {
   description?: string;
   pricePerKg?: number;
   pricePerItem?: number;
+  price?: number;
+  unit?: 'KG' | 'ITEM';
 }
+
 
 export interface OrderItem {
   itemId: string;
