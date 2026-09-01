@@ -391,7 +391,22 @@ export default function OrderBoard({
 
                   <div className="flex gap-4 mb-4 text-sm font-bold text-gray-600 flex-wrap items-center">
                     <span className="flex items-center gap-1"><Clock size={16}/> {new Date(order.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
-                    <span className="flex items-center gap-1"><CreditCard size={16}/> ₹{order.totalAmount}</span>
+                    {(() => {
+                      const hasKg = order.items.some(it => it.unit === 'KG');
+                      if (hasKg && !order.kgPriceUpdated) {
+                        return (
+                          <span className="flex items-center gap-1.5 font-black text-black">
+                            <CreditCard size={16}/> ₹{order.totalAmount}
+                            <span className="text-[10px] font-black bg-yellow-300 border border-black px-1.5 py-0.2 rounded uppercase">
+                              + KG Pending
+                            </span>
+                          </span>
+                        );
+                      }
+                      return (
+                        <span className="flex items-center gap-1 font-black"><CreditCard size={16}/> ₹{order.totalAmount}</span>
+                      );
+                    })()}
                     <span className={`px-2.5 py-0.5 border-2 border-black rounded-lg text-xs font-black uppercase shadow-[1.5px_1.5px_0px_rgba(0,0,0,1)] ${
                       order.paymentMode === 'COD' 
                         ? 'bg-[#B0FF49] text-black' 
@@ -704,23 +719,90 @@ export default function OrderBoard({
                 </div>
               )}
 
-              {/* Items List */}
-              <div className="border-2 border-black">
-                <div className="bg-black text-white p-3 font-black text-sm uppercase">
-                  Items ({selectedOrder.items.length})
+              {/* Items List - Split by Category (Per Item vs Per KG) */}
+              <div className="border-2 border-black rounded-xl overflow-hidden shadow-[3px_3px_0px_rgba(0,0,0,1)]">
+                <div className="bg-black text-white p-3 font-black text-sm uppercase flex justify-between items-center">
+                  <span>Order Items ({selectedOrder.items.length})</span>
+                  {selectedOrder.items.some(it => it.unit === 'KG') && (
+                    <span className={`text-[10px] px-2 py-0.5 rounded font-black uppercase ${
+                      selectedOrder.kgPriceUpdated ? 'bg-[#B0FF49] text-black' : 'bg-yellow-400 text-black'
+                    }`}>
+                      {selectedOrder.kgPriceUpdated ? 'KG Weighed ✓' : 'KG Pending Weighing ⚖️'}
+                    </span>
+                  )}
                 </div>
-                <div className="divide-y-2 divide-black">
-                  {selectedOrder.items.map((it, idx) => (
-                    <div key={idx} className="p-3 flex justify-between items-center font-bold text-sm">
-                      <span>{it.quantity}x {it.name}</span>
-                      <span>₹{it.price * it.quantity}</span>
+
+                {/* 1. Per Item Category */}
+                {(() => {
+                  const perItemProducts = selectedOrder.items.filter(it => it.unit !== 'KG');
+                  const perKgProducts = selectedOrder.items.filter(it => it.unit === 'KG');
+
+                  return (
+                    <div>
+                      {perItemProducts.length > 0 && (
+                        <div>
+                          <div className="bg-gray-100 px-3 py-1.5 border-b border-black flex justify-between items-center">
+                            <span className="text-xs font-black uppercase text-gray-700">📦 Per-Item Category (Directly Calculated)</span>
+                            <span className="text-[10px] font-bold text-gray-500">{perItemProducts.length} items</span>
+                          </div>
+                          <div className="divide-y divide-gray-200">
+                            {perItemProducts.map((it, idx) => (
+                              <div key={idx} className="p-3 flex justify-between items-center font-bold text-sm bg-white">
+                                <span>{it.quantity}x {it.name}</span>
+                                <span className="font-black text-black">₹{it.price * it.quantity}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* 2. Per KG Category */}
+                      {perKgProducts.length > 0 && (
+                        <div>
+                          <div className="bg-blue-50 px-3 py-1.5 border-t-2 border-b border-black flex justify-between items-center">
+                            <span className="text-xs font-black uppercase text-[#0D8DE3]">⚖️ Per-KG Category (Weight-Based)</span>
+                            <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded ${
+                              selectedOrder.kgPriceUpdated ? 'bg-[#B0FF49] text-black' : 'bg-yellow-200 text-yellow-900'
+                            }`}>
+                              {selectedOrder.kgPriceUpdated ? 'Weighed & Added' : 'Pending Weighing'}
+                            </span>
+                          </div>
+                          <div className="divide-y divide-gray-200">
+                            {perKgProducts.map((it, idx) => (
+                              <div key={idx} className="p-3 flex justify-between items-center font-bold text-sm bg-blue-50/30">
+                                <div>
+                                  <p>{it.quantity}x {it.name}</p>
+                                  <p className="text-[11px] text-gray-500 font-bold uppercase">
+                                    {it.kgWeight ? `Weighed: ${it.kgWeight} KG` : 'Awaiting delivery agent weight entry'}
+                                  </p>
+                                </div>
+                                <span className="font-black">
+                                  {selectedOrder.kgPriceUpdated && it.price > 0 ? `₹${it.price}` : <span className="text-yellow-800 bg-yellow-100 border border-yellow-300 px-2 py-0.5 rounded text-xs">Pending</span>}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
-                  ))}
-                </div>
+                  );
+                })()}
+
                 <div className="bg-gray-50 p-4 border-t-2 border-black space-y-2">
                   <div className="flex justify-between text-sm font-bold text-gray-600">
-                    <span>Subtotal</span>
-                    <span>₹{selectedOrder.items.reduce((sum, it) => sum + (it.price * it.quantity), 0)}</span>
+                    <span>Items Subtotal</span>
+                    <span>
+                      ₹{selectedOrder.items
+                        .filter(it => it.unit !== 'KG')
+                        .reduce((sum, it) => sum + (it.price * it.quantity), 0)}
+                      {selectedOrder.items.some(it => it.unit === 'KG') && (
+                        <span className="text-xs text-[#0D8DE3] ml-1">
+                          {selectedOrder.kgPriceUpdated 
+                            ? `+ ₹${selectedOrder.items.filter(it => it.unit === 'KG').reduce((s, it) => s + (it.price || 0), 0)} (KG)` 
+                            : '(+ KG Pending)'}
+                        </span>
+                      )}
+                    </span>
                   </div>
                   {selectedOrder.washPreferences && selectedOrder.washPreferences.length > 0 && (
                     <div className="flex justify-between text-sm font-bold text-gray-700">
@@ -744,7 +826,14 @@ export default function OrderBoard({
                   )}
                   <div className="flex justify-between text-lg font-black pt-2 border-t border-gray-300">
                     <span>Total Amount</span>
-                    <span className="text-[#0D8DE3]">₹{selectedOrder.totalAmount}</span>
+                    <span className="text-[#0D8DE3]">
+                      ₹{selectedOrder.totalAmount}
+                      {selectedOrder.items.some(it => it.unit === 'KG') && !selectedOrder.kgPriceUpdated && (
+                        <span className="text-xs font-bold text-yellow-800 bg-yellow-200 border border-black px-1.5 py-0.5 rounded ml-2">
+                          KG Pending
+                        </span>
+                      )}
+                    </span>
                   </div>
                 </div>
               </div>

@@ -100,7 +100,52 @@ export default function OrderHistory() {
                   </div>
                   <div>
                     <p className="text-[10px] sm:text-xs text-black bg-[#B0FF49] border-2 border-black px-2 py-0.5 rounded-lg uppercase tracking-widest font-black mb-2 w-fit">Total Amount</p>
-                    <p className="text-xl sm:text-2xl font-black text-[#0D8DE3] lilita-one-regular tracking-wide">₹{order.totalAmount}</p>
+                    {(() => {
+                      const perItemProducts = order.items.filter(it => it.unit !== 'KG');
+                      const perKgProducts = order.items.filter(it => it.unit === 'KG');
+                      const hasKgItems = perKgProducts.length > 0;
+                      const isKgPending = hasKgItems && !order.kgPriceUpdated;
+
+                      if (isKgPending) {
+                        if (perItemProducts.length === 0) {
+                          // Only KG items in this order
+                          return (
+                            <div>
+                              <span className="text-base sm:text-lg font-black text-[#0D8DE3] lilita-one-regular uppercase tracking-wider bg-yellow-200 border-2 border-black px-2.5 py-1 rounded-lg inline-block">
+                                Pending Calculation
+                              </span>
+                              <p className="text-[10px] font-bold text-gray-500 uppercase mt-1">Calculated after weighing on delivery</p>
+                            </div>
+                          );
+                        }
+
+                        // Both per-item and KG items
+                        return (
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="text-xl sm:text-2xl font-black text-[#0D8DE3] lilita-one-regular tracking-wide">
+                                ₹{order.totalAmount}
+                              </span>
+                              <span className="text-[10px] sm:text-xs font-black bg-yellow-300 text-black border-2 border-black px-2 py-0.5 rounded-lg uppercase tracking-wider animate-pulse">
+                                + KG Pending
+                              </span>
+                            </div>
+                            <p className="text-[10px] font-bold text-gray-500 uppercase mt-0.5">Final price updated on delivery</p>
+                          </div>
+                        );
+                      }
+
+                      return (
+                        <div className="flex items-center gap-2">
+                          <p className="text-xl sm:text-2xl font-black text-[#0D8DE3] lilita-one-regular tracking-wide">₹{order.totalAmount}</p>
+                          {hasKgItems && order.kgPriceUpdated && (
+                            <span className="text-[10px] font-black bg-[#B0FF49] text-black border border-black px-1.5 py-0.5 rounded uppercase">
+                              KG Calculated ✓
+                            </span>
+                          )}
+                        </div>
+                      );
+                    })()}
                   </div>
                   {order.paymentMode && (
                     <div>
@@ -117,72 +162,166 @@ export default function OrderHistory() {
                   </div>
                 </div>
                 
-                {/* Order Details */}
-                <div className="p-5 sm:p-6 bg-white">
-                  <div className="flex flex-col md:flex-row gap-8 md:gap-12">
-                    
-                    {/* Items List */}
-                    <div className="flex-1">
-                      <h4 className="text-base sm:text-lg font-black text-black mb-4 flex items-center gap-3 uppercase tracking-widest bg-gray-100 p-2 rounded-xl border-2 border-black w-fit shadow-[2px_2px_0px_rgba(0,0,0,1)]">
-                        <div className="bg-black p-1.5 rounded-lg border-2 border-black text-white">
-                            <Package size={18} />
-                        </div>
-                        Items ({order.items.length})
-                      </h4>
-                      <div className="space-y-3">
-                        {order.items.map((item, idx) => (
-                          <div key={idx} className="flex justify-between items-center text-sm sm:text-base p-3 border-2 border-black rounded-xl bg-gray-50">
-                            <span className="font-bold text-black uppercase">{item.quantity}x <span className="ml-2 text-gray-700">{item.name}</span></span>
-                            <span className="font-black text-[#0D8DE3] bg-white border-2 border-black px-2 py-1 rounded-lg">₹{item.price * item.quantity}</span>
-                          </div>
-                        ))}
-                      </div>
+                {/* Order Details Body */}
+                <div className="p-5 sm:p-6 bg-white space-y-6">
+                  {(() => {
+                    const perItemProducts = order.items.filter(it => it.unit !== 'KG');
+                    const perKgProducts = order.items.filter(it => it.unit === 'KG');
 
-                      {/* Wash Add-ons */}
-                      {order.washPreferences && order.washPreferences.length > 0 && (
-                        <div className="mt-4 p-3 bg-[#B0FF49]/20 border-2 border-black rounded-xl space-y-2">
-                          <h5 className="font-black text-xs uppercase text-black flex items-center gap-1.5">
-                            <Sparkles size={14} className="text-[#0D8DE3]" /> Wash Add-ons:
-                          </h5>
-                          <div className="flex flex-wrap gap-2">
-                            {order.washPreferences.map((p, pIdx) => (
-                              <span key={pIdx} className="bg-white border-2 border-black px-2.5 py-1 rounded-lg text-xs font-black flex items-center gap-1">
-                                <Sparkles size={12} className="text-[#0D8DE3]" /> {p.name} (+₹{p.price})
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                    
-                    <div className="w-full md:w-0.5 h-0.5 md:h-auto bg-black rounded-full"></div>
-                    
-                    {/* Delivery & Pickup Info */}
-                    <div className="flex-1 space-y-6">
-                      <div>
-                        <h4 className="text-base sm:text-lg font-black text-black mb-3 flex items-center gap-3 uppercase tracking-widest bg-gray-100 p-2 rounded-xl border-2 border-black w-fit shadow-[2px_2px_0px_rgba(0,0,0,1)]">
-                          <div className="bg-[#0D8DE3] p-1.5 rounded-lg border-2 border-black text-white">
-                            <Navigation size={18} />
-                          </div>
-                          Delivery Details
-                        </h4>
-                        <p className="text-sm sm:text-base font-bold text-gray-700 uppercase p-3 border-2 border-black rounded-xl bg-white shadow-[2px_2px_0px_rgba(0,0,0,1)]">{order.deliveryAddress}</p>
-                      </div>
-                      
-                      {order.pickupTime && (
-                        <div>
-                          <h4 className="text-base sm:text-lg font-black text-black mb-3 flex items-center gap-3 uppercase tracking-widest bg-gray-100 p-2 rounded-xl border-2 border-black w-fit shadow-[2px_2px_0px_rgba(0,0,0,1)]">
-                            <div className="bg-[#B0FF49] p-1.5 rounded-lg border-2 border-black text-black">
-                                <Clock size={18} />
+                    return (
+                      <>
+                        {/* ── Top Row: Left = Per-Item, Right = Per-KG with vertical line between ── */}
+                        <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-stretch">
+                          
+                          {/* Left Column: Per-Item Category */}
+                          <div className="flex-1 space-y-3">
+                            <div className="flex items-center justify-between">
+                              <h4 className="text-xs sm:text-sm font-black text-black flex items-center gap-2 uppercase tracking-widest bg-gray-100 px-3 py-1.5 rounded-xl border-2 border-black w-fit shadow-[2px_2px_0px_rgba(0,0,0,1)]">
+                                <div className="bg-black p-1 rounded-lg border border-black text-white">
+                                  <Package size={14} />
+                                </div>
+                                Per-Item Category ({perItemProducts.length})
+                              </h4>
+                              {perItemProducts.length > 0 && (
+                                <span className="text-[10px] font-black uppercase text-green-700 bg-green-100 border border-green-400 px-2 py-0.5 rounded-md">
+                                  Directly Calculated
+                                </span>
+                              )}
                             </div>
-                            Requested Pickup
-                          </h4>
-                          <p className="text-sm sm:text-base font-black text-black uppercase bg-[#B0FF49] p-3 border-2 border-black rounded-xl w-fit shadow-[2px_2px_0px_rgba(0,0,0,1)]">{order.pickupTime}</p>
+
+                            {perItemProducts.length > 0 ? (
+                              <div className="space-y-2">
+                                {perItemProducts.map((item, idx) => (
+                                  <div key={idx} className="flex justify-between items-center text-sm p-3 border-2 border-black rounded-xl bg-gray-50 shadow-[2px_2px_0px_rgba(0,0,0,1)]">
+                                    <span className="font-bold text-black uppercase">
+                                      {item.quantity}x <span className="ml-2 text-gray-800">{item.name}</span>
+                                    </span>
+                                    <span className="font-black text-[#0D8DE3] bg-white border-2 border-black px-2.5 py-0.5 rounded-lg text-sm">
+                                      ₹{item.price * item.quantity}
+                                    </span>
+                                  </div>
+                                ))}
+                              </div>
+                            ) : (
+                              <div className="p-4 border-2 border-dashed border-gray-300 rounded-xl text-center bg-gray-50/50">
+                                <p className="text-xs font-bold text-gray-400 uppercase">No per-piece items in this order</p>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Vertical Divider Line */}
+                          <div className="hidden md:block w-0.5 bg-black shrink-0 self-stretch"></div>
+                          <div className="block md:hidden w-full h-0.5 bg-black"></div>
+
+                          {/* Right Column: Per-KG Category */}
+                          <div className="flex-1 space-y-3">
+                            <div className="flex items-center justify-between">
+                              <h4 className="text-xs sm:text-sm font-black text-black flex items-center gap-2 uppercase tracking-widest bg-blue-50 px-3 py-1.5 rounded-xl border-2 border-[#0D8DE3] w-fit shadow-[2px_2px_0px_rgba(13,141,227,1)]">
+                                <div className="bg-[#0D8DE3] p-1 rounded-lg border border-black text-white">
+                                  <span className="text-xs font-black">⚖️</span>
+                                </div>
+                                Per-KG Category ({perKgProducts.length})
+                              </h4>
+                              {perKgProducts.length > 0 && (
+                                <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-md border ${
+                                  order.kgPriceUpdated 
+                                    ? 'bg-[#B0FF49] text-black border-black' 
+                                    : 'bg-yellow-100 text-yellow-800 border-yellow-400'
+                                }`}>
+                                  {order.kgPriceUpdated ? 'Weighed & Finalized' : 'Pending Weighing'}
+                                </span>
+                              )}
+                            </div>
+
+                            {perKgProducts.length > 0 ? (
+                              <div className="space-y-2">
+                                {perKgProducts.map((item, idx) => (
+                                  <div key={idx} className="p-3 border-2 border-black rounded-xl bg-blue-50/50 flex flex-wrap justify-between items-center gap-2 shadow-[2px_2px_0px_rgba(0,0,0,1)]">
+                                    <div>
+                                      <p className="font-black text-black text-sm uppercase">
+                                        {item.quantity}x {item.name}
+                                      </p>
+                                      <p className="text-[11px] font-bold text-gray-600 uppercase mt-0.5">
+                                        {item.kgWeight 
+                                          ? `Weighed: ${item.kgWeight} KG` 
+                                          : 'Weight will be taken by delivery agent'}
+                                      </p>
+                                    </div>
+
+                                    <div>
+                                      {order.kgPriceUpdated && item.price > 0 ? (
+                                        <span className="font-black text-black bg-[#B0FF49] border-2 border-black px-2.5 py-1 rounded-lg text-sm">
+                                          ₹{item.price}
+                                        </span>
+                                      ) : (
+                                        <span className="font-black text-xs text-yellow-900 bg-yellow-200 border-2 border-black px-2.5 py-1 rounded-lg uppercase tracking-wider">
+                                          Pending Calculation
+                                        </span>
+                                      )}
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            ) : (
+                              <div className="p-4 border-2 border-dashed border-gray-300 rounded-xl text-center bg-gray-50/50">
+                                <p className="text-xs font-bold text-gray-400 uppercase">No per-kg items in this order</p>
+                              </div>
+                            )}
+                          </div>
                         </div>
-                      )}
-                    </div>
-                    
-                  </div>
+
+                        {/* ── Horizontal Divider Line ── */}
+                        <div className="w-full h-0.5 bg-black my-2"></div>
+
+                        {/* ── Bottom Row: Delivery Details, Requested Pickup & Wash Add-ons (Horizontally below both) ── */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <h4 className="text-xs sm:text-sm font-black text-black mb-2 flex items-center gap-2 uppercase tracking-widest bg-gray-100 p-2 rounded-xl border-2 border-black w-fit shadow-[2px_2px_0px_rgba(0,0,0,1)]">
+                              <div className="bg-[#0D8DE3] p-1 rounded-lg border border-black text-white">
+                                <Navigation size={14} />
+                              </div>
+                              Delivery Details
+                            </h4>
+                            <p className="text-sm font-bold text-gray-700 uppercase p-3 border-2 border-black rounded-xl bg-white shadow-[2px_2px_0px_rgba(0,0,0,1)]">
+                              {order.deliveryAddress}
+                            </p>
+                          </div>
+                          
+                          <div className="space-y-3">
+                            {order.pickupTime && (
+                              <div>
+                                <h4 className="text-xs sm:text-sm font-black text-black mb-2 flex items-center gap-2 uppercase tracking-widest bg-gray-100 p-2 rounded-xl border-2 border-black w-fit shadow-[2px_2px_0px_rgba(0,0,0,1)]">
+                                  <div className="bg-[#B0FF49] p-1 rounded-lg border border-black text-black">
+                                    <Clock size={14} />
+                                  </div>
+                                  Requested Pickup
+                                </h4>
+                                <p className="text-sm font-black text-black uppercase bg-[#B0FF49] p-3 border-2 border-black rounded-xl w-fit shadow-[2px_2px_0px_rgba(0,0,0,1)]">
+                                  {order.pickupTime}
+                                </p>
+                              </div>
+                            )}
+
+                            {/* Wash Add-ons */}
+                            {order.washPreferences && order.washPreferences.length > 0 && (
+                              <div className="p-3 bg-[#B0FF49]/20 border-2 border-black rounded-xl space-y-1.5">
+                                <h5 className="font-black text-xs uppercase text-black flex items-center gap-1.5">
+                                  <Sparkles size={13} className="text-[#0D8DE3]" /> Wash Add-ons:
+                                </h5>
+                                <div className="flex flex-wrap gap-2">
+                                  {order.washPreferences.map((p, pIdx) => (
+                                    <span key={pIdx} className="bg-white border-2 border-black px-2.5 py-0.5 rounded-lg text-xs font-black flex items-center gap-1">
+                                      <Sparkles size={11} className="text-[#0D8DE3]" /> {p.name} (+₹{p.price})
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </>
+                    );
+                  })()}
                 </div>
               </div>
             ))}

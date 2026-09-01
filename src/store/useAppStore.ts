@@ -81,6 +81,7 @@ interface AppState {
   // Actions - Delivery Boy Operations
   verifyOrderItems: (orderId: string, itemsCount: Record<string, number>) => Promise<void>;
   recordPayment: (orderId: string, paymentMode: PaymentMode) => Promise<void>;
+  updateKgWeight: (orderId: string, items: { itemId: string; kgWeight: number }[]) => Promise<void>;
 
   // Actions - Super Admin Operations
   createShop: (name: string, branches: string[], upiId: string, bankName: string, accountNo: string, adminEmail: string) => Promise<void>;
@@ -517,7 +518,8 @@ export const useAppStore = create<AppState>()(
           name: c.name,
           quantity: c.quantity,
           unit: c.unit,
-          price: c.price,
+          // KG items are priced at 0 — delivery agent will weigh and update later
+          price: c.unit === 'KG' ? 0 : c.price,
         }));
 
         try {
@@ -526,7 +528,11 @@ export const useAppStore = create<AppState>()(
           const deliveryFeeAmt = shop?.deliveryFee || 0;
           const tax = (subtotal * taxPercent) / 100;
           const washPrefsCost = washPreferences?.reduce((s, w) => s + w.price, 0) || 0;
-          const finalTotal = subtotal - discount + tax + deliveryFeeAmt + washPrefsCost;
+          // KG items excluded from subtotal — pending delivery agent weighing
+          const perItemSubtotal = cart
+            .filter(c => c.unit !== 'KG')
+            .reduce((sum, c) => sum + c.price * c.quantity, 0);
+          const finalTotal = perItemSubtotal - discount + tax + deliveryFeeAmt + washPrefsCost;
 
           const res = await api.post('/orders', {
             shopId: currentTenantId,
@@ -615,9 +621,9 @@ export const useAppStore = create<AppState>()(
           if (image && (image.startsWith('data:') || (image as any) instanceof File)) {
             finalImage = await uploadImageToCloudinary(image);
           }
-          const res = await api.post('/catalog/categories', { shopId, name, image: finalImage });
-          set(state => ({ categories: [...state.categories, res.data] }));
-          return res.data;
+          // Do NOT push to state here — SocketManager's category_created event is the single source of truth
+          // to prevent double-push race condition when socket fires before/after API response updates state.
+          await api.post('/catalog/categories', { shopId, name, image: finalImage });
         } catch (err) {
           console.error('Failed to add category', err);
           throw err;
@@ -676,7 +682,8 @@ export const useAppStore = create<AppState>()(
           if (image && (image.startsWith('data:') || (image as any) instanceof File)) {
             finalImage = await uploadImageToCloudinary(image);
           }
-          const res = await api.post('/catalog/items', {
+          // Do NOT push to state here — SocketManager's item_created event is source of truth
+          await api.post('/catalog/items', {
             shopId,
             categoryId,
             name,
@@ -684,8 +691,6 @@ export const useAppStore = create<AppState>()(
             image: finalImage,
             ...(unit === 'KG' ? { pricePerKg: price } : { pricePerItem: price }),
           });
-          set(state => ({ items: [...state.items, res.data] }));
-          return res.data;
         } catch (err) {
           console.error('Failed to add item', err);
           throw err;
@@ -752,11 +757,11 @@ export const useAppStore = create<AppState>()(
       addOffer: async (offerData) => {
         const { currentTenantId } = get();
         try {
-          const res = await api.post('/catalog/offers', {
+          // Do NOT push to state here — SocketManager's offer_created event is source of truth
+          await api.post('/catalog/offers', {
             shopId: currentTenantId,
             ...offerData,
           });
-          set(state => ({ offers: [...state.offers, res.data] }));
         } catch (err: any) {
           console.error('Failed to add offer:', err);
           throw err;
@@ -832,6 +837,21 @@ export const useAppStore = create<AppState>()(
           }));
         } catch (err) {
           console.error('Failed to record payment:', err);
+        }
+      },
+
+      // updateKgWeight — delivery agent submits weights for KG items; backend recalculates total
+      updateKgWeight: async (orderId, items) => {
+        try {
+          const res = await api.patch(`/orders/${orderId}/kg-weight`, { items });
+          if (res.data) {
+            set(state => ({
+              orders: state.orders.map(o => o._id === orderId ? res.data : o),
+            }));
+          }
+        } catch (err) {
+          console.error('Failed to update KG weights:', err);
+          throw err;
         }
       },
 

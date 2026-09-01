@@ -127,11 +127,21 @@ export default function CategoryItems() {
                       <p className="text-xs font-bold text-gray-700 line-clamp-2 mt-1 uppercase bg-gray-100 p-2 border-2 border-black rounded-lg">{item.description}</p>
                     )}
                     
-                    <div className="flex items-end justify-between mt-4">
-                      <div className="bg-[#B0FF49] px-3 py-1 border-2 border-black rounded-xl shadow-[4px_4px_0px_rgba(0,0,0,1)] transform -rotate-2">
-                        <span className="font-black text-black text-xl">₹{price}</span>
-                        <span className="text-xs font-black text-black ml-1 uppercase">/ {unit}</span>
-                      </div>
+            <div className="flex items-end justify-between mt-4">
+                      {item.pricePerKg ? (
+                        // Per-KG items: price is determined at delivery by weighing
+                        <div className="flex flex-col gap-1">
+                          <div className="bg-[#0D8DE3] px-3 py-1 border-2 border-black rounded-xl shadow-[4px_4px_0px_rgba(0,0,0,1)] transform -rotate-2">
+                            <span className="font-black text-white text-sm uppercase tracking-wider">🏋️ Per KG</span>
+                          </div>
+                          <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">Priced at delivery</span>
+                        </div>
+                      ) : (
+                        <div className="bg-[#B0FF49] px-3 py-1 border-2 border-black rounded-xl shadow-[4px_4px_0px_rgba(0,0,0,1)] transform -rotate-2">
+                          <span className="font-black text-black text-xl">₹{item.pricePerItem || 0}</span>
+                          <span className="text-xs font-black text-black ml-1 uppercase">/ Item</span>
+                        </div>
+                      )}
                       
                       <div>
                         {qty > 0 ? (
@@ -154,6 +164,7 @@ export default function CategoryItems() {
                         )}
                       </div>
                     </div>
+
                   </div>
                 </div>
               );
@@ -173,7 +184,15 @@ export default function CategoryItems() {
               <p className="text-xs font-black text-black tracking-widest uppercase bg-white border-2 border-black inline-block px-2 py-0.5 rounded">
                 {cart.length} ITEM{cart.length > 1 ? 'S' : ''} ADDED
               </p>
-              <p className="text-2xl font-black mt-2 lilita-one-regular">₹{cartTotal}</p>
+              {cart.some(c => c.unit === 'KG') ? (
+                <p className="text-lg sm:text-xl font-black mt-2 lilita-one-regular uppercase tracking-wide">
+                  {cart.filter(c => c.unit !== 'KG').reduce((s, c) => s + c.price * c.quantity, 0) > 0 
+                    ? `₹${cart.filter(c => c.unit !== 'KG').reduce((s, c) => s + c.price * c.quantity, 0)} + KG Pending` 
+                    : 'Pending Weighing'}
+                </p>
+              ) : (
+                <p className="text-2xl font-black mt-2 lilita-one-regular">₹{cartTotal}</p>
+              )}
             </div>
             <div className="flex items-center gap-3">
               <span className="font-black text-lg uppercase tracking-widest">Basket</span>

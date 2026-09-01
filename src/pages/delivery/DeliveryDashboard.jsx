@@ -2,15 +2,18 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '../../store/useAppStore';
 import Navbar from '../../components/Navbar';
-import { MapPin, Navigation, Package, Phone, CheckCircle, Clock, X, PartyPopper } from 'lucide-react';
+import { MapPin, Navigation, Package, Phone, CheckCircle, Clock, X, PartyPopper, Scale, Sparkles } from 'lucide-react';
 
 export default function DeliveryDashboard() {
-  const { currentUser, fetchOrders, orders, users, shops, updateOrderStatus, verifyOrderItems, initializeAppData } = useAppStore();
+  const { currentUser, fetchOrders, orders, users, shops, items, updateOrderStatus, verifyOrderItems, updateKgWeight, initializeAppData } = useAppStore();
   const navigate = useNavigate();
 
   const [activeTab, setActiveTab] = useState('PICKUP'); // 'PICKUP' or 'DELIVERY'
   const [verifyModalOrder, setVerifyModalOrder] = useState(null);
   const [paymentModalOrder, setPaymentModalOrder] = useState(null);
+  const [weighModalOrder, setWeighModalOrder] = useState(null);
+  const [kgWeights, setKgWeights] = useState({});
+  const [isUpdatingKg, setIsUpdatingKg] = useState(false);
   
   // Verify modal state
   const [counts, setCounts] = useState({});
@@ -36,6 +39,36 @@ export default function DeliveryDashboard() {
 
   const displayOrders = activeTab === 'PICKUP' ? pendingPickups : pendingDeliveries;
 
+  const handleOpenWeighModal = (order) => {
+    const initial = {};
+    order.items.forEach(it => {
+      if (it.unit === 'KG') {
+        initial[it.itemId] = it.kgWeight || '';
+      }
+    });
+    setKgWeights(initial);
+    setWeighModalOrder(order);
+  };
+
+  const handleSaveKgWeights = async () => {
+    if (!weighModalOrder) return;
+    setIsUpdatingKg(true);
+    try {
+      const payload = Object.entries(kgWeights).map(([itemId, weight]) => ({
+        itemId,
+        kgWeight: Number(weight) || 0
+      }));
+
+      await updateKgWeight(weighModalOrder._id, payload);
+      alert('Order weights updated and final price calculated successfully!');
+      setWeighModalOrder(null);
+    } catch (err) {
+      alert('Failed to update weights: ' + (err?.response?.data?.error || err.message));
+    } finally {
+      setIsUpdatingKg(false);
+    }
+  };
+
   const handleAction = (orderId) => {
     const order = orders.find(o => o._id === orderId);
     if (!order) return;
@@ -46,6 +79,12 @@ export default function DeliveryDashboard() {
       setCounts(initial);
       setVerifyModalOrder(order);
     } else {
+      // If order has KG items that haven't been weighed yet, prompt delivery agent to weigh them first
+      const hasUnweighedKg = order.items.some(it => it.unit === 'KG') && !order.kgPriceUpdated;
+      if (hasUnweighedKg) {
+        handleOpenWeighModal(order);
+        return;
+      }
       setPaymentModalOrder(order);
     }
   };
@@ -111,8 +150,8 @@ export default function DeliveryDashboard() {
             displayOrders.map(order => {
               const customer = users.find(u => u._id === order.customerId);
               const customerName = customer?.name || order.customerName || 'Unknown Customer';
-
               const displayAddress = (activeTab === 'PICKUP' ? order.pickupAddress : order.deliveryAddress) || customer?.address || 'No Address Provided';
+              const hasKgItems = order.items.some(it => it.unit === 'KG');
 
               return (
                 <div key={order._id} className="bg-white border-4 border-black shadow-[6px_6px_0px_rgba(0,0,0,1)] hover:-translate-y-1 hover:shadow-[8px_8px_0px_rgba(0,0,0,1)] transition-all flex flex-col">
@@ -141,16 +180,48 @@ export default function DeliveryDashboard() {
                       </button>
                     </div>
                     
-                    <div className="flex items-center gap-2 font-bold text-lg mb-6 text-gray-700">
-                      <Package size={20} /> {order.items.reduce((sum, item) => sum + item.quantity, 0)} items to {activeTab === 'PICKUP' ? 'collect' : 'deliver'}
+                    <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+                      <div className="flex items-center gap-2 font-bold text-base text-gray-700">
+                        <Package size={20} /> {order.items.reduce((sum, item) => sum + item.quantity, 0)} items to {activeTab === 'PICKUP' ? 'collect' : 'deliver'}
+                      </div>
+
+                      {/* KG Items indicator */}
+                      {hasKgItems && (
+                        <div className="flex items-center gap-2">
+                          <span className={`text-xs font-black uppercase px-2.5 py-1 border-2 border-black rounded-lg ${
+                            order.kgPriceUpdated ? 'bg-[#B0FF49] text-black' : 'bg-yellow-300 text-black'
+                          }`}>
+                            {order.kgPriceUpdated ? '⚖️ KG Weighed ✓' : '⚖️ KG Weighing Pending'}
+                          </span>
+                          
+                          <button
+                            onClick={() => handleOpenWeighModal(order)}
+                            className="bg-black text-white text-xs font-black uppercase px-3 py-1 rounded-lg border-2 border-black hover:bg-[#0D8DE3] transition-colors flex items-center gap-1"
+                          >
+                            <Scale size={13} /> {order.kgPriceUpdated ? 'Re-weigh' : 'Weigh Clothes'}
+                          </button>
+                        </div>
+                      )}
                     </div>
                     
-                    <button 
-                      onClick={() => handleAction(order._id)}
-                      className={`w-full py-4 font-black uppercase text-xl border-4 border-black transition-all hover:-translate-y-1 hover:shadow-[4px_4px_0px_rgba(0,0,0,1)] ${activeTab === 'PICKUP' ? 'bg-[#0D8DE3] text-white' : 'bg-[#B0FF49] text-black'}`}
-                    >
-                      Mark {activeTab === 'PICKUP' ? 'Picked Up' : 'Delivered'}
-                    </button>
+                    <div className="flex gap-3">
+                      <button 
+                        onClick={() => handleAction(order._id)}
+                        className={`flex-1 py-4 font-black uppercase text-lg border-4 border-black transition-all hover:-translate-y-1 hover:shadow-[4px_4px_0px_rgba(0,0,0,1)] ${
+                          activeTab === 'PICKUP' 
+                            ? 'bg-[#0D8DE3] text-white' 
+                            : (hasKgItems && !order.kgPriceUpdated) 
+                            ? 'bg-yellow-400 text-black' 
+                            : 'bg-[#B0FF49] text-black'
+                        }`}
+                      >
+                        {activeTab === 'PICKUP' 
+                          ? 'Mark Picked Up' 
+                          : (hasKgItems && !order.kgPriceUpdated)
+                          ? '⚖️ Weigh & Deliver'
+                          : 'Mark Delivered'}
+                      </button>
+                    </div>
                   </div>
                 </div>
               );
@@ -316,6 +387,152 @@ export default function DeliveryDashboard() {
           </div>
         </div>
       )}
+
+      {/* ─── WEIGH KG ITEMS MODAL (Delivery Agent) ─────────────────── */}
+      {weighModalOrder && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-white border-4 border-black shadow-[12px_12px_0px_rgba(0,0,0,1)] w-full max-w-lg max-h-[90vh] flex flex-col animate-scale-up">
+            <div className="p-5 border-b-4 border-black bg-[#0D8DE3] text-white flex justify-between items-center">
+              <div>
+                <span className="text-[10px] font-black uppercase tracking-widest bg-black px-2 py-0.5 rounded text-[#B0FF49]">
+                  Weight Calculation Portal
+                </span>
+                <h2 className="text-2xl font-black uppercase mt-1 flex items-center gap-2">
+                  <Scale size={24} /> Weigh KG Clothes
+                </h2>
+              </div>
+              <button 
+                onClick={() => setWeighModalOrder(null)}
+                className="p-1 hover:bg-black hover:text-white rounded border-2 border-transparent hover:border-black transition-colors"
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            <div className="p-6 overflow-y-auto bg-gray-50 flex-1 space-y-4 border-b-4 border-black">
+              <p className="text-xs font-bold text-gray-600 uppercase">
+                Enter measured weight in KG for each item. The customer total will be calculated and updated immediately.
+              </p>
+
+              {weighModalOrder.items.filter(it => it.unit === 'KG').map(it => {
+                const catalogItem = items.find(i => i._id === it.itemId);
+                const ratePerKg = catalogItem?.pricePerKg || 0;
+                const weight = Number(kgWeights[it.itemId]) || 0;
+                const itemTotal = Math.round(weight * ratePerKg * 100) / 100;
+
+                return (
+                  <div key={it.itemId} className="bg-white border-2 border-black p-4 rounded-xl shadow-[3px_3px_0px_rgba(0,0,0,1)] space-y-3">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h4 className="font-black text-base uppercase text-black">{it.name}</h4>
+                        <p className="text-xs font-bold text-[#0D8DE3] uppercase mt-0.5">
+                          Rate: ₹{ratePerKg} / KG
+                        </p>
+                      </div>
+                      <span className="text-xs font-black uppercase bg-[#B0FF49] border border-black px-2 py-1 rounded">
+                        {it.quantity} bundle{it.quantity > 1 ? 's' : ''}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-3 pt-1">
+                      <div className="flex-1">
+                        <label className="block text-[10px] font-black uppercase text-gray-500 mb-1">
+                          Weight in Kilograms (KG)
+                        </label>
+                        <div className="flex items-center border-2 border-black rounded-lg bg-white overflow-hidden focus-within:ring-2 focus-within:ring-[#0D8DE3]">
+                          <input 
+                            type="number"
+                            step="0.1"
+                            min="0"
+                            placeholder="e.g. 2.5"
+                            value={kgWeights[it.itemId] ?? ''}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              setKgWeights(prev => ({ ...prev, [it.itemId]: val }));
+                            }}
+                            className="w-full p-2.5 font-black text-lg outline-none bg-transparent"
+                          />
+                          <span className="bg-gray-100 font-black text-xs uppercase px-3 py-3 border-l-2 border-black text-gray-600">
+                            KG
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="text-right shrink-0">
+                        <span className="text-[10px] font-black uppercase text-gray-500 block mb-1">Calculated</span>
+                        <span className="font-black text-lg text-black bg-[#B0FF49] border-2 border-black px-3 py-1.5 rounded-lg inline-block">
+                          ₹{itemTotal}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+
+              {/* Live Preview Summary */}
+              {(() => {
+                const perItemSubtotal = weighModalOrder.items
+                  .filter(it => it.unit !== 'KG')
+                  .reduce((s, it) => s + it.price * it.quantity, 0);
+
+                let kgTotal = 0;
+                weighModalOrder.items.filter(it => it.unit === 'KG').forEach(it => {
+                  const catalogItem = items.find(i => i._id === it.itemId);
+                  const ratePerKg = catalogItem?.pricePerKg || 0;
+                  const weight = Number(kgWeights[it.itemId]) || 0;
+                  kgTotal += weight * ratePerKg;
+                });
+
+                const prefsTotal = (weighModalOrder.washPreferences || []).reduce((s, p) => s + (p.price || 0), 0);
+                const grandTotal = Math.round((perItemSubtotal + kgTotal + (weighModalOrder.taxAmount || 0) + (weighModalOrder.deliveryFee || 0) - (weighModalOrder.discountAmount || 0) + prefsTotal) * 100) / 100;
+
+                return (
+                  <div className="bg-yellow-50 border-2 border-black p-4 rounded-xl space-y-2">
+                    <h5 className="font-black text-xs uppercase tracking-wider text-black">Live Total Preview</h5>
+                    <div className="flex justify-between text-xs font-bold text-gray-700">
+                      <span>Per-Item Subtotal:</span>
+                      <span>₹{perItemSubtotal}</span>
+                    </div>
+                    <div className="flex justify-between text-xs font-bold text-[#0D8DE3]">
+                      <span>Weighed KG Subtotal:</span>
+                      <span>+₹{Math.round(kgTotal * 100) / 100}</span>
+                    </div>
+                    {prefsTotal > 0 && (
+                      <div className="flex justify-between text-xs font-bold text-gray-700">
+                        <span>Wash Add-ons:</span>
+                        <span>+₹{prefsTotal}</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between items-center pt-2 border-t-2 border-black text-base font-black text-black">
+                      <span>New Grand Total:</span>
+                      <span className="text-xl text-[#0D8DE3] bg-white border-2 border-black px-2.5 py-0.5 rounded-lg">
+                        ₹{grandTotal}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
+
+            <div className="p-5 bg-white flex gap-4">
+              <button 
+                onClick={() => setWeighModalOrder(null)}
+                className="flex-1 border-2 border-black py-3 font-black uppercase hover:bg-gray-100 transition-colors text-sm"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={handleSaveKgWeights}
+                disabled={isUpdatingKg}
+                className="flex-[2] bg-[#B0FF49] text-black border-2 border-black shadow-[3px_3px_0px_rgba(0,0,0,1)] py-3 font-black uppercase hover:translate-y-[1px] hover:shadow-[1px_1px_0px_rgba(0,0,0,1)] transition-all text-sm disabled:opacity-50 flex items-center justify-center gap-1.5"
+              >
+                {isUpdatingKg ? 'Calculating & Saving...' : 'Save & Finalize Price'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+

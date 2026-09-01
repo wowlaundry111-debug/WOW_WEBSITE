@@ -75,10 +75,12 @@ export default function Cart() {
     }
   };
 
-  const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const hasKgItems = cart.some(c => c.unit === 'KG');
+  const perItemSubtotal = cart.filter(c => c.unit !== 'KG').reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const subtotal = perItemSubtotal;
   
   const taxPercent = shop?.taxPercent || 5;
-  const deliveryFee = subtotal > 500 ? 0 : (shop?.deliveryFee || 50);
+  const deliveryFee = hasKgItems ? (shop?.deliveryFee || 50) : (subtotal > 500 ? 0 : (shop?.deliveryFee || 50));
   const tax = (subtotal * taxPercent) / 100;
   const discount = activeCoupon ? Math.min((subtotal * activeCoupon.discountPercent) / 100, activeCoupon.maxDiscount) : 0;
   const washPrefsCost = selectedWashPrefs.reduce((sum, p) => sum + p.price, 0);
@@ -102,7 +104,8 @@ export default function Cart() {
       return;
     }
     const minOrderValue = shop?.minOrderValue || 0;
-    if (subtotal < minOrderValue) {
+    // Only enforce minimum order check if there are no KG items (since KG items are weighed later)
+    if (!hasKgItems && subtotal < minOrderValue) {
       setError(`Minimum order value is ₹${minOrderValue}. Please add more items.`);
       return;
     }
@@ -113,6 +116,7 @@ export default function Cart() {
     const res = await placeOrder(finalAddress, pickupTime, selectedWashPrefs);
     
     setLoading(false);
+
     if (res.success) {
       navigate('/order-history', { state: { successMsg: res.message } });
     } else {
@@ -331,11 +335,19 @@ export default function Cart() {
                   </div>
                   <div className="flex-1 pl-2">
                     <h3 className="font-black text-black text-lg uppercase tracking-wide line-clamp-1">{item.name}</h3>
-                    <p className="text-sm text-gray-700 font-extrabold mt-1">₹{item.price} / {item.unit}</p>
+                    {item.unit === 'KG' ? (
+                      <p className="text-xs font-black text-[#0D8DE3] uppercase tracking-widest mt-1 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-lg inline-block">🏋️ Weighed at delivery</p>
+                    ) : (
+                      <p className="text-sm text-gray-700 font-extrabold mt-1">₹{item.price} / {item.unit}</p>
+                    )}
                   </div>
                   
                   <div className="flex flex-col items-end gap-3">
-                    <span className="font-black text-black text-xl bg-[#B0FF49] px-2 py-0.5 border-2 border-black rounded-lg">₹{item.price * item.quantity}</span>
+                    {item.unit === 'KG' ? (
+                      <span className="font-black text-xs text-white bg-[#0D8DE3] px-2 py-1 border-2 border-black rounded-lg uppercase tracking-wider">Pending</span>
+                    ) : (
+                      <span className="font-black text-black text-xl bg-[#B0FF49] px-2 py-0.5 border-2 border-black rounded-lg">₹{item.price * item.quantity}</span>
+                    )}
                     <div className="flex items-center bg-[#0D8DE3] border-2 border-black rounded-xl shadow-[4px_4px_0px_rgba(0,0,0,1)] overflow-hidden">
                       <button onClick={() => updateCartQuantity(item.itemId, item.quantity - 1)} className="w-10 h-10 flex items-center justify-center text-black hover:bg-black hover:text-[#0D8DE3] transition-colors border-r-4 border-black">
                         <Minus size={20} strokeWidth={5} />
@@ -396,39 +408,69 @@ export default function Cart() {
             </div>
             
             <div className="space-y-5">
-              <div className="flex justify-between text-base">
-                <span className="font-extrabold text-gray-700 uppercase tracking-wide">Item Total</span>
-                <span className="font-black text-black">₹{subtotal.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between text-base">
-                <span className="font-extrabold text-gray-700 uppercase tracking-wide">Taxes & Charges ({taxPercent}%)</span>
-                <span className="font-black text-black">₹{tax.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between text-base">
-                <span className="font-extrabold text-gray-700 uppercase tracking-wide">Delivery Fee</span>
-                <span className="font-black text-black bg-[#B0FF49] px-2 py-0.5 rounded-md border-2 border-black">{deliveryFee === 0 ? 'FREE' : `₹${deliveryFee.toFixed(2)}`}</span>
-              </div>
-              {washPrefsCost > 0 && (
-                <div className="flex justify-between text-base">
-                  <span className="font-extrabold text-gray-700 uppercase tracking-wide flex items-center gap-1.5">
-                    <Sparkles size={16} className="text-[#0D8DE3]" /> Wash Add-ons ({selectedWashPrefs.length})
-                  </span>
-                  <span className="font-black text-black">+₹{washPrefsCost.toFixed(2)}</span>
-                </div>
-              )}
-              {discount > 0 && (
-                <div className="flex justify-between text-base">
-                  <span className="font-black text-[#0D8DE3] uppercase tracking-wide bg-black px-2 py-0.5 rounded-md">Promo Applied</span>
-                  <span className="font-black text-black">-₹{discount.toFixed(2)}</span>
-                </div>
-              )}
-              
-              <div className="pt-6 mt-4 border-t-4 border-black border-dashed">
-                <div className="flex justify-between items-center bg-[#B0FF49] p-5 rounded-2xl border-2 border-black shadow-[4px_4px_0px_rgba(0,0,0,1)] transform rotate-1">
-                  <span className="font-black text-black text-xl uppercase tracking-widest">Grand Total</span>
-                  <span className="font-black text-3xl text-black bg-white px-3 py-1 rounded-xl border-2 border-black">₹{total.toFixed(2)}</span>
-                </div>
-              </div>
+              {(() => {
+                const perItemSubtotal = cart.filter(c => c.unit !== 'KG').reduce((s, c) => s + c.price * c.quantity, 0);
+                const kgItems = cart.filter(c => c.unit === 'KG');
+                const hasKgItems = kgItems.length > 0;
+                return (
+                  <>
+                    <div className="flex justify-between text-base">
+                      <span className="font-extrabold text-gray-700 uppercase tracking-wide">Item Total</span>
+                      <span className="font-black text-black">₹{perItemSubtotal.toFixed(2)}</span>
+                    </div>
+                    {hasKgItems && (
+                      <div className="flex justify-between text-base bg-blue-50 border-2 border-[#0D8DE3] rounded-xl p-3">
+                        <span className="font-extrabold text-[#0D8DE3] uppercase tracking-wide flex items-center gap-1.5">🏋️ KG Items ({kgItems.length})</span>
+                        <span className="font-black text-[#0D8DE3] text-xs uppercase tracking-widest">Weighed at delivery</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between text-base">
+                      <span className="font-extrabold text-gray-700 uppercase tracking-wide">Taxes &amp; Charges ({taxPercent}%)</span>
+                      <span className="font-black text-black">₹{tax.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between text-base">
+                      <span className="font-extrabold text-gray-700 uppercase tracking-wide">Delivery Fee</span>
+                      <span className="font-black text-black bg-[#B0FF49] px-2 py-0.5 rounded-md border-2 border-black">{deliveryFee === 0 ? 'FREE' : `₹${deliveryFee.toFixed(2)}`}</span>
+                    </div>
+                    {washPrefsCost > 0 && (
+                      <div className="flex justify-between text-base">
+                        <span className="font-extrabold text-gray-700 uppercase tracking-wide flex items-center gap-1.5">
+                          <Sparkles size={16} className="text-[#0D8DE3]" /> Wash Add-ons ({selectedWashPrefs.length})
+                        </span>
+                        <span className="font-black text-black">+₹{washPrefsCost.toFixed(2)}</span>
+                      </div>
+                    )}
+                    {discount > 0 && (
+                      <div className="flex justify-between text-base">
+                        <span className="font-black text-[#0D8DE3] uppercase tracking-wide bg-black px-2 py-0.5 rounded-md">Promo Applied</span>
+                        <span className="font-black text-black">-₹{discount.toFixed(2)}</span>
+                      </div>
+                    )}
+                    <div className="pt-6 mt-4 border-t-4 border-black border-dashed">
+                      {hasKgItems ? (
+                        <div className="bg-[#B0FF49] p-5 rounded-2xl border-2 border-black shadow-[4px_4px_0px_rgba(0,0,0,1)]">
+                          <div className="flex justify-between items-center">
+                            <div>
+                              <span className="font-black text-black text-lg sm:text-xl uppercase tracking-widest">Grand Total</span>
+                              <p className="text-[10px] font-black text-gray-700 uppercase tracking-widest mt-0.5">
+                                Final price calculated upon delivery weighing
+                              </p>
+                            </div>
+                            <span className="font-black text-base sm:text-lg text-black bg-white px-3 py-1.5 rounded-xl border-2 border-black uppercase shadow-[2px_2px_0px_rgba(0,0,0,1)]">
+                              Pending Calculation
+                            </span>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex justify-between items-center bg-[#B0FF49] p-5 rounded-2xl border-2 border-black shadow-[4px_4px_0px_rgba(0,0,0,1)] transform rotate-1">
+                          <span className="font-black text-black text-xl uppercase tracking-widest">Grand Total</span>
+                          <span className="font-black text-3xl text-black bg-white px-3 py-1 rounded-xl border-2 border-black">₹{total.toFixed(2)}</span>
+                        </div>
+                      )}
+                    </div>
+                  </>
+                );
+              })()}
             </div>
           </div>
         </div>
@@ -438,19 +480,28 @@ export default function Cart() {
       <div className="fixed bottom-0 left-0 right-0 bg-[#0D8DE3] border-t-4 border-black p-4 z-50 shadow-[0_-8px_0_rgba(0,0,0,1)]">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
           <div className="bg-white p-3 border-2 border-black rounded-2xl shadow-[4px_4px_0px_rgba(0,0,0,1)]">
-            <p className="text-xs font-black text-black uppercase tracking-widest mb-1 bg-[#B0FF49] inline-block px-2 border-2 border-black rounded">Pay via UPI / Cash</p>
-            <p className="font-black text-3xl text-black lilita-one-regular">₹{total.toFixed(2)}</p>
+            <p className="text-xs font-black text-black uppercase tracking-widest mb-1 bg-[#B0FF49] inline-block px-2 border-2 border-black rounded">
+              {hasKgItems ? 'Pay After Weighing' : 'Pay via UPI / Cash'}
+            </p>
+            {hasKgItems ? (
+              <p className="font-black text-xl sm:text-2xl text-black lilita-one-regular uppercase tracking-wider">
+                Pending Calculation
+              </p>
+            ) : (
+              <p className="font-black text-3xl text-black lilita-one-regular">₹{total.toFixed(2)}</p>
+            )}
           </div>
           
           <button 
             onClick={handlePlaceOrder}
-            disabled={loading || isClosed || subtotal < (shop?.minOrderValue || 0)}
+            disabled={loading || isClosed || (!hasKgItems && subtotal < (shop?.minOrderValue || 0))}
             className="bg-[#0D8DE3] hover:bg-blue-600 disabled:bg-gray-300 disabled:shadow-[4px_4px_0px_rgba(0,0,0,1)] text-white font-black py-5 px-8 sm:px-12 rounded-2xl border-2 border-black shadow-[6px_6px_0px_rgba(0,0,0,1)] flex items-center gap-3 active:translate-y-2 active:translate-x-2 active:shadow-none transition-all text-xl uppercase tracking-widest"
           >
             {loading ? 'Processing...' : isClosed ? 'Shop Closed' : 'Place Order'}
             {!loading && !isClosed && <CheckCircle2 size={28} strokeWidth={4} />}
           </button>
         </div>
+
         
         {error && (
           <div className="max-w-4xl mx-auto mt-4">
