@@ -100,11 +100,13 @@ export default function CategoryItems() {
             <p className="text-black font-bold mt-2 uppercase">There are no items in this category yet.</p>
           </div>
         ) : (
-          <div className="space-y-6">
+            <div className="space-y-6">
             {categoryItems.map((item, idx) => {
               const qty = getQuantity(item._id);
-              const price = item.pricePerKg || item.pricePerItem || 0;
-              const unit = item.pricePerKg ? 'KG' : 'Item';
+              const isKg = Boolean(item.pricePerKg && item.pricePerKg > 0) || 
+                item.unit === 'KG' || 
+                (typeof item.name === 'string' && (item.name.toLowerCase().includes('per kg') || item.name.toLowerCase().includes('/ kg') || item.name.toLowerCase().includes('per-kg')));
+              const unit = isKg ? 'KG' : 'Item';
 
               return (
                 <div 
@@ -127,8 +129,8 @@ export default function CategoryItems() {
                       <p className="text-xs font-bold text-gray-700 line-clamp-2 mt-1 uppercase bg-gray-100 p-2 border-2 border-black rounded-lg">{item.description}</p>
                     )}
                     
-            <div className="flex items-end justify-between mt-4">
-                      {item.pricePerKg ? (
+                    <div className="flex items-end justify-between mt-4">
+                      {isKg ? (
                         // Per-KG items: price is determined at delivery by weighing
                         <div className="flex flex-col gap-1">
                           <div className="bg-[#0D8DE3] px-3 py-1 border-2 border-black rounded-xl shadow-[4px_4px_0px_rgba(0,0,0,1)] transform -rotate-2">
@@ -142,6 +144,7 @@ export default function CategoryItems() {
                           <span className="text-xs font-black text-black ml-1 uppercase">/ Item</span>
                         </div>
                       )}
+
                       
                       <div>
                         {qty > 0 ? (
@@ -184,16 +187,20 @@ export default function CategoryItems() {
               <p className="text-xs font-black text-black tracking-widest uppercase bg-white border-2 border-black inline-block px-2 py-0.5 rounded">
                 {cart.length} ITEM{cart.length > 1 ? 'S' : ''} ADDED
               </p>
-              {cart.some(c => c.unit === 'KG') ? (
-                <p className="text-lg sm:text-xl font-black mt-2 lilita-one-regular uppercase tracking-wide">
-                  {cart.filter(c => c.unit !== 'KG').reduce((s, c) => s + c.price * c.quantity, 0) > 0 
-                    ? `₹${cart.filter(c => c.unit !== 'KG').reduce((s, c) => s + c.price * c.quantity, 0)} + KG Pending` 
-                    : 'Pending Weighing'}
-                </p>
-              ) : (
-                <p className="text-2xl font-black mt-2 lilita-one-regular">₹{cartTotal}</p>
-              )}
+              {(() => {
+                const isKgCheck = (c) => c.unit === 'KG' || Boolean(c.pricePerKg && c.pricePerKg > 0) || (typeof c.name === 'string' && (c.name.toLowerCase().includes('per kg') || c.name.toLowerCase().includes('/ kg')));
+                const hasKg = cart.some(isKgCheck);
+                const perItemTotal = cart.filter(c => !isKgCheck(c)).reduce((s, c) => s + (c.price || 0) * c.quantity, 0);
+                return hasKg ? (
+                  <p className="text-lg sm:text-xl font-black mt-2 lilita-one-regular uppercase tracking-wide">
+                    {perItemTotal > 0 ? `₹${perItemTotal} + KG Pending` : 'Pending Weighing'}
+                  </p>
+                ) : (
+                  <p className="text-2xl font-black mt-2 lilita-one-regular">₹{cartTotal}</p>
+                );
+              })()}
             </div>
+
             <div className="flex items-center gap-3">
               <span className="font-black text-lg uppercase tracking-widest">Basket</span>
               <div className="w-12 h-12 bg-black text-[#B0FF49] border-2 border-black rounded-full flex items-center justify-center">

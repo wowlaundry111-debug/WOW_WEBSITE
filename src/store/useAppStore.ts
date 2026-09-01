@@ -438,8 +438,11 @@ export const useAppStore = create<AppState>()(
       addToCart: (item, quantity) => {
         const { cart } = get();
         const existingIndex = cart.findIndex(c => c.itemId === item._id);
-        const resolvedPrice = item.pricePerKg ?? item.pricePerItem ?? 0;
-        const resolvedUnit = item.pricePerKg ? 'KG' : 'ITEM';
+        const isKg = Boolean(item.pricePerKg && item.pricePerKg > 0) || 
+          item.unit === 'KG' || 
+          (typeof item.name === 'string' && (item.name.toLowerCase().includes('per kg') || item.name.toLowerCase().includes('/ kg')));
+        const resolvedPrice = isKg ? 0 : (item.pricePerItem ?? item.price ?? 0);
+        const resolvedUnit = isKg ? 'KG' : 'ITEM';
 
         if (existingIndex >= 0) {
           const newCart = [...cart];
@@ -507,32 +510,40 @@ export const useAppStore = create<AppState>()(
 
         set({ isLoading: true, error: null });
 
-        const subtotal = cart.reduce((sum, c) => sum + c.price * c.quantity, 0);
+        const isKgItemCheck = (c: any) => 
+          c.unit === 'KG' || 
+          (typeof c.name === 'string' && (c.name.toLowerCase().includes('per kg') || c.name.toLowerCase().includes('/ kg'))) || 
+          Boolean(c.pricePerKg && c.pricePerKg > 0);
+
+        const perItemSubtotal = cart
+          .filter(c => !isKgItemCheck(c))
+          .reduce((sum, c) => sum + (c.price || 0) * c.quantity, 0);
+
         let discount = 0;
         if (activeCoupon) {
-          discount = Math.min((subtotal * activeCoupon.discountPercent) / 100, activeCoupon.maxDiscount);
+          discount = Math.min((perItemSubtotal * activeCoupon.discountPercent) / 100, activeCoupon.maxDiscount);
         }
 
-        const orderItems: OrderItem[] = cart.map(c => ({
-          itemId: c.itemId,
-          name: c.name,
-          quantity: c.quantity,
-          unit: c.unit,
-          // KG items are priced at 0 — delivery agent will weigh and update later
-          price: c.unit === 'KG' ? 0 : c.price,
-        }));
+        const orderItems: OrderItem[] = cart.map(c => {
+          const isKg = isKgItemCheck(c);
+          return {
+            itemId: c.itemId,
+            name: c.name,
+            quantity: c.quantity,
+            unit: isKg ? 'KG' : 'ITEM',
+            // KG items are priced at 0 — delivery agent will weigh and update later
+            price: isKg ? 0 : (c.price || 0),
+          };
+        });
 
         try {
           const shop = get().shops.find(s => s._id === currentTenantId);
           const taxPercent = shop?.taxPercent || 0;
           const deliveryFeeAmt = shop?.deliveryFee || 0;
-          const tax = (subtotal * taxPercent) / 100;
+          const tax = (perItemSubtotal * taxPercent) / 100;
           const washPrefsCost = washPreferences?.reduce((s, w) => s + w.price, 0) || 0;
-          // KG items excluded from subtotal — pending delivery agent weighing
-          const perItemSubtotal = cart
-            .filter(c => c.unit !== 'KG')
-            .reduce((sum, c) => sum + c.price * c.quantity, 0);
           const finalTotal = perItemSubtotal - discount + tax + deliveryFeeAmt + washPrefsCost;
+
 
           const res = await api.post('/orders', {
             shopId: currentTenantId,

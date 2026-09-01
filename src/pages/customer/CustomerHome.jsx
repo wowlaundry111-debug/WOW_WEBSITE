@@ -243,15 +243,19 @@ export default function CustomerHome() {
               <p className="text-xs font-black text-[#B0FF49] tracking-widest uppercase">
                 {cart.length} ITEM{cart.length > 1 ? 'S' : ''} ADDED
               </p>
-              {cart.some(c => c.unit === 'KG') ? (
-                <p className="text-lg sm:text-xl font-black mt-1 lilita-one-regular text-[#B0FF49] tracking-wider uppercase">
-                  {cart.filter(c => c.unit !== 'KG').reduce((s, c) => s + c.price * c.quantity, 0) > 0 
-                    ? `₹${cart.filter(c => c.unit !== 'KG').reduce((s, c) => s + c.price * c.quantity, 0)} + KG Pending` 
-                    : 'Pending Weighing'}
-                </p>
-              ) : (
-                <p className="text-2xl font-black mt-1 lilita-one-regular tracking-wider">₹{cartTotal}</p>
-              )}
+              {(() => {
+                const isKgCheck = (c) => c.unit === 'KG' || Boolean(c.pricePerKg && c.pricePerKg > 0) || (typeof c.name === 'string' && (c.name.toLowerCase().includes('per kg') || c.name.toLowerCase().includes('/ kg')));
+                const hasKg = cart.some(isKgCheck);
+                const perItemTotal = cart.filter(c => !isKgCheck(c)).reduce((s, c) => s + (c.price || 0) * c.quantity, 0);
+                return hasKg ? (
+                  <p className="text-lg sm:text-xl font-black mt-1 lilita-one-regular text-[#B0FF49] tracking-wider uppercase">
+                    {perItemTotal > 0 ? `₹${perItemTotal} + KG Pending` : 'Pending Weighing'}
+                  </p>
+                ) : (
+                  <p className="text-2xl font-black mt-1 lilita-one-regular tracking-wider">₹{cartTotal}</p>
+                );
+              })()}
+
             </div>
             <div className="flex items-center gap-3">
               <span className="font-black text-lg uppercase tracking-wide">Checkout</span>

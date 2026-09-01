@@ -75,8 +75,16 @@ export default function Cart() {
     }
   };
 
-  const hasKgItems = cart.some(c => c.unit === 'KG');
-  const perItemSubtotal = cart.filter(c => c.unit !== 'KG').reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const isKgItem = (c) => {
+    if (!c) return false;
+    if (c.unit === 'KG' || c.unit === 'kg') return true;
+    if (typeof c.name === 'string' && (c.name.toLowerCase().includes('per kg') || c.name.toLowerCase().includes('/ kg') || c.name.toLowerCase().includes('per-kg'))) return true;
+    if (Boolean(c.pricePerKg && c.pricePerKg > 0)) return true;
+    return false;
+  };
+
+  const hasKgItems = cart.some(isKgItem);
+  const perItemSubtotal = cart.filter(c => !isKgItem(c)).reduce((sum, item) => sum + (item.price || 0) * item.quantity, 0);
   const subtotal = perItemSubtotal;
   
   const taxPercent = shop?.taxPercent || 5;
@@ -109,6 +117,7 @@ export default function Cart() {
       setError(`Minimum order value is ₹${minOrderValue}. Please add more items.`);
       return;
     }
+
 
     setLoading(true);
     setError('');
@@ -324,42 +333,45 @@ export default function Cart() {
               <span className="bg-black text-[#B0FF49] text-sm font-black px-3 py-1.5 rounded-lg border-2 border-black tracking-widest uppercase">{cart.length} ITEMS</span>
             </div>
             <div className="divide-y-4 divide-black p-2">
-              {cart.map((item) => (
-                <div key={item.itemId} className="p-4 flex gap-4 items-center group hover:bg-gray-50 transition-colors">
-                  <div className="w-20 h-20 bg-[#0D8DE3] rounded-2xl overflow-hidden flex-shrink-0 flex items-center justify-center border-2 border-black shadow-[4px_4px_0px_rgba(0,0,0,1)] group-hover:scale-105 transition-transform">
-                    {item.image ? (
-                      <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
-                    ) : (
-                      <span className="text-black text-3xl font-black lilita-one-regular">{item.name.charAt(0)}</span>
-                    )}
-                  </div>
-                  <div className="flex-1 pl-2">
-                    <h3 className="font-black text-black text-lg uppercase tracking-wide line-clamp-1">{item.name}</h3>
-                    {item.unit === 'KG' ? (
-                      <p className="text-xs font-black text-[#0D8DE3] uppercase tracking-widest mt-1 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-lg inline-block">🏋️ Weighed at delivery</p>
-                    ) : (
-                      <p className="text-sm text-gray-700 font-extrabold mt-1">₹{item.price} / {item.unit}</p>
-                    )}
-                  </div>
-                  
-                  <div className="flex flex-col items-end gap-3">
-                    {item.unit === 'KG' ? (
-                      <span className="font-black text-xs text-white bg-[#0D8DE3] px-2 py-1 border-2 border-black rounded-lg uppercase tracking-wider">Pending</span>
-                    ) : (
-                      <span className="font-black text-black text-xl bg-[#B0FF49] px-2 py-0.5 border-2 border-black rounded-lg">₹{item.price * item.quantity}</span>
-                    )}
-                    <div className="flex items-center bg-[#0D8DE3] border-2 border-black rounded-xl shadow-[4px_4px_0px_rgba(0,0,0,1)] overflow-hidden">
-                      <button onClick={() => updateCartQuantity(item.itemId, item.quantity - 1)} className="w-10 h-10 flex items-center justify-center text-black hover:bg-black hover:text-[#0D8DE3] transition-colors border-r-4 border-black">
-                        <Minus size={20} strokeWidth={5} />
-                      </button>
-                      <span className="w-10 text-center font-black text-black text-lg bg-white h-10 flex items-center justify-center">{item.quantity}</span>
-                      <button onClick={() => updateCartQuantity(item.itemId, item.quantity + 1)} className="w-10 h-10 flex items-center justify-center text-black hover:bg-black hover:text-[#0D8DE3] transition-colors border-l-4 border-black">
-                        <Plus size={20} strokeWidth={5} />
-                      </button>
+              {cart.map((item) => {
+                const isKg = isKgItem(item);
+                return (
+                  <div key={item.itemId} className="p-4 flex gap-4 items-center group hover:bg-gray-50 transition-colors">
+                    <div className="w-20 h-20 bg-[#0D8DE3] rounded-2xl overflow-hidden flex-shrink-0 flex items-center justify-center border-2 border-black shadow-[4px_4px_0px_rgba(0,0,0,1)] group-hover:scale-105 transition-transform">
+                      {item.image ? (
+                        <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <span className="text-black text-3xl font-black lilita-one-regular">{item.name.charAt(0)}</span>
+                      )}
+                    </div>
+                    <div className="flex-1 pl-2">
+                      <h3 className="font-black text-black text-lg uppercase tracking-wide line-clamp-1">{item.name}</h3>
+                      {isKg ? (
+                        <p className="text-xs font-black text-[#0D8DE3] uppercase tracking-widest mt-1 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-lg inline-block">🏋️ Weighed at delivery</p>
+                      ) : (
+                        <p className="text-sm text-gray-700 font-extrabold mt-1">₹{item.price} / {item.unit || 'Item'}</p>
+                      )}
+                    </div>
+                    
+                    <div className="flex flex-col items-end gap-3">
+                      {isKg ? (
+                        <span className="font-black text-xs text-white bg-[#0D8DE3] px-2 py-1 border-2 border-black rounded-lg uppercase tracking-wider">Pending</span>
+                      ) : (
+                        <span className="font-black text-black text-xl bg-[#B0FF49] px-2 py-0.5 border-2 border-black rounded-lg">₹{(item.price || 0) * item.quantity}</span>
+                      )}
+                      <div className="flex items-center bg-[#0D8DE3] border-2 border-black rounded-xl shadow-[4px_4px_0px_rgba(0,0,0,1)] overflow-hidden">
+                        <button onClick={() => updateCartQuantity(item.itemId, item.quantity - 1)} className="w-10 h-10 flex items-center justify-center text-black hover:bg-black hover:text-[#0D8DE3] transition-colors border-r-4 border-black">
+                          <Minus size={20} strokeWidth={5} />
+                        </button>
+                        <span className="w-10 text-center font-black text-black text-lg bg-white h-10 flex items-center justify-center">{item.quantity}</span>
+                        <button onClick={() => updateCartQuantity(item.itemId, item.quantity + 1)} className="w-10 h-10 flex items-center justify-center text-black hover:bg-black hover:text-[#0D8DE3] transition-colors border-l-4 border-black">
+                          <Plus size={20} strokeWidth={5} />
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </div>
@@ -409,14 +421,16 @@ export default function Cart() {
             
             <div className="space-y-5">
               {(() => {
-                const perItemSubtotal = cart.filter(c => c.unit !== 'KG').reduce((s, c) => s + c.price * c.quantity, 0);
-                const kgItems = cart.filter(c => c.unit === 'KG');
+                const perItemSubtotal = cart.filter(c => !isKgItem(c)).reduce((s, c) => s + (c.price || 0) * c.quantity, 0);
+                const kgItems = cart.filter(isKgItem);
                 const hasKgItems = kgItems.length > 0;
                 return (
                   <>
                     <div className="flex justify-between text-base">
                       <span className="font-extrabold text-gray-700 uppercase tracking-wide">Item Total</span>
-                      <span className="font-black text-black">₹{perItemSubtotal.toFixed(2)}</span>
+                      <span className="font-black text-black">
+                        {perItemSubtotal > 0 ? `₹${perItemSubtotal.toFixed(2)}` : (hasKgItems ? 'Pending Weighing' : '₹0.00')}
+                      </span>
                     </div>
                     {hasKgItems && (
                       <div className="flex justify-between text-base bg-blue-50 border-2 border-[#0D8DE3] rounded-xl p-3">
@@ -428,6 +442,7 @@ export default function Cart() {
                       <span className="font-extrabold text-gray-700 uppercase tracking-wide">Taxes &amp; Charges ({taxPercent}%)</span>
                       <span className="font-black text-black">₹{tax.toFixed(2)}</span>
                     </div>
+
                     <div className="flex justify-between text-base">
                       <span className="font-extrabold text-gray-700 uppercase tracking-wide">Delivery Fee</span>
                       <span className="font-black text-black bg-[#B0FF49] px-2 py-0.5 rounded-md border-2 border-black">{deliveryFee === 0 ? 'FREE' : `₹${deliveryFee.toFixed(2)}`}</span>
