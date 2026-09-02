@@ -576,9 +576,10 @@ function Hero() {
                         <img
                             src={heroimage}
                             alt="WOW Laundry Professional"
-                            className={`w-full max-w-[400px] lg:max-w-[500px] object-contain relative z-20 drop-shadow-[0_20px_20px_rgba(0,0,0,0.15)] ${imageLoaded ? '' : 'hidden'}`}
+                            className={`w-full max-w-[420px] lg:max-w-[520px] object-contain relative z-20 drop-shadow-[0_20px_20px_rgba(0,0,0,0.15)] scale-105 transform translate-y-1 ${imageLoaded ? '' : 'hidden'}`}
                             onLoad={() => setImageLoaded(true)}
                         />
+
 
                         {/* RESTORED: CSS 3D Laundry Basket in front of the man */}
                         <div className="absolute -bottom-6 right-1/2 transform translate-x-1/2 bg-gradient-to-br from-[#1F8AF2] to-[#0a5cb5] border-[4px] border-black rounded-t-[10px] rounded-b-[40px] w-[250px] md:w-[350px] h-32 md:h-40 z-30 shadow-[6px_6px_0px_#000] flex flex-col items-center justify-center overflow-hidden">
