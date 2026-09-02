@@ -8,26 +8,27 @@ const contactDetails = [
     {
         icon: <FaPhoneAlt size={28} />, 
         title: "Contact", 
-        details: ["+91 8578938248", "+91 9110199310"]
+        details: ["+91 07814508706"]
     },
     {
         icon: <IoMailUnread size={28} />, 
         title: "Email", 
-        details: ["wowlaundry@gmail.com"],
+        details: ["wowlaundry111@gmail.com"],
         border: true
     },
     {
         icon: <FaMapMarker size={28} />, 
         title: "Address", 
-        details: ["Law gate, LPU, Phagwara, Jalandhar", "Landmark - Opposite of Ashiana PG"],
+        details: ["11/1 WARE HOUSE, RAMA MANDI, Jalandhar Cantt, Jalandhar, Punjab 144005"],
         border: true
     },
     {
         icon: <BsClockFill size={28} />, 
-        title: "Working Hour", 
-        details: ["Monday-Sunday 9:00 AM to 11:00 PM"]
+        title: "Working Hours", 
+        details: ["Monday - Sunday: 10:00 AM to 11:00 PM"]
     }
 ];
+
 
 function FAQ() {
     return (
