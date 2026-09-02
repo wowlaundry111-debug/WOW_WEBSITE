@@ -428,25 +428,25 @@ function Hero() {
                                     </h1>
 
                                     {/* Book Order Button — hidden on mobile, shown sm+ (mobile gets its own button below) */}
-                                    <div className='hidden sm:block relative z-20 w-[58%] max-w-[320px] mt-1.5 md:mt-2.5'>
+                                    <div className='hidden sm:block relative z-20 w-[72%] max-w-[340px] mt-2 md:mt-3'>
                                         <Link to={'/order'}>
-                                            <button className='w-full bg-[#B0FF49] text-black px-3 py-1.5 md:px-4 md:py-2 text-[9px] md:text-sm font-black uppercase tracking-widest rounded-full border-[2px] md:border-[3px] border-black shadow-[3px_3px_0px_#000] md:shadow-[4px_4px_0px_#000] hover:translate-y-0.5 hover:shadow-[1px_1px_0px_#000] flex items-center justify-center gap-2 transition-all group'>
-                                                <div className="bg-black text-[#B0FF49] p-1 md:p-1.5 rounded-full border-[1.5px] md:border-[2px] border-black group-hover:rotate-[360deg] transition-transform duration-700 shrink-0">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="12" height="12" className="md:w-[16px] md:h-[16px]">
+                                            <button className='w-full bg-[#B0FF49] hover:bg-[#9de83a] text-black px-4 py-2.5 md:px-5 md:py-3 text-xs md:text-base font-black uppercase tracking-widest rounded-full border-[2.5px] md:border-[3.5px] border-black shadow-[4px_4px_0px_#000] md:shadow-[5px_5px_0px_#000] hover:translate-y-0.5 hover:shadow-[2px_2px_0px_#000] flex items-center justify-center gap-2.5 transition-all group cursor-pointer'>
+                                                <div className="bg-black text-[#B0FF49] p-1.5 md:p-2 rounded-full border-[1.5px] md:border-[2px] border-black group-hover:rotate-[360deg] transition-transform duration-700 shrink-0">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="13" height="13" className="md:w-[17px] md:h-[17px]">
                                                         <path fill="none" d="M0 0h24v24H0z"></path>
                                                         <path fill="currentColor" d="M1.946 9.315c-.522-.174-.527-.455.01-.634l19.087-6.362c.529-.176.832.12.684.638l-5.454 19.086c-.15.529-.455.547-.679.045L12 14l6-8-8 6-8.054-2.685z"></path>
                                                     </svg>
                                                 </div>
-                                                <span className="whitespace-nowrap">Book Your Order</span>
+                                                <span className="whitespace-nowrap font-black">Book Your Order</span>
                                             </button>
                                         </Link>
                                     </div>
 
                                     {/* Pricing Box (Below) */}
-                                    <div className='bg-[#1565C0] border-[2px] md:border-[3px] border-black px-3 py-1 md:px-4 md:py-1.5 rounded-2xl max-w-[80%] relative z-20 shadow-[3px_3px_0px_#000] transition-transform hover:-translate-y-0.5'>
-                                        <p className='font-black text-white uppercase text-[9px] md:text-[9.5px] tracking-widest leading-relaxed text-center'>
+                                    <div className='bg-[#1565C0] border-[2px] md:border-[3px] border-black px-3.5 py-1.5 md:px-5 md:py-2 rounded-2xl max-w-[85%] relative z-20 shadow-[3px_3px_0px_#000] transition-transform hover:-translate-y-0.5 mt-1'>
+                                        <p className='font-black text-white uppercase text-[9.5px] md:text-xs tracking-widest leading-relaxed text-center'>
                                             <span className='text-[#B0FF49]'>Lawgate's</span> first and best laundry. <br /> 
-                                            Starting at just <span className='text-[#B0FF49] text-[11px] md:text-sm ml-0.5'>25/- per kg</span>
+                                            Starting at just <span className='text-[#B0FF49] text-xs md:text-sm font-black ml-0.5'>35/- per kg</span>
                                         </p>
                                     </div>
                                 </div>
@@ -457,17 +457,18 @@ function Hero() {
                     {/* MOBILE-ONLY: Book Now button floating between bucket and man */}
                     <div className='block sm:hidden w-full flex justify-center items-center py-4 z-30 relative'>
                         <Link to={'/order'}>
-                            <button className='bg-[#B0FF49] text-black px-8 py-3 text-sm font-black uppercase tracking-widest rounded-full border-[3px] border-black shadow-[4px_4px_0px_#000] active:translate-y-1 active:shadow-[1px_1px_0px_#000] flex items-center justify-center gap-2.5 transition-all'>
-                                <div className="bg-black text-[#B0FF49] p-1.5 rounded-full border-[2px] border-black shrink-0">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16">
+                            <button className='bg-[#B0FF49] active:bg-[#9de83a] text-black px-9 py-3.5 text-base font-black uppercase tracking-widest rounded-full border-[3.5px] border-black shadow-[5px_5px_0px_#000] active:translate-y-1 active:shadow-[1px_1px_0px_#000] flex items-center justify-center gap-3 transition-all cursor-pointer'>
+                                <div className="bg-black text-[#B0FF49] p-2 rounded-full border-[2px] border-black shrink-0">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18">
                                         <path fill="none" d="M0 0h24v24H0z"></path>
                                         <path fill="currentColor" d="M1.946 9.315c-.522-.174-.527-.455.01-.634l19.087-6.362c.529-.176.832.12.684.638l-5.454 19.086c-.15.529-.455.547-.679.045L12 14l6-8-8 6-8.054-2.685z"></path>
                                     </svg>
                                 </div>
-                                <span className="whitespace-nowrap">Book Your Order</span>
+                                <span className="whitespace-nowrap font-black">Book Your Order</span>
                             </button>
                         </Link>
                     </div>
+
 
                     {/* RIGHT: THE MAN */}
                     <div className='lg:w-1/2 flex flex-col justify-end items-center relative h-full mt-10 lg:mt-0'>
