@@ -169,28 +169,27 @@ export const useAppStore = create<AppState>()(
           get().fetchOrders(1);
           get().fetchUsers();
         } else {
-          // Logout — clear ALL state so next login sees a clean slate
+          // Logout — clear user-specific state so next login sees a clean slate
           setAuthToken(null);
           set({
             currentUser: null,
             currentRole: 'Customer',
             currentTenantId: '',
-            shops: [],
             users: [],
             categories: [],
             items: [],
-            offers: [],
             orders: [],
             cart: [],
             activeCoupon: null,
-            shopsLastFetched: 0,
-            offersLastFetched: 0,
             catalogLastFetched: 0,
             orderTotal: 0,
             orderPage: 1,
           });
+          // Ensure public shops and offers remain available
+          get().initializeAppData();
         }
       },
+
 
       autoSelectUserForRole: async (role, shopId) => {
         const targetShopId = shopId || get().currentTenantId;

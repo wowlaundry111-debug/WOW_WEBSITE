@@ -22,38 +22,51 @@ export function getDirectDownloadUrl(url) {
 }
 
 function Service() {
-  const { shops, currentTenantId } = useAppStore();
+  const { shops, currentTenantId, initializeAppData } = useAppStore();
   const [iosModalOpen, setIosModalOpen] = useState(false);
+
+  React.useEffect(() => {
+    if (!shops || shops.length === 0) {
+      initializeAppData();
+    }
+  }, [shops, initializeAppData]);
+
+  // Find any shop that has androidAppUrl or iosAppUrl configured by SuperAdmin
+  const globalAndroid = shops?.find(s => s.androidAppUrl && s.androidAppUrl.trim())?.androidAppUrl || '';
+  const globalIos = shops?.find(s => s.iosAppUrl && s.iosAppUrl.trim())?.iosAppUrl || '';
 
   const currentShop = (shops && shops.length > 0)
     ? (shops.find(s => s._id === currentTenantId) || shops[0])
     : null;
 
-  const androidUrl = currentShop?.androidAppUrl ? getDirectDownloadUrl(currentShop.androidAppUrl) : '';
-  const iosUrl = currentShop?.iosAppUrl ? currentShop.iosAppUrl.trim() : '';
+  const effectiveAndroid = (currentShop?.androidAppUrl && currentShop.androidAppUrl.trim()) || globalAndroid;
+  const effectiveIos = (currentShop?.iosAppUrl && currentShop.iosAppUrl.trim()) || globalIos;
+
+  const androidUrl = getDirectDownloadUrl(effectiveAndroid);
+  const iosUrl = effectiveIos;
 
   const handleAndroidDownload = () => {
     if (androidUrl) {
-      // Create a hidden anchor element to trigger direct browser file download
       const link = document.createElement('a');
       link.href = androidUrl;
-      link.setAttribute('download', 'WOW_Laundry_App.apk');
       link.target = '_blank';
+      link.rel = 'noopener noreferrer';
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
     } else {
-      alert("Android APK download link will be available soon! Admin can add the link in Shop Settings.");
+      alert("Android App download link will be available soon! SuperAdmin can add the APK link in Admin Dashboard.");
     }
   };
 
   const handleIosClick = () => {
     if (iosUrl) {
-      window.open(iosUrl, '_blank');
+      window.open(iosUrl, '_blank', 'noopener,noreferrer');
     } else {
       setIosModalOpen(true);
     }
   };
+
 
   return (
     <div className='p-6 lg:px-20 lg:py-16 mt-10 bg-white font-outfit selection:bg-black selection:text-[#B0FF49]'>
