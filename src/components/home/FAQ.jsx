@@ -8,8 +8,9 @@ const contactDetails = [
     {
         icon: <FaPhoneAlt size={28} />, 
         title: "Contact", 
-        details: ["+91 07814508706"]
+        details: ["+91 07814508706", "+91 6280832724"]
     },
+
     {
         icon: <IoMailUnread size={28} />, 
         title: "Email", 

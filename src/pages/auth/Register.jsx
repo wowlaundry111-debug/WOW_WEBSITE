@@ -61,13 +61,11 @@ export default function Register() {
 
         {/* Logo */}
         <div className="mb-6 flex flex-col items-center animate-fade-in-up" style={{ animationDelay: '0ms' }}>
-          <div className="bg-white border-2 border-black rounded-full p-2 shadow-[6px_6px_0px_rgba(0,0,0,1)] hover:-translate-y-2 hover:shadow-[10px_10px_0px_rgba(0,0,0,1)] transition-all mb-3">
-            <img src={logo} alt="WOW Laundry" className="w-20 h-20 object-contain" />
+          <div className="bg-black border-4 border-black rounded-3xl px-6 py-3 shadow-[8px_8px_0px_rgba(0,0,0,1)] hover:-translate-y-1 hover:shadow-[12px_12px_0px_rgba(0,0,0,1)] transition-all mb-4 flex items-center justify-center">
+            <img src={logo} alt="WOW Laundry" className="h-14 w-auto object-contain" />
           </div>
-          <h1 className="text-3xl font-extrabold text-black lilita-one-regular tracking-wide bg-white px-6 py-1.5 border-2 border-black shadow-[6px_6px_0px_rgba(0,0,0,1)] rounded-2xl transform -rotate-2">
-            Create Account
-          </h1>
         </div>
+
 
         {/* Card */}
         <div
