@@ -106,10 +106,12 @@ export default function Login() {
       <div className="w-full max-w-md z-10 flex flex-col items-center">
         {/* Logo */}
         <div className="mb-8 flex flex-col items-center animate-fade-in-up" style={{ animationDelay: '0ms' }}>
-          <div className="bg-black border-4 border-black rounded-3xl px-6 py-3 shadow-[8px_8px_0px_rgba(0,0,0,1)] hover:-translate-y-1 hover:shadow-[12px_12px_0px_rgba(0,0,0,1)] transition-all mb-4 flex items-center justify-center">
-            <img src={logo} alt="WOW Laundry" className="h-16 w-auto object-contain" />
+          <div className="bg-white border-2 border-black rounded-full p-2 shadow-[6px_6px_0px_rgba(0,0,0,1)] hover:-translate-y-2 hover:shadow-[10px_10px_0px_rgba(0,0,0,1)] transition-all mb-4 flex items-center justify-center w-28 h-28 overflow-hidden">
+            <img src={logo} alt="WOW Laundry" className="w-26 h-26 object-contain scale-125" />
           </div>
+          <h1 className="text-4xl font-extrabold text-black lilita-one-regular tracking-wide bg-white px-6 py-2 border-2 border-black shadow-[6px_6px_0px_rgba(0,0,0,1)] rounded-2xl transform -rotate-2">WOW Laundry</h1>
         </div>
+
 
 
         {/* Card */}

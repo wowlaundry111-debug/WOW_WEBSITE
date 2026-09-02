@@ -32,12 +32,16 @@ export default function Navbar() {
         <div className="flex justify-between items-center h-20">
           
           <div className="flex items-center">
-            <Link to="/" className="flex items-center transition-transform hover:scale-105 active:scale-95">
-              <div className="bg-black border-2 sm:border-3 border-black rounded-2xl px-3 py-1.5 sm:px-4 sm:py-2 shadow-[4px_4px_0px_rgba(0,0,0,1)] flex items-center justify-center">
-                <img src={logo} alt="WOW Laundry" className="h-10 sm:h-12 w-auto object-contain" />
+            <Link to="/" className="flex items-center gap-3 transition-colors">
+              <div className="bg-white border-2 sm:border-3 border-black rounded-full shadow-[3px_3px_0px_rgba(0,0,0,1)] flex items-center justify-center w-14 h-14 sm:w-18 sm:h-18 overflow-hidden shrink-0">
+                <img src={logo} alt="WOW Laundry" className="w-16 h-16 sm:w-22 sm:h-22 object-contain scale-125" />
               </div>
+              <span className="font-extrabold text-2xl sm:text-4xl text-black lilita-one-regular uppercase tracking-wider bg-white px-3 py-0.5 sm:px-4 sm:py-1 border-2 sm:border-4 border-black shadow-[3px_3px_0px_rgba(0,0,0,1)] sm:shadow-[6px_6px_0px_rgba(0,0,0,1)] rounded-xl sm:rounded-2xl transform -rotate-2">
+                WOW Laundry
+              </span>
             </Link>
           </div>
+
 
 
           <div className="flex items-center gap-4 sm:gap-6">
