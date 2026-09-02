@@ -582,8 +582,9 @@ function Hero() {
 
 
 
-                        {/* RESTORED: CSS 3D Laundry Basket in front of the man */}
-                        <div className="absolute -bottom-6 right-1/2 transform translate-x-1/2 bg-gradient-to-br from-[#1F8AF2] to-[#0a5cb5] border-[4px] border-black rounded-t-[10px] rounded-b-[40px] w-[250px] md:w-[350px] h-32 md:h-40 z-30 shadow-[6px_6px_0px_#000] flex flex-col items-center justify-center overflow-hidden">
+                        {/* RESTORED: CSS 3D Laundry Basket in front of the specialist */}
+                        <div className="absolute bottom-2 sm:bottom-4 md:bottom-6 right-1/2 transform translate-x-1/2 bg-gradient-to-br from-[#1F8AF2] to-[#0a5cb5] border-[4px] border-black rounded-t-[10px] rounded-b-[40px] w-[250px] md:w-[350px] h-32 md:h-40 z-30 shadow-[6px_6px_0px_#000] flex flex-col items-center justify-center overflow-hidden">
+
                             {/* Basket highlight */}
                             <div className="absolute top-0 left-0 w-full h-3 bg-white/20"></div>
 
