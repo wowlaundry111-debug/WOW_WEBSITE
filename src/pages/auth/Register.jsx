@@ -2,18 +2,19 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { User, Mail, Phone, Lock, ArrowRight, ArrowLeft, AlertTriangle } from 'lucide-react';
 import logo from '../../assets/logo.png';
-import api from '../../services/api';
+import { useAppStore } from '../../store/useAppStore';
 
 export default function Register() {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
-    password: 'password123', // default secure password for OTP-based system
+    password: '',
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  const { register } = useAppStore();
   const navigate = useNavigate();
 
   const handleRegister = async (e) => {
@@ -24,18 +25,27 @@ export default function Register() {
     setError('');
 
     try {
-      await api.post('/auth/register', {
-        name: formData.name.trim(),
-        email: formData.email.trim().toLowerCase(),
-        phone: formData.phone.trim(),
-        password: formData.password || 'password123',
-      });
+      const res = await register(
+        formData.name.trim(),
+        formData.phone.trim(),
+        formData.email.trim().toLowerCase(),
+        formData.password ? formData.password.trim() : undefined
+      );
 
-      // Navigate to login after successful register to trigger OTP
-      navigate('/login');
-      alert('Registration successful! Please sign in with your email.');
+      if (res.success) {
+        const user = useAppStore.getState().currentUser;
+        if (user?.role === 'SuperAdmin' || user?.role === 'ShopAdmin') {
+          navigate('/admin');
+        } else if (user?.role === 'Delivery') {
+          navigate('/delivery');
+        } else {
+          navigate('/order');
+        }
+      } else {
+        setError(res.message || 'Registration failed');
+      }
     } catch (err) {
-      setError(err.response?.data?.error || err.message || 'Failed to register');
+      setError(err.message || 'Failed to register');
     } finally {
       setLoading(false);
     }
@@ -68,8 +78,6 @@ export default function Register() {
             Create Account
           </h1>
         </div>
-
-
 
         {/* Card */}
         <div
@@ -147,6 +155,23 @@ export default function Register() {
               </div>
             </div>
 
+            {/* Password (Optional) */}
+            <div>
+              <label className="block text-xs font-black text-black mb-1.5 uppercase tracking-widest bg-yellow-300 inline-block px-2 border-2 border-black rounded shadow-[2px_2px_0px_rgba(0,0,0,1)] transform -rotate-1">
+                Password (Optional)
+              </label>
+              <div className="flex items-center bg-gray-50 border-2 border-black rounded-xl px-3.5 shadow-[4px_4px_0px_rgba(0,0,0,1)] focus-within:bg-[#B0FF49] transition-colors">
+                <Lock size={18} strokeWidth={2.5} className="text-black mr-2.5 shrink-0" />
+                <input
+                  type="password"
+                  value={formData.password}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  placeholder="CREATE PASSWORD (OPTIONAL)"
+                  className="w-full bg-transparent border-none py-3.5 outline-none text-black font-black placeholder-gray-400 tracking-wider text-sm"
+                />
+              </div>
+            </div>
+
             <button
               type="submit"
               disabled={!isFormValid || loading}
@@ -156,7 +181,7 @@ export default function Register() {
                 'CREATING ACCOUNT...'
               ) : (
                 <>
-                  SIGN UP <ArrowRight size={22} strokeWidth={3.5} />
+                  SIGN UP & ENTER <ArrowRight size={22} strokeWidth={3.5} />
                 </>
               )}
             </button>

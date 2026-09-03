@@ -47,8 +47,8 @@ interface AppState {
 
   // Async Data Fetching
   initializeAppData: () => Promise<void>;
-  login: (email: string, otp: string) => Promise<{ success: boolean; message: string }>;
-  register: (name: string, phone: string, email: string) => Promise<{ success: boolean; message: string }>;
+  login: (identifier: string, password?: string) => Promise<{ success: boolean; message: string }>;
+  register: (name: string, phone: string, email: string, password?: string) => Promise<{ success: boolean; message: string }>;
   fetchCatalog: (overrideShopId?: string) => Promise<void>;
   fetchOrders: (page?: number) => Promise<void>;
   fetchUsers: () => Promise<void>;
@@ -271,13 +271,17 @@ export const useAppStore = create<AppState>()(
         }
       },
 
-      login: async (email, otp) => {
+      login: async (identifier, password) => {
         try {
           set({ isLoading: true, error: null });
-          const response = await api.post('/auth/verify-otp', { email, otp });
+          const response = await api.post('/auth/login', {
+            identifier,
+            email: identifier,
+            password,
+          });
           const { user, token } = response.data;
 
-          setAuthToken(token);
+          if (token) setAuthToken(token);
 
           // Reset TTLs so initializeAppData always re-fetches shops/offers on login
           set({
@@ -317,13 +321,28 @@ export const useAppStore = create<AppState>()(
         }
       },
 
-      register: async (name, phone, email) => {
+      register: async (name, phone, email, password) => {
         try {
           set({ isLoading: true, error: null });
-          const response = await api.post('/auth/register', { name, phone, email });
-          set({ isLoading: false });
+          const response = await api.post('/auth/register', { name, phone, email, password });
+          const { user, token } = response.data;
 
-          let message = response.data.message || 'OTP sent successfully!';
+          if (token && user) {
+            setAuthToken(token);
+            set({
+              currentUser: user,
+              currentRole: user.role,
+              currentTenantId: user.role === 'SuperAdmin' ? '' : (user.role === 'Customer' && !user.shopId ? '' : (user.shopId || get().currentTenantId)),
+              shopsLastFetched: 0,
+              offersLastFetched: 0,
+              isLoading: false,
+            });
+            await get().initializeAppData();
+          } else {
+            set({ isLoading: false });
+          }
+
+          let message = response.data.message || 'Registered successfully!';
           return { success: true, message };
         } catch (err: any) {
           const msg = err.response?.data?.error || 'Registration failed';
