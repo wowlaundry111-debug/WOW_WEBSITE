@@ -274,9 +274,7 @@ export const useAppStore = create<AppState>()(
       login: async (identifier, password) => {
         try {
           set({ isLoading: true, error: null });
-          // Use staff-login endpoint: only SuperAdmin, ShopAdmin, and Delivery roles are allowed.
-          // Customer accounts will receive a 403 and be told to use the mobile app.
-          const response = await api.post('/auth/staff-login', {
+          const response = await api.post('/auth/login', {
             identifier,
             email: identifier,
             password,
@@ -285,17 +283,15 @@ export const useAppStore = create<AppState>()(
 
           if (token) setAuthToken(token);
 
-          // Reset TTLs so initializeAppData always re-fetches shops/offers on login
           set({
             currentUser: user,
             currentRole: user.role,
-            currentTenantId: user.role === 'SuperAdmin' ? '' : (user.role === 'Customer' && !user.shopId ? '' : (user.shopId || get().currentTenantId)),
+            currentTenantId: user.role === 'SuperAdmin' ? '' : (user.shopId || get().currentTenantId),
             shopsLastFetched: 0,
             offersLastFetched: 0,
             isLoading: false,
           });
 
-          // initializeAppData ensures shops + offers + role-specific data loaded in one shot
           await get().initializeAppData();
           return { success: true, message: 'Logged in successfully' };
         } catch (err: any) {
@@ -327,27 +323,55 @@ export const useAppStore = create<AppState>()(
         try {
           set({ isLoading: true, error: null });
           const response = await api.post('/auth/register', { name, phone, email, password });
-          const { user, token } = response.data;
+          set({ isLoading: false });
 
+          // Step 1 complete: OTP sent to email — caller shows OTP input
+          if (response.data.requiresOtp) {
+            return { success: true, requiresOtp: true, message: response.data.message };
+          }
+
+          // Legacy path: account created directly (no OTP step)
+          const { user, token } = response.data;
           if (token && user) {
             setAuthToken(token);
             set({
               currentUser: user,
               currentRole: user.role,
-              currentTenantId: user.role === 'SuperAdmin' ? '' : (user.role === 'Customer' && !user.shopId ? '' : (user.shopId || get().currentTenantId)),
+              currentTenantId: user.role === 'SuperAdmin' ? '' : (user.shopId || get().currentTenantId),
               shopsLastFetched: 0,
               offersLastFetched: 0,
-              isLoading: false,
             });
             await get().initializeAppData();
-          } else {
-            set({ isLoading: false });
           }
-
-          let message = response.data.message || 'Registered successfully!';
-          return { success: true, message };
+          return { success: true, message: response.data.message || 'Registered successfully!' };
         } catch (err: any) {
           const msg = err.response?.data?.error || 'Registration failed';
+          set({ isLoading: false, error: msg });
+          return { success: false, message: msg };
+        }
+      },
+
+      verifyOtp: async (email, otp) => {
+        try {
+          set({ isLoading: true, error: null });
+          const response = await api.post('/auth/verify-otp', { email, otp });
+          const { user, token } = response.data;
+
+          if (token) setAuthToken(token);
+
+          set({
+            currentUser: user,
+            currentRole: user.role,
+            currentTenantId: user.role === 'SuperAdmin' ? '' : (user.shopId || get().currentTenantId),
+            shopsLastFetched: 0,
+            offersLastFetched: 0,
+            isLoading: false,
+          });
+
+          await get().initializeAppData();
+          return { success: true, message: 'Account verified and created!' };
+        } catch (err: any) {
+          const msg = err.response?.data?.error || 'OTP verification failed';
           set({ isLoading: false, error: msg });
           return { success: false, message: msg };
         }
