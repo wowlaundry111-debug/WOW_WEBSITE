@@ -15,7 +15,7 @@ function Hero() {
     const [bucketLoaded, setBucketLoaded] = useState(false);
 
     return (
-        <div className="bg-white font-outfit selection:bg-black selection:text-[#B0FF49] min-h-screen relative overflow-hidden flex flex-col items-center w-full">
+        <div className="bg-white font-outfit selection:bg-black selection:text-[#9AE600] min-h-screen relative overflow-hidden flex flex-col items-center w-full">
 
             <style>
                 {`
@@ -205,8 +205,8 @@ function Hero() {
 
                             {/* Horizontal Handles pushed much further inward to attach to the basket body (covering the grey handles of the image) */}
                             {/* Hidden since the new custom bucket image has its own matching brutalist handles */}
-                            <div className="hidden absolute left-[16%] md:left-[18%] top-[45%] w-16 md:w-24 h-10 md:h-12 bg-gradient-to-b from-[#B0FF49] to-[#8cd927] border-[4px] border-black rounded-l-full shadow-[inset_2px_2px_0px_rgba(255,255,255,0.5)] z-[-1] transition-transform duration-300 group-hover:-translate-x-3"></div>
-                            <div className="hidden absolute right-[16%] md:right-[18%] top-[45%] w-16 md:w-24 h-10 md:h-12 bg-gradient-to-b from-[#B0FF49] to-[#8cd927] border-[4px] border-black rounded-r-full shadow-[inset_2px_2px_0px_rgba(255,255,255,0.5)] z-[-1] transition-transform duration-300 group-hover:translate-x-3"></div>
+                            <div className="hidden absolute left-[16%] md:left-[18%] top-[45%] w-16 md:w-24 h-10 md:h-12 bg-gradient-to-b from-[#9AE600] to-[#8cd927] border-[4px] border-black rounded-l-full shadow-[inset_2px_2px_0px_rgba(255,255,255,0.5)] z-[-1] transition-transform duration-300 group-hover:-translate-x-3"></div>
+                            <div className="hidden absolute right-[16%] md:right-[18%] top-[45%] w-16 md:w-24 h-10 md:h-12 bg-gradient-to-b from-[#9AE600] to-[#8cd927] border-[4px] border-black rounded-r-full shadow-[inset_2px_2px_0px_rgba(255,255,255,0.5)] z-[-1] transition-transform duration-300 group-hover:translate-x-3"></div>
 
                             {!bucketLoaded && <Skeleton className="w-full aspect-[4/3] rounded-3xl" />}
                             <img
@@ -392,7 +392,7 @@ function Hero() {
                                     {/* Features Box - moved to top and sized down horizontally */}
                                     <div className='bg-white border-[2px] md:border-[3px] border-black rounded-full px-2 py-1 md:px-3 md:py-2 flex gap-1 md:gap-2 justify-center items-center shadow-[3px_3px_0px_rgba(0,0,0,1)] z-30 w-[65%] max-w-[380px] mb-1'>
                                         <div className='flex items-center gap-1 cursor-default group/feat'>
-                                            <div className="bg-[#B0FF49] p-1 md:p-1.5 border-[2px] border-black rounded-lg shadow-[2px_2px_0px_#000] group-hover/feat:-translate-y-1 transition-transform">
+                                            <div className="bg-[#9AE600] p-1 md:p-1.5 border-[2px] border-black rounded-lg shadow-[2px_2px_0px_#000] group-hover/feat:-translate-y-1 transition-transform">
                                                 <TbTruckDelivery className='text-[8px] md:text-base text-black' />
                                             </div>
                                             <div className='text-[7px] md:text-[6px] font-black uppercase tracking-wider text-black leading-tight'>Pickup in <br /> 10 min</div>
@@ -418,7 +418,7 @@ function Hero() {
                                         <span className="mb-1">Best Washing</span>
                                         <div className="flex justify-center items-center gap-2 mb-1">
                                             <span>With</span>
-                                            <span className='bg-black text-[#B0FF49] px-3 py-0.5 md:px-4 md:py-1 rounded-2xl border-[2px] md:border-[3px] border-black shadow-[3px_3px_0px_#B0FF49] transform -rotate-2 hover:scale-105 transition-transform'>Fast</span>
+                                            <span className='bg-black text-[#9AE600] px-3 py-0.5 md:px-4 md:py-1 rounded-2xl border-[2px] md:border-[3px] border-black shadow-[3px_3px_0px_#9AE600] transform -rotate-2 hover:scale-105 transition-transform'>Fast</span>
                                             <span>And</span>
                                         </div>
                                         <div className="flex justify-center items-center gap-2">
@@ -430,8 +430,8 @@ function Hero() {
                                     {/* Book Order Button — hidden on mobile, shown sm+ (mobile gets its own button below) */}
                                     <div className='hidden sm:block relative z-20 w-[72%] max-w-[340px] mt-2 md:mt-3'>
                                         <Link to={'/order'}>
-                                            <button className='w-full bg-[#B0FF49] hover:bg-[#9de83a] text-black px-4 py-2.5 md:px-5 md:py-3 text-xs md:text-base font-black uppercase tracking-widest rounded-full border-[2.5px] md:border-[3.5px] border-black shadow-[4px_4px_0px_#000] md:shadow-[5px_5px_0px_#000] hover:translate-y-0.5 hover:shadow-[2px_2px_0px_#000] flex items-center justify-center gap-2.5 transition-all group cursor-pointer'>
-                                                <div className="bg-black text-[#B0FF49] p-1.5 md:p-2 rounded-full border-[1.5px] md:border-[2px] border-black group-hover:rotate-[360deg] transition-transform duration-700 shrink-0">
+                                            <button className='w-full bg-[#9AE600] hover:bg-[#9de83a] text-black px-4 py-2.5 md:px-5 md:py-3 text-xs md:text-base font-black uppercase tracking-widest rounded-full border-[2.5px] md:border-[3.5px] border-black shadow-[4px_4px_0px_#000] md:shadow-[5px_5px_0px_#000] hover:translate-y-0.5 hover:shadow-[2px_2px_0px_#000] flex items-center justify-center gap-2.5 transition-all group cursor-pointer'>
+                                                <div className="bg-black text-[#9AE600] p-1.5 md:p-2 rounded-full border-[1.5px] md:border-[2px] border-black group-hover:rotate-[360deg] transition-transform duration-700 shrink-0">
                                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="13" height="13" className="md:w-[17px] md:h-[17px]">
                                                         <path fill="none" d="M0 0h24v24H0z"></path>
                                                         <path fill="currentColor" d="M1.946 9.315c-.522-.174-.527-.455.01-.634l19.087-6.362c.529-.176.832.12.684.638l-5.454 19.086c-.15.529-.455.547-.679.045L12 14l6-8-8 6-8.054-2.685z"></path>
@@ -445,8 +445,8 @@ function Hero() {
                                     {/* Pricing Box (Below) */}
                                     <div className='bg-[#1565C0] border-[2px] md:border-[3px] border-black px-3.5 py-1.5 md:px-5 md:py-2 rounded-2xl max-w-[85%] relative z-20 shadow-[3px_3px_0px_#000] transition-transform hover:-translate-y-0.5 mt-1'>
                                         <p className='font-black text-white uppercase text-[9.5px] md:text-xs tracking-widest leading-relaxed text-center'>
-                                            <span className='text-[#B0FF49]'>Lawgate's</span> first and best laundry. <br /> 
-                                            Starting at just <span className='text-[#B0FF49] text-xs md:text-sm font-black ml-0.5'>35/- per kg</span>
+                                            <span className='text-[#9AE600]'>Lawgate's</span> first and best laundry. <br /> 
+                                            Starting at just <span className='text-[#9AE600] text-xs md:text-sm font-black ml-0.5'>35/- per kg</span>
                                         </p>
                                     </div>
                                 </div>
@@ -457,8 +457,8 @@ function Hero() {
                     {/* MOBILE-ONLY: Book Now button floating between bucket and man */}
                     <div className='block sm:hidden w-full flex justify-center items-center py-4 z-30 relative'>
                         <Link to={'/order'}>
-                            <button className='bg-[#B0FF49] active:bg-[#9de83a] text-black px-9 py-3.5 text-base font-black uppercase tracking-widest rounded-full border-[3.5px] border-black shadow-[5px_5px_0px_#000] active:translate-y-1 active:shadow-[1px_1px_0px_#000] flex items-center justify-center gap-3 transition-all cursor-pointer'>
-                                <div className="bg-black text-[#B0FF49] p-2 rounded-full border-[2px] border-black shrink-0">
+                            <button className='bg-[#9AE600] active:bg-[#9de83a] text-black px-9 py-3.5 text-base font-black uppercase tracking-widest rounded-full border-[3.5px] border-black shadow-[5px_5px_0px_#000] active:translate-y-1 active:shadow-[1px_1px_0px_#000] flex items-center justify-center gap-3 transition-all cursor-pointer'>
+                                <div className="bg-black text-[#9AE600] p-2 rounded-full border-[2px] border-black shrink-0">
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18">
                                         <path fill="none" d="M0 0h24v24H0z"></path>
                                         <path fill="currentColor" d="M1.946 9.315c-.522-.174-.527-.455.01-.634l19.087-6.362c.529-.176.832.12.684.638l-5.454 19.086c-.15.529-.455.547-.679.045L12 14l6-8-8 6-8.054-2.685z"></path>
@@ -557,7 +557,7 @@ function Hero() {
                                 </span>
 
                                 <span 
-                                    className="font-black text-[19px] sm:text-[25px] tracking-wide uppercase text-[#B0FF49] leading-tight my-0.5 lilita-one-regular" 
+                                    className="font-black text-[19px] sm:text-[25px] tracking-wide uppercase text-[#9AE600] leading-tight my-0.5 lilita-one-regular" 
                                     style={{ 
                                         WebkitTextStroke: '1.4px black',
                                         textShadow: '1.5px 1.5px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000'
@@ -605,7 +605,7 @@ function Hero() {
                                 <div className="w-2.5 h-2.5 md:w-4 md:h-4 bg-black rounded-full shadow-[inset_1px_1px_2px_rgba(255,255,255,0.4)]"></div>
                             </div>
 
-                            <div className="bg-[#B0FF49] border-[2px] md:border-[4px] border-black px-4 py-1.5 md:px-6 md:py-2 rounded-xl shadow-[2px_2px_0px_#000] relative z-10 transform -rotate-2 hover:rotate-2 transition-transform cursor-pointer">
+                            <div className="bg-[#9AE600] border-[2px] md:border-[4px] border-black px-4 py-1.5 md:px-6 md:py-2 rounded-xl shadow-[2px_2px_0px_#000] relative z-10 transform -rotate-2 hover:rotate-2 transition-transform cursor-pointer">
                                 <span className="font-black text-black text-[10px] md:text-sm uppercase tracking-widest text-center block leading-tight">Clean Clothes<br />Happy You!</span>
                             </div>
                         </div>

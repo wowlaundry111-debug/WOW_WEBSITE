@@ -31,7 +31,7 @@ const SERVICE_LABEL_FOR_CATEGORY = (catName) => {
 const stripeColor = (s) => {
   if (['PLACED', 'ACCEPTED'].includes(s)) return 'bg-red-500';
   if (['PICKUP_ASSIGNED', 'OUT_FOR_DELIVERY'].includes(s)) return 'bg-[#0D8DE3]';
-  if (['PICKED_UP', 'WASHING', 'IRONING'].includes(s)) return 'bg-[#B0FF49]';
+  if (['PICKED_UP', 'WASHING', 'IRONING'].includes(s)) return 'bg-[#9AE600]';
   if (s === 'DELIVERED') return 'bg-green-500';
   return 'bg-gray-400';
 };
@@ -225,7 +225,7 @@ export default function AdminDashboard() {
         <aside className="w-full md:w-64 shrink-0 flex flex-col gap-3">
           
           {/* Shop Context Card */}
-          <div className="p-4 bg-[#B0FF49] border-4 border-black shadow-[4px_4px_0px_rgba(0,0,0,1)] rounded-xl">
+          <div className="p-4 bg-[#9AE600] border-4 border-black shadow-[4px_4px_0px_rgba(0,0,0,1)] rounded-xl">
             <h2 className="text-[10px] font-black uppercase tracking-widest text-black/70 mb-1">
               {isSuperAdmin ? 'Super Admin Context' : 'Branch Console'}
             </h2>

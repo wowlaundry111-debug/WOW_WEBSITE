@@ -24,7 +24,7 @@ export default function GlobalUsers({ users, deleteUser }) {
             </thead>
             <tbody>
               {users.map((user, i) => (
-                <tr key={user._id} className={`hover:bg-[#B0FF49]/10 transition-colors ${i !== users.length - 1 ? 'border-b-2 border-gray-200' : ''}`}>
+                <tr key={user._id} className={`hover:bg-[#9AE600]/10 transition-colors ${i !== users.length - 1 ? 'border-b-2 border-gray-200' : ''}`}>
                   <td className="p-4">
                     <div className="flex items-center gap-4">
                       <div className="w-10 h-10 bg-black text-white border-2 border-black rounded-full flex items-center justify-center font-black">
@@ -42,7 +42,7 @@ export default function GlobalUsers({ users, deleteUser }) {
                     <span className={`px-3 py-1 border-2 border-black font-black text-xs uppercase ${
                       user.role === 'SuperAdmin' ? 'bg-purple-300' : 
                       user.role === 'ShopAdmin' ? 'bg-[#0D8DE3] text-white' : 
-                      user.role === 'Delivery' ? 'bg-[#B0FF49]' : 'bg-gray-200'
+                      user.role === 'Delivery' ? 'bg-[#9AE600]' : 'bg-gray-200'
                     }`}>
                       {user.role}
                     </span>

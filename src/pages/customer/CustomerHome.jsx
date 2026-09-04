@@ -80,7 +80,7 @@ export default function CustomerHome() {
         {/* Header Block */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4 animate-fade-in-up">
           <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-full bg-[#B0FF49] border-2 border-black flex items-center justify-center shadow-[4px_4px_0px_rgba(0,0,0,1)]">
+            <div className="w-14 h-14 rounded-full bg-[#9AE600] border-2 border-black flex items-center justify-center shadow-[4px_4px_0px_rgba(0,0,0,1)]">
               {currentUser?.name ? (
                 <span className="text-black font-extrabold text-xl lilita-one-regular">{currentUser.name.charAt(0).toUpperCase()}</span>
               ) : (
@@ -126,7 +126,7 @@ export default function CustomerHome() {
                 {/* Connecting Line */}
                 <div className="absolute top-6 left-0 w-full h-2 bg-gray-200 border-y-2 border-black -z-0"></div>
                 <div 
-                  className="absolute top-6 left-0 h-2 bg-[#B0FF49] border-y-2 border-black -z-0 transition-all duration-500"
+                  className="absolute top-6 left-0 h-2 bg-[#9AE600] border-y-2 border-black -z-0 transition-all duration-500"
                   style={{ width: `${Math.max(0, (activeStepIndex / (ORDER_STEPS.length - 1)) * 100)}%` }}
                 ></div>
 
@@ -139,7 +139,7 @@ export default function CustomerHome() {
                     <div key={step.key} className="flex flex-col items-center z-10 w-12">
                       <div className={`w-12 h-12 rounded-full flex items-center justify-center border-2 border-black transition-all duration-300 ${
                         isActive ? 'bg-[#0D8DE3] scale-125 shadow-[4px_4px_0px_rgba(0,0,0,1)] text-black' : 
-                        isCompleted ? 'bg-[#B0FF49] text-black' : 'bg-gray-100 text-gray-500'
+                        isCompleted ? 'bg-[#9AE600] text-black' : 'bg-gray-100 text-gray-500'
                       }`}>
                         <StepIcon size={20} strokeWidth={2.5} />
                       </div>
@@ -162,9 +162,9 @@ export default function CustomerHome() {
 
         {/* Promo Banners */}
         <div className="flex gap-6 overflow-x-auto pb-6 mb-6 snap-x no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0 animate-fade-in-up" style={{ animationDelay: '300ms' }}>
-          <div className="snap-start shrink-0 w-[280px] sm:w-[320px] bg-[#B0FF49] border-2 border-black rounded-2xl p-6 shadow-[6px_6px_0px_rgba(0,0,0,1)] text-black relative overflow-hidden flex items-center justify-between transform transition-transform hover:-translate-y-1">
+          <div className="snap-start shrink-0 w-[280px] sm:w-[320px] bg-[#9AE600] border-2 border-black rounded-2xl p-6 shadow-[6px_6px_0px_rgba(0,0,0,1)] text-black relative overflow-hidden flex items-center justify-between transform transition-transform hover:-translate-y-1">
             <div className="relative z-10 pr-2">
-              <span className="bg-black text-[#B0FF49] px-2 py-0.5 rounded text-[10px] font-black tracking-widest uppercase mb-2 inline-block">{promo1.badge || 'PROMO'}</span>
+              <span className="bg-black text-[#9AE600] px-2 py-0.5 rounded text-[10px] font-black tracking-widest uppercase mb-2 inline-block">{promo1.badge || 'PROMO'}</span>
               <h2 className="text-3xl font-black italic lilita-one-regular">{promo1.title}</h2>
               <p className="font-extrabold mt-1 text-xs uppercase">{promo1.subtitle}</p>
             </div>
@@ -179,7 +179,7 @@ export default function CustomerHome() {
               <h2 className="text-3xl font-black italic lilita-one-regular leading-tight">{promo2.title}</h2>
               <p className="font-extrabold mt-1 text-xs uppercase text-white">{promo2.subtitle}</p>
             </div>
-            <div className="w-16 h-16 rounded-full bg-[#B0FF49] border-2 border-black flex items-center justify-center shrink-0 shadow-[2px_2px_0px_rgba(0,0,0,1)] text-black">
+            <div className="w-16 h-16 rounded-full bg-[#9AE600] border-2 border-black flex items-center justify-center shrink-0 shadow-[2px_2px_0px_rgba(0,0,0,1)] text-black">
               <Truck size={32} strokeWidth={2.5} />
             </div>
           </div>
@@ -237,10 +237,10 @@ export default function CustomerHome() {
         <div className="fixed bottom-6 left-0 right-0 px-4 z-50 pointer-events-none flex justify-center animate-bounce-soft">
           <Link 
             to="/cart" 
-            className="w-full max-w-3xl bg-black text-white p-5 rounded-2xl border-2 border-black shadow-[6px_6px_0px_#B0FF49] flex items-center justify-between pointer-events-auto transition-all hover:bg-gray-900 active:translate-x-1 active:translate-y-1 active:shadow-[0px_0px_0px_#B0FF49]"
+            className="w-full max-w-3xl bg-black text-white p-5 rounded-2xl border-2 border-black shadow-[6px_6px_0px_#9AE600] flex items-center justify-between pointer-events-auto transition-all hover:bg-gray-900 active:translate-x-1 active:translate-y-1 active:shadow-[0px_0px_0px_#9AE600]"
           >
             <div>
-              <p className="text-xs font-black text-[#B0FF49] tracking-widest uppercase">
+              <p className="text-xs font-black text-[#9AE600] tracking-widest uppercase">
                 {cart.length} ITEM{cart.length > 1 ? 'S' : ''} ADDED
               </p>
               {(() => {
@@ -248,7 +248,7 @@ export default function CustomerHome() {
                 const hasKg = cart.some(isKgCheck);
                 const perItemTotal = cart.filter(c => !isKgCheck(c)).reduce((s, c) => s + (c.price || 0) * c.quantity, 0);
                 return hasKg ? (
-                  <p className="text-lg sm:text-xl font-black mt-1 lilita-one-regular text-[#B0FF49] tracking-wider uppercase">
+                  <p className="text-lg sm:text-xl font-black mt-1 lilita-one-regular text-[#9AE600] tracking-wider uppercase">
                     {perItemTotal > 0 ? `₹${perItemTotal} + KG Pending` : 'Pending Weighing'}
                   </p>
                 ) : (
@@ -259,7 +259,7 @@ export default function CustomerHome() {
             </div>
             <div className="flex items-center gap-3">
               <span className="font-black text-lg uppercase tracking-wide">Checkout</span>
-              <div className="w-10 h-10 bg-[#B0FF49] border-2 border-black rounded-full flex items-center justify-center">
+              <div className="w-10 h-10 bg-[#9AE600] border-2 border-black rounded-full flex items-center justify-center">
                 <ChevronDown size={24} strokeWidth={4} className="text-black -rotate-90" />
               </div>
             </div>

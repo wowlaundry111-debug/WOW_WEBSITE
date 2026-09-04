@@ -220,13 +220,13 @@ export default function ShopDashboard({ tenantOrders = [], deliveryBoys = [], us
   };
 
   return (
-    <div className="space-y-8 font-outfit selection:bg-black selection:text-[#B0FF49]">
+    <div className="space-y-8 font-outfit selection:bg-black selection:text-[#9AE600]">
       {/* Top Header & Range Filters */}
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 bg-white border-4 border-black p-6 rounded-2xl shadow-[6px_6px_0px_rgba(0,0,0,1)]">
         <div>
           <div className="flex items-center gap-2">
             <h1 className="text-3xl sm:text-4xl font-black text-black uppercase lilita-one-regular">Analytics Dashboard</h1>
-            <span className="bg-[#B0FF49] border-2 border-black font-black text-xs uppercase px-3 py-1 rounded-full shadow-[2px_2px_0px_rgba(0,0,0,1)] flex items-center gap-1">
+            <span className="bg-[#9AE600] border-2 border-black font-black text-xs uppercase px-3 py-1 rounded-full shadow-[2px_2px_0px_rgba(0,0,0,1)] flex items-center gap-1">
               <Zap size={14} fill="black" /> Live Pulse
             </span>
           </div>
@@ -254,7 +254,7 @@ export default function ShopDashboard({ tenantOrders = [], deliveryBoys = [], us
                 onClick={() => setTimeRange(btn.id)}
                 className={`shrink-0 px-3 py-1.5 font-black text-xs uppercase transition-all rounded-lg border border-black whitespace-nowrap ${
                   timeRange === btn.id
-                    ? 'bg-[#B0FF49] text-black shadow-[2px_2px_0px_rgba(0,0,0,1)]'
+                    ? 'bg-[#9AE600] text-black shadow-[2px_2px_0px_rgba(0,0,0,1)]'
                     : 'bg-white text-gray-700 hover:bg-gray-200'
                 }`}
               >
@@ -311,10 +311,10 @@ export default function ShopDashboard({ tenantOrders = [], deliveryBoys = [], us
       {/* Bento Grid KPI Overview Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {/* Card 1: Total Sales Revenue */}
-        <div className="bg-[#B0FF49] border-4 border-black shadow-[6px_6px_0px_rgba(0,0,0,1)] p-6 rounded-2xl flex flex-col justify-between relative overflow-hidden group">
+        <div className="bg-[#9AE600] border-4 border-black shadow-[6px_6px_0px_rgba(0,0,0,1)] p-6 rounded-2xl flex flex-col justify-between relative overflow-hidden group">
           <div className="flex items-center justify-between">
             <span className="font-black uppercase text-xs tracking-wider text-black">Total Revenue</span>
-            <div className="w-8 h-8 rounded-lg bg-black text-[#B0FF49] flex items-center justify-center border border-black">
+            <div className="w-8 h-8 rounded-lg bg-black text-[#9AE600] flex items-center justify-center border border-black">
               <TrendingUp size={18} strokeWidth={3} />
             </div>
           </div>
@@ -350,7 +350,7 @@ export default function ShopDashboard({ tenantOrders = [], deliveryBoys = [], us
         <div className="bg-[#0D8DE3] text-white border-4 border-black shadow-[6px_6px_0px_rgba(0,0,0,1)] p-6 rounded-2xl flex flex-col justify-between relative overflow-hidden">
           <div className="flex items-center justify-between">
             <span className="font-black uppercase text-xs tracking-wider text-white">Active Queue</span>
-            <div className="w-8 h-8 rounded-lg bg-black text-[#B0FF49] flex items-center justify-center border border-black">
+            <div className="w-8 h-8 rounded-lg bg-black text-[#9AE600] flex items-center justify-center border border-black">
               <Layers size={18} strokeWidth={3} />
             </div>
           </div>
@@ -359,7 +359,7 @@ export default function ShopDashboard({ tenantOrders = [], deliveryBoys = [], us
               {pendingOrdersCount}
             </h2>
             <div className="flex items-center gap-2">
-              <span className="font-bold text-xs bg-black text-[#B0FF49] px-2.5 py-1 border-2 border-black rounded-lg uppercase">
+              <span className="font-bold text-xs bg-black text-[#9AE600] px-2.5 py-1 border-2 border-black rounded-lg uppercase">
                 {deliveredOrdersCount} Delivered
               </span>
               {cancelledOrdersCount > 0 && (
@@ -375,7 +375,7 @@ export default function ShopDashboard({ tenantOrders = [], deliveryBoys = [], us
         <div className="bg-white border-4 border-black shadow-[6px_6px_0px_rgba(0,0,0,1)] p-6 rounded-2xl flex flex-col justify-between relative overflow-hidden">
           <div className="flex items-center justify-between">
             <span className="font-black uppercase text-xs tracking-wider text-gray-700">Active Delivery Fleet</span>
-            <div className="w-8 h-8 rounded-lg bg-[#B0FF49] text-black flex items-center justify-center border border-black">
+            <div className="w-8 h-8 rounded-lg bg-[#9AE600] text-black flex items-center justify-center border border-black">
               <Users size={18} strokeWidth={3} />
             </div>
           </div>
@@ -408,7 +408,7 @@ export default function ShopDashboard({ tenantOrders = [], deliveryBoys = [], us
           </div>
 
           <div className="flex items-center gap-3">
-            <span className="flex items-center gap-1.5 text-xs font-black uppercase bg-[#B0FF49] border-2 border-black px-3 py-1.5 rounded-xl shadow-[2px_2px_0px_rgba(0,0,0,1)]">
+            <span className="flex items-center gap-1.5 text-xs font-black uppercase bg-[#9AE600] border-2 border-black px-3 py-1.5 rounded-xl shadow-[2px_2px_0px_rgba(0,0,0,1)]">
               <span className="w-3 h-3 rounded-full bg-black inline-block"></span> Total Sales Revenue (₹)
             </span>
           </div>
@@ -455,7 +455,7 @@ export default function ShopDashboard({ tenantOrders = [], deliveryBoys = [], us
                       {/* Direct Value Badge on top of bar */}
                       {bucket.revenue > 0 && (
                         <div className={`mb-1.5 px-1.5 py-0.5 border border-black rounded text-[10px] font-black uppercase shadow-[1px_1px_0px_rgba(0,0,0,1)] transition-transform group-hover:scale-110 ${
-                          isPeak ? 'bg-black text-[#B0FF49]' : 'bg-white text-black'
+                          isPeak ? 'bg-black text-[#9AE600]' : 'bg-white text-black'
                         }`}>
                           {formatCompactNumber(bucket.revenue)}
                         </div>
@@ -463,7 +463,7 @@ export default function ShopDashboard({ tenantOrders = [], deliveryBoys = [], us
 
                       {/* Hover Tooltip Popup */}
                       {isHovered && (
-                        <div className="absolute -top-16 z-30 bg-black text-[#B0FF49] border-2 border-black p-2 rounded-xl text-center shadow-[4px_4px_0px_rgba(0,0,0,1)] whitespace-nowrap animate-fade-in-up">
+                        <div className="absolute -top-16 z-30 bg-black text-[#9AE600] border-2 border-black p-2 rounded-xl text-center shadow-[4px_4px_0px_rgba(0,0,0,1)] whitespace-nowrap animate-fade-in-up">
                           <p className="text-[10px] font-black uppercase text-white">{bucket.label}</p>
                           <p className="text-sm font-black lilita-one-regular">₹{bucket.revenue.toLocaleString('en-IN')}</p>
                           <p className="text-[9px] font-bold text-gray-300 uppercase">{bucket.orders} Order{bucket.orders > 1 ? 's' : ''}</p>
@@ -477,7 +477,7 @@ export default function ShopDashboard({ tenantOrders = [], deliveryBoys = [], us
                           background: isHovered
                             ? 'linear-gradient(to top, #0D8DE3, #38BDF8)'
                             : isPeak
-                            ? 'linear-gradient(to top, #90E114, #B0FF49)'
+                            ? 'linear-gradient(to top, #90E114, #9AE600)'
                             : 'linear-gradient(to top, #A3E635, #BEF264)'
                         }}
                         className="w-full max-w-[42px] rounded-t-xl border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] transition-all transform group-hover:-translate-y-1"
@@ -486,7 +486,7 @@ export default function ShopDashboard({ tenantOrders = [], deliveryBoys = [], us
                       {/* X-Axis Date Pill Container (Prevents clipping & overlapping) */}
                       <div className="absolute -bottom-12 w-full flex justify-center">
                         <span className={`text-[10px] font-black uppercase border border-black px-2 py-0.5 rounded-md whitespace-nowrap shadow-[1px_1px_0px_rgba(0,0,0,1)] ${
-                          isHovered ? 'bg-black text-[#B0FF49]' : 'bg-white text-black'
+                          isHovered ? 'bg-black text-[#9AE600]' : 'bg-white text-black'
                         }`}>
                           {bucket.label}
                         </span>
@@ -512,7 +512,7 @@ export default function ShopDashboard({ tenantOrders = [], deliveryBoys = [], us
                 <CreditCard size={22} className="text-[#0D8DE3]" strokeWidth={3} />
                 <h3 className="text-2xl font-black uppercase text-black lilita-one-regular">Payment Collection</h3>
               </div>
-              <span className="text-xs font-black uppercase bg-[#B0FF49] border-2 border-black px-2.5 py-1 rounded-lg">Channel Share</span>
+              <span className="text-xs font-black uppercase bg-[#9AE600] border-2 border-black px-2.5 py-1 rounded-lg">Channel Share</span>
             </div>
 
             <div className="mt-6 space-y-6">
@@ -525,7 +525,7 @@ export default function ShopDashboard({ tenantOrders = [], deliveryBoys = [], us
                 <div className="w-full h-5 bg-gray-100 border-2 border-black rounded-xl overflow-hidden flex shadow-[2px_2px_0px_rgba(0,0,0,1)]">
                   <div
                     style={{ width: `${totalRevenue > 0 ? (cashRevenue / totalRevenue) * 100 : 0}%` }}
-                    className="h-full bg-[#B0FF49] border-r-2 border-black transition-all"
+                    className="h-full bg-[#9AE600] border-r-2 border-black transition-all"
                   />
                 </div>
                 <p className="text-[10px] font-bold text-gray-500 uppercase mt-1.5">
@@ -552,7 +552,7 @@ export default function ShopDashboard({ tenantOrders = [], deliveryBoys = [], us
             </div>
           </div>
 
-          <div className="bg-[#B0FF49]/20 border-2 border-black p-4 rounded-xl shadow-[3px_3px_0px_rgba(0,0,0,1)] mt-4">
+          <div className="bg-[#9AE600]/20 border-2 border-black p-4 rounded-xl shadow-[3px_3px_0px_rgba(0,0,0,1)] mt-4">
             <p className="text-xs font-black uppercase text-black">Net Filtered Collections</p>
             <p className="text-3xl font-black text-black lilita-one-regular mt-1">₹{totalRevenue.toLocaleString('en-IN')}</p>
             <p className="text-[10px] font-bold text-gray-600 uppercase mt-0.5">Total collected revenue across active range</p>
@@ -566,7 +566,7 @@ export default function ShopDashboard({ tenantOrders = [], deliveryBoys = [], us
               <Sparkles size={22} className="text-[#0D8DE3]" strokeWidth={3} />
               <h3 className="text-2xl font-black uppercase text-black lilita-one-regular">Popular Wash Services</h3>
             </div>
-            <span className="text-xs font-black uppercase bg-[#B0FF49] border-2 border-black px-2.5 py-1 rounded-lg">Top Services</span>
+            <span className="text-xs font-black uppercase bg-[#9AE600] border-2 border-black px-2.5 py-1 rounded-lg">Top Services</span>
           </div>
 
           {categoryStats.length === 0 ? (
@@ -579,7 +579,7 @@ export default function ShopDashboard({ tenantOrders = [], deliveryBoys = [], us
                   <div key={idx} className="space-y-1.5">
                     <div className="flex justify-between items-center text-xs font-black uppercase">
                       <span className="flex items-center gap-2">
-                        <span className="w-5 h-5 bg-black text-[#B0FF49] rounded-md border border-black flex items-center justify-center text-[10px]">#{idx + 1}</span>
+                        <span className="w-5 h-5 bg-black text-[#9AE600] rounded-md border border-black flex items-center justify-center text-[10px]">#{idx + 1}</span>
                         {cat.name}
                       </span>
                       <span className="text-black">₹{cat.revenue.toLocaleString('en-IN')} ({cat.count} items)</span>
@@ -587,7 +587,7 @@ export default function ShopDashboard({ tenantOrders = [], deliveryBoys = [], us
                     <div className="w-full h-4 bg-gray-100 border-2 border-black rounded-xl overflow-hidden flex shadow-[2px_2px_0px_rgba(0,0,0,1)]">
                       <div
                         style={{ width: `${Math.max(widthPercent, 5)}%` }}
-                        className="h-full bg-[#B0FF49] border-r-2 border-black transition-all"
+                        className="h-full bg-[#9AE600] border-r-2 border-black transition-all"
                       />
                     </div>
                   </div>
@@ -615,7 +615,7 @@ export default function ShopDashboard({ tenantOrders = [], deliveryBoys = [], us
           ) : (
             topCustomers.map((cust, i) => (
               <div key={i} className="flex items-center gap-4 py-4 hover:bg-gray-50 transition-colors">
-                <div className="w-12 h-12 bg-[#B0FF49] border-2 border-black rounded-full flex items-center justify-center font-black text-xl shadow-[2px_2px_0px_rgba(0,0,0,1)]">
+                <div className="w-12 h-12 bg-[#9AE600] border-2 border-black rounded-full flex items-center justify-center font-black text-xl shadow-[2px_2px_0px_rgba(0,0,0,1)]">
                   {cust.name.charAt(0).toUpperCase()}
                 </div>
                 <div className="flex-1 min-w-0">

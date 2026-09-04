@@ -30,7 +30,7 @@ export default function ShopSettings({
             <span className="text-sm font-bold text-gray-500">{isShopOpen ? 'Accepting Orders' : 'Store Closed'}</span>
             <button 
               onClick={() => setIsShopOpen(!isShopOpen)}
-              className={`w-12 h-6 rounded-full border-2 border-black flex items-center p-1 transition-colors ${isShopOpen ? 'bg-[#B0FF49]' : 'bg-gray-300'}`}
+              className={`w-12 h-6 rounded-full border-2 border-black flex items-center p-1 transition-colors ${isShopOpen ? 'bg-[#9AE600]' : 'bg-gray-300'}`}
             >
               <div className={`w-4 h-4 bg-white border-2 border-black rounded-full transition-transform ${isShopOpen ? 'translate-x-5' : 'translate-x-0'}`}/>
             </button>
@@ -45,7 +45,7 @@ export default function ShopSettings({
                 type="number" 
                 value={settingsForm.minOrderValue}
                 onChange={e => setSettingsForm({...settingsForm, minOrderValue: e.target.value})}
-                className="w-full bg-gray-50 border-2 border-black p-3 font-bold outline-none focus:bg-[#B0FF49]/10" 
+                className="w-full bg-gray-50 border-2 border-black p-3 font-bold outline-none focus:bg-[#9AE600]/10" 
               />
             </div>
             <div>
@@ -54,7 +54,7 @@ export default function ShopSettings({
                 type="number" 
                 value={settingsForm.taxPercent}
                 onChange={e => setSettingsForm({...settingsForm, taxPercent: e.target.value})}
-                className="w-full bg-gray-50 border-2 border-black p-3 font-bold outline-none focus:bg-[#B0FF49]/10" 
+                className="w-full bg-gray-50 border-2 border-black p-3 font-bold outline-none focus:bg-[#9AE600]/10" 
               />
             </div>
           </div>
@@ -66,7 +66,7 @@ export default function ShopSettings({
                 type="number" 
                 value={settingsForm.deliveryFee}
                 onChange={e => setSettingsForm({...settingsForm, deliveryFee: e.target.value})}
-                className="w-full bg-gray-50 border-2 border-black p-3 font-bold outline-none focus:bg-[#B0FF49]/10" 
+                className="w-full bg-gray-50 border-2 border-black p-3 font-bold outline-none focus:bg-[#9AE600]/10" 
               />
             </div>
             <div>
@@ -75,7 +75,7 @@ export default function ShopSettings({
                 type="text" 
                 value={settingsForm.contactNumber}
                 onChange={e => setSettingsForm({...settingsForm, contactNumber: e.target.value})}
-                className="w-full bg-gray-50 border-2 border-black p-3 font-bold outline-none focus:bg-[#B0FF49]/10" 
+                className="w-full bg-gray-50 border-2 border-black p-3 font-bold outline-none focus:bg-[#9AE600]/10" 
               />
             </div>
           </div>
@@ -88,7 +88,7 @@ export default function ShopSettings({
               placeholder="e.g. rahul@okaxis"
               value={settingsForm.upiId}
               onChange={e => setSettingsForm({...settingsForm, upiId: e.target.value})}
-              className="w-full bg-gray-50 border-2 border-black p-3 font-bold outline-none focus:bg-[#B0FF49]/10" 
+              className="w-full bg-gray-50 border-2 border-black p-3 font-bold outline-none focus:bg-[#9AE600]/10" 
             />
           </div>
 
@@ -99,7 +99,7 @@ export default function ShopSettings({
                 type="text" 
                 value={settingsForm.bankName}
                 onChange={e => setSettingsForm({...settingsForm, bankName: e.target.value})}
-                className="w-full bg-gray-50 border-2 border-black p-3 font-bold outline-none focus:bg-[#B0FF49]/10" 
+                className="w-full bg-gray-50 border-2 border-black p-3 font-bold outline-none focus:bg-[#9AE600]/10" 
               />
             </div>
             <div>
@@ -108,7 +108,7 @@ export default function ShopSettings({
                 type="text" 
                 value={settingsForm.accountNo}
                 onChange={e => setSettingsForm({...settingsForm, accountNo: e.target.value})}
-                className="w-full bg-gray-50 border-2 border-black p-3 font-bold outline-none focus:bg-[#B0FF49]/10" 
+                className="w-full bg-gray-50 border-2 border-black p-3 font-bold outline-none focus:bg-[#9AE600]/10" 
               />
             </div>
           </div>
@@ -122,8 +122,8 @@ export default function ShopSettings({
             </h3>
 
             {/* Banner 1 */}
-            <div className="bg-[#B0FF49]/20 border-2 border-black p-4 rounded-xl space-y-3">
-              <span className="text-xs font-black uppercase bg-[#B0FF49] border border-black px-2 py-0.5 rounded">Lime Promo Card (Banner 1)</span>
+            <div className="bg-[#9AE600]/20 border-2 border-black p-4 rounded-xl space-y-3">
+              <span className="text-xs font-black uppercase bg-[#9AE600] border border-black px-2 py-0.5 rounded">Lime Promo Card (Banner 1)</span>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-black uppercase mb-1">Badge Tag</label>
@@ -232,7 +232,7 @@ export default function ShopSettings({
                     };
                     setSettingsForm({ ...settingsForm, washPreferences: [...current, newPref] });
                   }}
-                  className="bg-[#B0FF49] border-2 border-black px-3 py-1 font-black uppercase text-xs shadow-[2px_2px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 transition-all flex items-center gap-1"
+                  className="bg-[#9AE600] border-2 border-black px-3 py-1 font-black uppercase text-xs shadow-[2px_2px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 transition-all flex items-center gap-1"
                 >
                   <Plus size={14} /> Add Add-on
                 </button>
@@ -251,7 +251,7 @@ export default function ShopSettings({
                             setSettingsForm({ ...settingsForm, washPreferences: updated });
                           }}
                           className={`w-10 h-5 rounded-full border-2 border-black flex items-center p-0.5 transition-colors ${
-                            pref.enabled ? 'bg-[#B0FF49]' : 'bg-gray-300'
+                            pref.enabled ? 'bg-[#9AE600]' : 'bg-gray-300'
                           }`}
                         >
                           <div className={`w-3.5 h-3.5 bg-white border-2 border-black rounded-full transition-transform ${

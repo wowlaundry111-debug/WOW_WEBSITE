@@ -114,7 +114,7 @@ export default function Login() {
   const isOtpValid = otp.join('').length === 6;
 
   return (
-    <div className="min-h-screen bg-[#0D8DE3] flex flex-col items-center justify-center p-4 font-outfit selection:bg-black selection:text-[#B0FF49]">
+    <div className="min-h-screen bg-[#0D8DE3] flex flex-col items-center justify-center p-4 font-outfit selection:bg-black selection:text-[#9AE600]">
       <div className="w-full max-w-md z-10 flex flex-col items-center">
 
         {/* Logo */}
@@ -140,10 +140,10 @@ export default function Login() {
           {step === 'EMAIL' ? (
             <form onSubmit={handleSendOTP} className="space-y-5">
               <div>
-                <label className="block text-sm font-black text-black mb-2 uppercase tracking-widest bg-[#B0FF49] inline-block px-2 border-2 border-black rounded shadow-[2px_2px_0px_rgba(0,0,0,1)] transform rotate-1">
+                <label className="block text-sm font-black text-black mb-2 uppercase tracking-widest bg-[#9AE600] inline-block px-2 border-2 border-black rounded shadow-[2px_2px_0px_rgba(0,0,0,1)] transform rotate-1">
                   Email Address
                 </label>
-                <div className="flex items-center bg-gray-50 border-2 border-black rounded-xl px-4 shadow-[4px_4px_0px_rgba(0,0,0,1)] focus-within:bg-[#B0FF49] transition-colors">
+                <div className="flex items-center bg-gray-50 border-2 border-black rounded-xl px-4 shadow-[4px_4px_0px_rgba(0,0,0,1)] focus-within:bg-[#9AE600] transition-colors">
                   <Mail size={20} strokeWidth={2.5} className="text-black mr-2.5 shrink-0" />
                   <input
                     type="text"
@@ -170,7 +170,7 @@ export default function Login() {
                 </div>
 
                 {showPassword && (
-                  <div className="flex items-center bg-gray-50 border-2 border-black rounded-xl px-4 shadow-[4px_4px_0px_rgba(0,0,0,1)] focus-within:bg-[#B0FF49] transition-colors mt-2">
+                  <div className="flex items-center bg-gray-50 border-2 border-black rounded-xl px-4 shadow-[4px_4px_0px_rgba(0,0,0,1)] focus-within:bg-[#9AE600] transition-colors mt-2">
                     <Lock size={20} strokeWidth={2.5} className="text-black mr-2.5 shrink-0" />
                     <input
                       type="password"
@@ -195,7 +195,7 @@ export default function Login() {
             </form>
           ) : (
             <div className="space-y-6 flex flex-col items-center">
-              <div className="w-16 h-16 bg-[#B0FF49] rounded-full flex items-center justify-center border-2 border-black shadow-[4px_4px_0px_rgba(0,0,0,1)] transform rotate-6">
+              <div className="w-16 h-16 bg-[#9AE600] rounded-full flex items-center justify-center border-2 border-black shadow-[4px_4px_0px_rgba(0,0,0,1)] transform rotate-6">
                 <ShieldCheck size={32} strokeWidth={3} className="text-black" />
               </div>
 
@@ -231,7 +231,7 @@ export default function Login() {
                     onChange={(e) => handleOtpChange(e.target.value, idx)}
                     onKeyDown={(e) => handleOtpKeyDown(e, idx)}
                     className={`w-11 h-14 sm:w-12 sm:h-16 text-center text-2xl font-black lilita-one-regular rounded-xl border-2 border-black shadow-[4px_4px_0px_rgba(0,0,0,1)] transition-colors focus:outline-none focus:-translate-y-1 ${
-                      d ? 'bg-[#B0FF49] text-black' : 'bg-gray-50 text-black'
+                      d ? 'bg-[#9AE600] text-black' : 'bg-gray-50 text-black'
                     }`}
                     autoFocus={idx === 0}
                   />
@@ -268,7 +268,7 @@ export default function Login() {
               New Customer?
               <Link
                 to="/register"
-                className="bg-[#B0FF49] text-black border-2 border-black px-3 py-1 rounded-full hover:bg-black hover:text-[#B0FF49] transition-colors"
+                className="bg-[#9AE600] text-black border-2 border-black px-3 py-1 rounded-full hover:bg-black hover:text-[#9AE600] transition-colors"
               >
                 Register
               </Link>

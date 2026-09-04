@@ -64,7 +64,7 @@ export default function Register() {
     formData.phone.replace(/[^0-9]/g, '').length === 10;
 
   return (
-    <div className="min-h-screen bg-[#0D8DE3] flex flex-col items-center justify-center p-4 font-outfit selection:bg-black selection:text-[#B0FF49]">
+    <div className="min-h-screen bg-[#0D8DE3] flex flex-col items-center justify-center p-4 font-outfit selection:bg-black selection:text-[#9AE600]">
       <div className="w-full max-w-md z-10 flex flex-col items-center">
 
         {/* Back Button */}
@@ -116,10 +116,10 @@ export default function Register() {
             <form onSubmit={handleRegister} className="space-y-4">
               {/* Full Name */}
               <div>
-                <label className="block text-xs font-black text-black mb-1.5 uppercase tracking-widest bg-[#B0FF49] inline-block px-2 border-2 border-black rounded shadow-[2px_2px_0px_rgba(0,0,0,1)] transform rotate-1">
+                <label className="block text-xs font-black text-black mb-1.5 uppercase tracking-widest bg-[#9AE600] inline-block px-2 border-2 border-black rounded shadow-[2px_2px_0px_rgba(0,0,0,1)] transform rotate-1">
                   Full Name
                 </label>
-                <div className="flex items-center bg-gray-50 border-2 border-black rounded-xl px-3.5 shadow-[4px_4px_0px_rgba(0,0,0,1)] focus-within:bg-[#B0FF49] transition-colors">
+                <div className="flex items-center bg-gray-50 border-2 border-black rounded-xl px-3.5 shadow-[4px_4px_0px_rgba(0,0,0,1)] focus-within:bg-[#9AE600] transition-colors">
                   <User size={18} strokeWidth={2.5} className="text-black mr-2.5 shrink-0" />
                   <input
                     type="text"
@@ -134,10 +134,10 @@ export default function Register() {
 
               {/* Email */}
               <div>
-                <label className="block text-xs font-black text-black mb-1.5 uppercase tracking-widest bg-[#B0FF49] inline-block px-2 border-2 border-black rounded shadow-[2px_2px_0px_rgba(0,0,0,1)] transform -rotate-1">
+                <label className="block text-xs font-black text-black mb-1.5 uppercase tracking-widest bg-[#9AE600] inline-block px-2 border-2 border-black rounded shadow-[2px_2px_0px_rgba(0,0,0,1)] transform -rotate-1">
                   Email Address
                 </label>
-                <div className="flex items-center bg-gray-50 border-2 border-black rounded-xl px-3.5 shadow-[4px_4px_0px_rgba(0,0,0,1)] focus-within:bg-[#B0FF49] transition-colors">
+                <div className="flex items-center bg-gray-50 border-2 border-black rounded-xl px-3.5 shadow-[4px_4px_0px_rgba(0,0,0,1)] focus-within:bg-[#9AE600] transition-colors">
                   <Mail size={18} strokeWidth={2.5} className="text-black mr-2.5 shrink-0" />
                   <input
                     type="email"
@@ -152,10 +152,10 @@ export default function Register() {
 
               {/* Phone */}
               <div>
-                <label className="block text-xs font-black text-black mb-1.5 uppercase tracking-widest bg-[#B0FF49] inline-block px-2 border-2 border-black rounded shadow-[2px_2px_0px_rgba(0,0,0,1)] transform rotate-1">
+                <label className="block text-xs font-black text-black mb-1.5 uppercase tracking-widest bg-[#9AE600] inline-block px-2 border-2 border-black rounded shadow-[2px_2px_0px_rgba(0,0,0,1)] transform rotate-1">
                   Phone Number
                 </label>
-                <div className="flex items-center bg-gray-50 border-2 border-black rounded-xl px-3.5 shadow-[4px_4px_0px_rgba(0,0,0,1)] focus-within:bg-[#B0FF49] transition-colors">
+                <div className="flex items-center bg-gray-50 border-2 border-black rounded-xl px-3.5 shadow-[4px_4px_0px_rgba(0,0,0,1)] focus-within:bg-[#9AE600] transition-colors">
                   <Phone size={18} strokeWidth={2.5} className="text-black mr-2.5 shrink-0" />
                   <div className="border-r-2 border-black pr-2.5 mr-2.5 text-black font-black text-sm">+91</div>
                   <input
@@ -175,7 +175,7 @@ export default function Register() {
                 <label className="block text-xs font-black text-black mb-1.5 uppercase tracking-widest bg-yellow-300 inline-block px-2 border-2 border-black rounded shadow-[2px_2px_0px_rgba(0,0,0,1)] transform -rotate-1">
                   Password (Optional)
                 </label>
-                <div className="flex items-center bg-gray-50 border-2 border-black rounded-xl px-3.5 shadow-[4px_4px_0px_rgba(0,0,0,1)] focus-within:bg-[#B0FF49] transition-colors">
+                <div className="flex items-center bg-gray-50 border-2 border-black rounded-xl px-3.5 shadow-[4px_4px_0px_rgba(0,0,0,1)] focus-within:bg-[#9AE600] transition-colors">
                   <Lock size={18} strokeWidth={2.5} className="text-black mr-2.5 shrink-0" />
                   <input
                     type="password"
@@ -201,14 +201,14 @@ export default function Register() {
           {step === 'otp' && (
             <form onSubmit={handleVerifyOtp} className="space-y-6">
               {/* Info */}
-              <div className="flex items-start gap-3 p-4 bg-[#B0FF49] border-2 border-black rounded-xl shadow-[3px_3px_0px_rgba(0,0,0,1)]">
+              <div className="flex items-start gap-3 p-4 bg-[#9AE600] border-2 border-black rounded-xl shadow-[3px_3px_0px_rgba(0,0,0,1)]">
                 <CheckCircle size={20} strokeWidth={2.5} className="text-black shrink-0 mt-0.5" />
                 <p className="text-sm font-bold text-black">{otpMessage}</p>
               </div>
 
               {/* OTP Input */}
               <div>
-                <label className="block text-xs font-black text-black mb-1.5 uppercase tracking-widest bg-[#B0FF49] inline-block px-2 border-2 border-black rounded shadow-[2px_2px_0px_rgba(0,0,0,1)]">
+                <label className="block text-xs font-black text-black mb-1.5 uppercase tracking-widest bg-[#9AE600] inline-block px-2 border-2 border-black rounded shadow-[2px_2px_0px_rgba(0,0,0,1)]">
                   Verification Code
                 </label>
                 <input
@@ -217,7 +217,7 @@ export default function Register() {
                   onChange={(e) => setOtp(e.target.value.replace(/[^0-9]/g, ''))}
                   placeholder="ENTER 6-DIGIT CODE"
                   maxLength={6}
-                  className="w-full bg-gray-50 border-2 border-black rounded-xl px-4 py-5 focus:outline-none focus:bg-[#B0FF49] transition-colors shadow-[4px_4px_0px_rgba(0,0,0,1)] text-black font-black text-2xl text-center tracking-[0.5em] placeholder-gray-400"
+                  className="w-full bg-gray-50 border-2 border-black rounded-xl px-4 py-5 focus:outline-none focus:bg-[#9AE600] transition-colors shadow-[4px_4px_0px_rgba(0,0,0,1)] text-black font-black text-2xl text-center tracking-[0.5em] placeholder-gray-400"
                   autoFocus
                   required
                 />
@@ -247,7 +247,7 @@ export default function Register() {
         <div className="mt-6 text-center animate-fade-in-up">
           <div className="bg-white px-6 py-3 rounded-full border-2 border-black shadow-[4px_4px_0px_rgba(0,0,0,1)] font-black text-black uppercase tracking-widest text-sm inline-flex items-center gap-2 transform rotate-1">
             Already have an account?
-            <Link to="/login" className="bg-[#B0FF49] text-black border-2 border-black px-3 py-1 rounded-full hover:bg-black hover:text-[#B0FF49] transition-colors">
+            <Link to="/login" className="bg-[#9AE600] text-black border-2 border-black px-3 py-1 rounded-full hover:bg-black hover:text-[#9AE600] transition-colors">
               Sign In
             </Link>
           </div>

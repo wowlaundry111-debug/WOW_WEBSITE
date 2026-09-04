@@ -234,7 +234,7 @@ export default function CatalogManager({ categories = [], items = [], shops = []
         <div className="flex flex-wrap gap-2">
           <button
             onClick={openAddCategory}
-            className="bg-[#B0FF49] text-black border-2 border-black shadow-[3px_3px_0px_rgba(0,0,0,1)] px-4 py-2 font-black uppercase text-xs sm:text-sm hover:translate-y-[1px] hover:shadow-[1px_1px_0px_rgba(0,0,0,1)] transition-all flex items-center gap-1.5"
+            className="bg-[#9AE600] text-black border-2 border-black shadow-[3px_3px_0px_rgba(0,0,0,1)] px-4 py-2 font-black uppercase text-xs sm:text-sm hover:translate-y-[1px] hover:shadow-[1px_1px_0px_rgba(0,0,0,1)] transition-all flex items-center gap-1.5"
           >
             <Plus size={16} /> Add Category
           </button>
@@ -282,7 +282,7 @@ export default function CatalogManager({ categories = [], items = [], shops = []
         
         {/* Categories Sidebar */}
         <div className="lg:col-span-1 space-y-3">
-          <div className="flex justify-between items-center bg-[#B0FF49] border-4 border-black p-3 shadow-[4px_4px_0px_rgba(0,0,0,1)]">
+          <div className="flex justify-between items-center bg-[#9AE600] border-4 border-black p-3 shadow-[4px_4px_0px_rgba(0,0,0,1)]">
             <span className="font-black uppercase text-sm">Categories ({categories.length})</span>
             <button 
               onClick={openAddCategory}
@@ -307,7 +307,7 @@ export default function CatalogManager({ categories = [], items = [], shops = []
                 <Tag size={16} /> All Services
               </span>
               <span className={`px-2 py-0.5 rounded-full text-xs font-black border ${
-                selectedCategoryId === null ? 'bg-[#B0FF49] text-black border-black' : 'bg-gray-100 text-black border-black'
+                selectedCategoryId === null ? 'bg-[#9AE600] text-black border-black' : 'bg-gray-100 text-black border-black'
               }`}>
                 {items.length}
               </span>
@@ -348,7 +348,7 @@ export default function CatalogManager({ categories = [], items = [], shops = []
                     <button 
                       onClick={(e) => openEditCategory(cat, e)}
                       className={`p-1.5 border border-black rounded transition-colors ${
-                        isSelected ? 'bg-white text-black hover:bg-[#B0FF49]' : 'bg-gray-100 hover:bg-[#B0FF49]'
+                        isSelected ? 'bg-white text-black hover:bg-[#9AE600]' : 'bg-gray-100 hover:bg-[#9AE600]'
                       }`}
                       title="Edit Category"
                     >
@@ -371,7 +371,7 @@ export default function CatalogManager({ categories = [], items = [], shops = []
                 <p className="font-bold text-gray-500 text-sm">No categories yet.</p>
                 <button
                   onClick={openAddCategory}
-                  className="mt-3 bg-[#B0FF49] border-2 border-black px-3 py-1 font-black uppercase text-xs shadow-[2px_2px_0px_rgba(0,0,0,1)]"
+                  className="mt-3 bg-[#9AE600] border-2 border-black px-3 py-1 font-black uppercase text-xs shadow-[2px_2px_0px_rgba(0,0,0,1)]"
                 >
                   + Add First
                 </button>
@@ -430,7 +430,7 @@ export default function CatalogManager({ categories = [], items = [], shops = []
 
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                          <span className="bg-[#B0FF49] border border-black px-2 py-0.5 text-[10px] font-black uppercase rounded">
+                          <span className="bg-[#9AE600] border border-black px-2 py-0.5 text-[10px] font-black uppercase rounded">
                             {parentCat?.name || 'Service'}
                           </span>
                         </div>
@@ -451,7 +451,7 @@ export default function CatalogManager({ categories = [], items = [], shops = []
                       <div className="flex items-center gap-2">
                         <button
                           onClick={(e) => openEditItem(item, e)}
-                          className="px-3 py-1.5 bg-white border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] font-black text-xs uppercase hover:bg-[#B0FF49] transition-all flex items-center gap-1"
+                          className="px-3 py-1.5 bg-white border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] font-black text-xs uppercase hover:bg-[#9AE600] transition-all flex items-center gap-1"
                         >
                           <Edit2 size={12} /> Edit
                         </button>
@@ -490,7 +490,7 @@ export default function CatalogManager({ categories = [], items = [], shops = []
       {catModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
           <div className="bg-white border-4 border-black shadow-[10px_10px_0px_rgba(0,0,0,1)] w-full max-w-lg overflow-hidden animate-scale-up">
-            <div className="flex justify-between items-center p-4 border-b-4 border-black bg-[#B0FF49]">
+            <div className="flex justify-between items-center p-4 border-b-4 border-black bg-[#9AE600]">
               <h3 className="font-black text-lg uppercase flex items-center gap-2">
                 <Layers size={18} /> {editingCategory ? 'Edit Category' : 'New Category'}
               </h3>
@@ -534,7 +534,7 @@ export default function CatalogManager({ categories = [], items = [], shops = []
                         onClick={() => setCatImage(img.id)}
                         className={`p-2 border-2 rounded-lg flex flex-col items-center justify-center transition-all ${
                           isPicked 
-                            ? 'bg-[#B0FF49] border-black shadow-[3px_3px_0px_rgba(0,0,0,1)] -translate-y-0.5 font-black text-black' 
+                            ? 'bg-[#9AE600] border-black shadow-[3px_3px_0px_rgba(0,0,0,1)] -translate-y-0.5 font-black text-black' 
                             : 'bg-white border-gray-300 hover:border-black hover:bg-gray-100 text-black'
                         }`}
                       >
@@ -568,7 +568,7 @@ export default function CatalogManager({ categories = [], items = [], shops = []
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex-1 bg-[#B0FF49] text-black border-2 border-black shadow-[3px_3px_0px_rgba(0,0,0,1)] py-3 font-black uppercase text-xs hover:translate-y-[1px] transition-all flex justify-center items-center gap-1.5"
+                  className="flex-1 bg-[#9AE600] text-black border-2 border-black shadow-[3px_3px_0px_rgba(0,0,0,1)] py-3 font-black uppercase text-xs hover:translate-y-[1px] transition-all flex justify-center items-center gap-1.5"
                 >
                   {loading ? 'Saving...' : editingCategory ? 'Save Changes' : 'Create Category'}
                 </button>

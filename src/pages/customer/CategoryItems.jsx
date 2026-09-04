@@ -63,7 +63,7 @@ export default function CategoryItems() {
       <div className="min-h-screen bg-white flex items-center justify-center font-outfit">
         <div className="text-black font-black flex flex-col items-center">
           <p className="text-2xl uppercase">Category not found.</p>
-          <button onClick={() => navigate('/order')} className="mt-6 px-6 py-3 bg-[#B0FF49] border-2 border-black shadow-[4px_4px_0px_rgba(0,0,0,1)] uppercase hover:translate-y-1 hover:translate-x-1 hover:shadow-none transition-all">Go Back</button>
+          <button onClick={() => navigate('/order')} className="mt-6 px-6 py-3 bg-[#9AE600] border-2 border-black shadow-[4px_4px_0px_rgba(0,0,0,1)] uppercase hover:translate-y-1 hover:translate-x-1 hover:shadow-none transition-all">Go Back</button>
         </div>
       </div>
     );
@@ -139,7 +139,7 @@ export default function CategoryItems() {
                           <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">Priced at delivery</span>
                         </div>
                       ) : (
-                        <div className="bg-[#B0FF49] px-3 py-1 border-2 border-black rounded-xl shadow-[4px_4px_0px_rgba(0,0,0,1)] transform -rotate-2">
+                        <div className="bg-[#9AE600] px-3 py-1 border-2 border-black rounded-xl shadow-[4px_4px_0px_rgba(0,0,0,1)] transform -rotate-2">
                           <span className="font-black text-black text-xl">₹{item.pricePerItem || 0}</span>
                           <span className="text-xs font-black text-black ml-1 uppercase">/ Item</span>
                         </div>
@@ -148,12 +148,12 @@ export default function CategoryItems() {
                       
                       <div>
                         {qty > 0 ? (
-                          <div className="flex items-center bg-[#B0FF49] border-2 border-black rounded-xl shadow-[4px_4px_0px_rgba(0,0,0,1)] overflow-hidden">
-                            <button onClick={() => handleAddToCart(item, -1)} className="w-10 h-10 flex items-center justify-center text-black hover:bg-black hover:text-[#B0FF49] transition-colors border-r-4 border-black">
+                          <div className="flex items-center bg-[#9AE600] border-2 border-black rounded-xl shadow-[4px_4px_0px_rgba(0,0,0,1)] overflow-hidden">
+                            <button onClick={() => handleAddToCart(item, -1)} className="w-10 h-10 flex items-center justify-center text-black hover:bg-black hover:text-[#9AE600] transition-colors border-r-4 border-black">
                               <Minus size={20} strokeWidth={5} />
                             </button>
                             <span className="w-10 text-center font-black text-black text-lg bg-white h-10 flex items-center justify-center">{qty}</span>
-                            <button onClick={() => handleAddToCart(item, 1)} className="w-10 h-10 flex items-center justify-center text-black hover:bg-black hover:text-[#B0FF49] transition-colors border-l-4 border-black">
+                            <button onClick={() => handleAddToCart(item, 1)} className="w-10 h-10 flex items-center justify-center text-black hover:bg-black hover:text-[#9AE600] transition-colors border-l-4 border-black">
                               <Plus size={20} strokeWidth={5} />
                             </button>
                           </div>
@@ -181,7 +181,7 @@ export default function CategoryItems() {
         <div className="fixed bottom-6 left-0 right-0 px-4 z-50 flex justify-center pointer-events-none animate-bounce-soft">
           <Link 
             to="/cart" 
-            className="w-full max-w-3xl bg-[#B0FF49] text-black p-5 rounded-2xl border-2 border-black shadow-[8px_8px_0px_rgba(0,0,0,1)] flex items-center justify-between pointer-events-auto transition-all active:translate-y-2 active:translate-x-2 active:shadow-none"
+            className="w-full max-w-3xl bg-[#9AE600] text-black p-5 rounded-2xl border-2 border-black shadow-[8px_8px_0px_rgba(0,0,0,1)] flex items-center justify-between pointer-events-auto transition-all active:translate-y-2 active:translate-x-2 active:shadow-none"
           >
             <div>
               <p className="text-xs font-black text-black tracking-widest uppercase bg-white border-2 border-black inline-block px-2 py-0.5 rounded">
@@ -203,7 +203,7 @@ export default function CategoryItems() {
 
             <div className="flex items-center gap-3">
               <span className="font-black text-lg uppercase tracking-widest">Basket</span>
-              <div className="w-12 h-12 bg-black text-[#B0FF49] border-2 border-black rounded-full flex items-center justify-center">
+              <div className="w-12 h-12 bg-black text-[#9AE600] border-2 border-black rounded-full flex items-center justify-center">
                 <ChevronDown size={28} strokeWidth={4} className="-rotate-90" />
               </div>
             </div>

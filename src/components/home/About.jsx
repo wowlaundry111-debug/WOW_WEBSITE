@@ -5,7 +5,7 @@ import { FaStar } from "react-icons/fa";
 
 function About() {
     return (
-        <div className='mx-3 sm:mx-5 lg:mx-20 px-4 sm:px-6 md:px-12 lg:px-20 py-8 sm:py-12 md:py-24 mt-10 sm:mt-16 md:mt-20 bg-[#0D8DE3] border-2 border-black rounded-[24px] sm:rounded-[40px] md:rounded-[80px] shadow-[6px_6px_0px_rgba(0,0,0,1)] sm:shadow-[8px_8px_0px_rgba(0,0,0,1)] font-outfit selection:bg-black selection:text-[#B0FF49]'>
+        <div className='mx-3 sm:mx-5 lg:mx-20 px-4 sm:px-6 md:px-12 lg:px-20 py-8 sm:py-12 md:py-24 mt-10 sm:mt-16 md:mt-20 bg-[#0D8DE3] border-2 border-black rounded-[24px] sm:rounded-[40px] md:rounded-[80px] shadow-[6px_6px_0px_rgba(0,0,0,1)] sm:shadow-[8px_8px_0px_rgba(0,0,0,1)] font-outfit selection:bg-black selection:text-[#9AE600]'>
 
             {/* ── Section Header ─────────────────────────────────────── */}
             <div className='text-center mb-8 sm:mb-12'>
@@ -23,13 +23,13 @@ function About() {
                 <div className='bg-white border-2 border-black p-5 sm:p-8 rounded-2xl sm:rounded-3xl shadow-[4px_4px_0px_rgba(0,0,0,1)] sm:shadow-[6px_6px_0px_rgba(0,0,0,1)] relative'>
 
                     {/* Decorative icon badge — clipped on mobile so it doesn't overflow */}
-                    <div className="absolute -top-4 -right-3 sm:-top-6 sm:-right-6 w-10 h-10 sm:w-14 sm:h-14 bg-[#B0FF49] border-2 border-black rounded-full shadow-[2px_2px_0px_rgba(0,0,0,1)] flex items-center justify-center transform rotate-12 z-10">
+                    <div className="absolute -top-4 -right-3 sm:-top-6 sm:-right-6 w-10 h-10 sm:w-14 sm:h-14 bg-[#9AE600] border-2 border-black rounded-full shadow-[2px_2px_0px_rgba(0,0,0,1)] flex items-center justify-center transform rotate-12 z-10">
                         <TbWash className="text-xl sm:text-3xl text-black" />
                     </div>
 
                     {/* Brand Statement */}
                     <div className='text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black uppercase tracking-wide leading-tight pr-6 sm:pr-0'>
-                        <span className='bg-black text-[#B0FF49] px-2 py-1 rounded-lg border-2 border-black inline-block transform -rotate-1 mb-2 text-base sm:text-xl md:text-2xl lg:text-3xl'>
+                        <span className='bg-black text-[#9AE600] px-2 py-1 rounded-lg border-2 border-black inline-block transform -rotate-1 mb-2 text-base sm:text-xl md:text-2xl lg:text-3xl'>
                             WOW Laundry
                         </span>
                         {' '}is the very first Laundry in Law gate established by{' '}
@@ -52,13 +52,13 @@ function About() {
                         ].map(({ value, label }) => (
                             <div key={label} className='bg-[#0D8DE3] border-2 border-black rounded-xl p-2 sm:p-3 text-center shadow-[2px_2px_0px_rgba(0,0,0,1)]'>
                                 <div className='text-lg sm:text-2xl font-black text-white leading-none'>{value}</div>
-                                <div className='text-[9px] sm:text-xs font-black text-[#B0FF49] uppercase tracking-wider mt-0.5 whitespace-pre-line leading-tight'>{label}</div>
+                                <div className='text-[9px] sm:text-xs font-black text-[#9AE600] uppercase tracking-wider mt-0.5 whitespace-pre-line leading-tight'>{label}</div>
                             </div>
                         ))}
                     </div>
 
                     {/* ── Feature card ─────────────────────────────────── */}
-                    <div className='mt-4 sm:mt-6 sm:mt-8 flex gap-3 sm:gap-5 bg-[#B0FF49] p-4 sm:p-5 border-2 border-black rounded-2xl shadow-[3px_3px_0px_rgba(0,0,0,1)] sm:shadow-[4px_4px_0px_rgba(0,0,0,1)] transition-transform hover:-translate-y-1'>
+                    <div className='mt-4 sm:mt-6 sm:mt-8 flex gap-3 sm:gap-5 bg-[#9AE600] p-4 sm:p-5 border-2 border-black rounded-2xl shadow-[3px_3px_0px_rgba(0,0,0,1)] sm:shadow-[4px_4px_0px_rgba(0,0,0,1)] transition-transform hover:-translate-y-1'>
                         <div className='p-2 sm:p-3 bg-black border-2 border-black rounded-xl text-[#0D8DE3] shadow-[2px_2px_0px_rgba(255,255,255,1)] h-fit shrink-0'>
                             <MdOutlineLocalLaundryService size={22} className="sm:text-[28px]" />
                         </div>
@@ -73,7 +73,7 @@ function About() {
                     {/* ── Value pills — mobile friendly ────────────────── */}
                     <div className='mt-4 flex flex-wrap gap-2'>
                         {['Pickup & Delivery', 'Express Wash', 'Eco-Friendly', 'Trusted'].map((tag) => (
-                            <span key={tag} className='bg-black text-[#B0FF49] text-[10px] sm:text-xs font-black uppercase tracking-widest px-3 py-1.5 rounded-full border-2 border-black'>
+                            <span key={tag} className='bg-black text-[#9AE600] text-[10px] sm:text-xs font-black uppercase tracking-widest px-3 py-1.5 rounded-full border-2 border-black'>
                                 {tag}
                             </span>
                         ))}
@@ -100,7 +100,7 @@ function About() {
                                     <div className='text-sm sm:text-base font-black text-[#0D8DE3] leading-tight'>10 minutes</div>
                                 </div>
                             </div>
-                            <div className='bg-[#B0FF49] border-2 border-black rounded-2xl px-3 py-2 shadow-[3px_3px_0px_rgba(0,0,0,1)] flex items-center gap-2'>
+                            <div className='bg-[#9AE600] border-2 border-black rounded-2xl px-3 py-2 shadow-[3px_3px_0px_rgba(0,0,0,1)] flex items-center gap-2'>
                                 <FaStar className='text-black text-base sm:text-xl shrink-0' />
                                 <div>
                                     <div className='text-[9px] sm:text-xs font-black uppercase tracking-widest text-black leading-none'>Rated</div>

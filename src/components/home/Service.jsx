@@ -69,11 +69,11 @@ function Service() {
 
 
   return (
-    <div className='p-6 lg:px-20 lg:py-16 mt-10 bg-white font-outfit selection:bg-black selection:text-[#B0FF49]'>
+    <div className='p-6 lg:px-20 lg:py-16 mt-10 bg-white font-outfit selection:bg-black selection:text-[#9AE600]'>
       <div className='lg:flex justify-between items-center'>
         <div className='lg:w-1/2'>
           <div className="inline-block bg-[#0D8DE3] border-2 border-black px-4 py-2 rounded-2xl shadow-[4px_4px_0px_rgba(0,0,0,1)] mb-6 transform -rotate-2">
-            <h2 className='text-4xl md:text-5xl lilita-one-regular text-white uppercase tracking-wider'>Why <span className='text-[#B0FF49]'>Us??</span></h2>
+            <h2 className='text-4xl md:text-5xl lilita-one-regular text-white uppercase tracking-wider'>Why <span className='text-[#9AE600]'>Us??</span></h2>
           </div>
           <ul className='text-sm md:text-lg mt-4 md:mt-8 font-black uppercase tracking-widest text-black space-y-4'>
             {[
@@ -82,7 +82,7 @@ function Service() {
               { text: "We use best machines and washing products", icon: <TbIroning3 className='text-xl md:text-2xl' /> },
               { text: "We deliver your clothes on the 3rd day after Pickup", icon: <TbTruckDelivery className='text-xl md:text-2xl' /> }
             ].map((item, index) => (
-              <li key={index} className='flex items-center gap-4 bg-[#B0FF49] border-2 border-black p-4 rounded-2xl shadow-[4px_4px_0px_rgba(0,0,0,1)] transform transition-transform hover:-translate-y-1 hover:shadow-[6px_6px_0px_rgba(0,0,0,1)]'>
+              <li key={index} className='flex items-center gap-4 bg-[#9AE600] border-2 border-black p-4 rounded-2xl shadow-[4px_4px_0px_rgba(0,0,0,1)] transform transition-transform hover:-translate-y-1 hover:shadow-[6px_6px_0px_rgba(0,0,0,1)]'>
                 <div className='p-2 bg-black border-2 border-black rounded-xl text-[#0D8DE3] shadow-[2px_2px_0px_rgba(255,255,255,1)]'>
                   {item.icon}
                 </div>
@@ -96,11 +96,11 @@ function Service() {
         <div className='lg:w-5/12 mt-16 lg:mt-0 flex flex-col justify-center items-center lg:items-end relative'>
           <div className='bg-[#0D8DE3] border-4 border-black p-8 rounded-[40px] shadow-[8px_8px_0px_rgba(0,0,0,1)] text-center w-full max-w-md relative'>
             {/* Decorative circles */}
-            <div className="absolute -top-5 -left-5 w-12 h-12 bg-[#B0FF49] border-2 border-black rounded-full shadow-[2px_2px_0px_rgba(0,0,0,1)] animate-bounce-soft"></div>
+            <div className="absolute -top-5 -left-5 w-12 h-12 bg-[#9AE600] border-2 border-black rounded-full shadow-[2px_2px_0px_rgba(0,0,0,1)] animate-bounce-soft"></div>
             <div className="absolute -bottom-5 -right-5 w-16 h-16 bg-white border-2 border-black rounded-full shadow-[2px_2px_0px_rgba(0,0,0,1)] animate-bounce-soft" style={{ animationDelay: '1s' }}></div>
 
             <h3 className='text-3xl md:text-4xl lilita-one-regular text-white uppercase tracking-wide mb-2'>
-              Get The <span className='text-[#B0FF49]'>App</span>
+              Get The <span className='text-[#9AE600]'>App</span>
             </h3>
             <p className='text-sm md:text-base font-bold text-white uppercase tracking-widest mb-8'>
               Order laundry right from your phone.
@@ -112,7 +112,7 @@ function Service() {
                 onClick={handleIosClick}
                 className='flex-1 flex items-center justify-center gap-3 bg-black text-white p-4 rounded-2xl border-2 border-black shadow-[4px_4px_0px_rgba(255,255,255,1)] hover:-translate-y-1 hover:translate-x-1 hover:shadow-none transition-all group cursor-pointer'
               >
-                <FaApple className='text-3xl group-hover:text-[#B0FF49] transition-colors' />
+                <FaApple className='text-3xl group-hover:text-[#9AE600] transition-colors' />
                 <div className='text-left'>
                   <div className='text-[10px] uppercase tracking-widest text-gray-300'>For Apple</div>
                   <div className='text-lg font-black uppercase leading-none mt-1'>iOS App</div>
@@ -122,7 +122,7 @@ function Service() {
               {/* Android Button */}
               <button
                 onClick={handleAndroidDownload}
-                className='flex-1 flex items-center justify-center gap-3 bg-[#B0FF49] text-black p-4 rounded-2xl border-2 border-black shadow-[4px_4px_0px_rgba(0,0,0,1)] hover:-translate-y-1 hover:translate-x-1 hover:shadow-none transition-all group cursor-pointer'
+                className='flex-1 flex items-center justify-center gap-3 bg-[#9AE600] text-black p-4 rounded-2xl border-2 border-black shadow-[4px_4px_0px_rgba(0,0,0,1)] hover:-translate-y-1 hover:translate-x-1 hover:shadow-none transition-all group cursor-pointer'
               >
                 <FaAndroid className='text-3xl text-black group-hover:scale-110 transition-transform' />
                 <div className='text-left'>
@@ -146,7 +146,7 @@ function Service() {
               <X size={18} />
             </button>
 
-            <div className="w-20 h-20 bg-black text-[#B0FF49] border-4 border-black rounded-3xl shadow-[4px_4px_0px_rgba(0,0,0,1)] flex items-center justify-center mx-auto mb-5">
+            <div className="w-20 h-20 bg-black text-[#9AE600] border-4 border-black rounded-3xl shadow-[4px_4px_0px_rgba(0,0,0,1)] flex items-center justify-center mx-auto mb-5">
               <FaApple size={44} />
             </div>
 
@@ -169,7 +169,7 @@ function Service() {
                     setIosModalOpen(false);
                     handleAndroidDownload();
                   }}
-                  className="w-full bg-[#B0FF49] text-black border-2 border-black p-3.5 rounded-2xl font-black uppercase text-sm shadow-[4px_4px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2"
+                  className="w-full bg-[#9AE600] text-black border-2 border-black p-3.5 rounded-2xl font-black uppercase text-sm shadow-[4px_4px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2"
                 >
                   <Download size={18} /> Download Android APK Instead
                 </button>
@@ -187,7 +187,7 @@ function Service() {
             
             <div className='mt-12 md:mt-20 grid grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10'>
                 <div className='rounded-3xl overflow-hidden border-2 border-black shadow-[8px_8px_0px_rgba(0,0,0,1)] transform hover:-translate-y-2 hover:rotate-1 transition-all group'>
-                    <div className="bg-[#B0FF49] border-b-2 border-black p-3 text-center font-black uppercase tracking-widest text-black">Modern Wash</div>
+                    <div className="bg-[#9AE600] border-b-2 border-black p-3 text-center font-black uppercase tracking-widest text-black">Modern Wash</div>
                     <img src={first} alt="Service 1" className='w-full h-48 md:h-64 object-cover group-hover:scale-110 transition-transform duration-500' />
                 </div>
 
@@ -197,7 +197,7 @@ function Service() {
                 </div>
 
                 <div className='rounded-3xl overflow-hidden border-2 border-black shadow-[8px_8px_0px_rgba(0,0,0,1)] transform hover:-translate-y-2 hover:rotate-2 transition-all group col-span-2 lg:col-span-1'>
-                    <div className="bg-black border-b-2 border-black p-3 text-center font-black uppercase tracking-widest text-[#B0FF49]">Care & Quality</div>
+                    <div className="bg-black border-b-2 border-black p-3 text-center font-black uppercase tracking-widest text-[#9AE600]">Care & Quality</div>
                     <img src={third} alt="Service 3" className='w-full h-48 md:h-64 object-cover group-hover:scale-110 transition-transform duration-500' />
                 </div>
             </div>

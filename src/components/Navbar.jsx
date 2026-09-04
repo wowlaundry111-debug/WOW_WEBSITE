@@ -27,7 +27,7 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="bg-[#B0FF49] border-b-2 border-black sticky top-0 z-50 shadow-[0_4px_0_rgba(0,0,0,1)] w-full">
+    <nav className="bg-[#9AE600] border-b-2 border-black sticky top-0 z-50 shadow-[0_4px_0_rgba(0,0,0,1)] w-full">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
           
@@ -52,7 +52,7 @@ export default function Navbar() {
             )}
 
             {(!currentUser || currentUser.role === 'Customer') && (
-              <Link to="/cart" className="relative p-1.5 bg-white border-2 border-black rounded-xl text-black hover:bg-black hover:text-[#B0FF49] shadow-[2px_2px_0px_rgba(0,0,0,1)] transition-colors">
+              <Link to="/cart" className="relative p-1.5 bg-white border-2 border-black rounded-xl text-black hover:bg-black hover:text-[#9AE600] shadow-[2px_2px_0px_rgba(0,0,0,1)] transition-colors">
                 <ShoppingCart size={20} strokeWidth={3} />
                 {cartItemsCount > 0 && (
                   <span className="absolute -top-3 -right-3 inline-flex items-center justify-center w-7 h-7 text-sm font-black text-white bg-[#0D8DE3] border-2 border-black rounded-full shadow-[2px_2px_0px_rgba(0,0,0,1)]">
@@ -68,7 +68,7 @@ export default function Navbar() {
                   onClick={() => setShowMenu(!showMenu)}
                   className="flex items-center gap-3 bg-white border-2 border-black rounded-full py-1.5 px-3 hover:bg-gray-100 shadow-[4px_4px_0px_rgba(0,0,0,1)] transition-colors"
                 >
-                  <div className="w-8 h-8 bg-black rounded-full flex items-center justify-center text-[#B0FF49] text-sm font-black border-2 border-black">
+                  <div className="w-8 h-8 bg-black rounded-full flex items-center justify-center text-[#9AE600] text-sm font-black border-2 border-black">
                     {currentUser.name?.charAt(0) || 'U'}
                   </div>
                   <span className="text-base font-black text-black uppercase tracking-widest hidden sm:block">{currentUser.name}</span>
@@ -84,7 +84,7 @@ export default function Navbar() {
                     <Link 
                       to={getDashboardLink()} 
                       onClick={() => setShowMenu(false)}
-                      className="flex items-center gap-3 px-5 py-3 text-sm font-black text-black hover:bg-[#B0FF49] hover:border-y-4 hover:border-black uppercase tracking-widest transition-colors"
+                      className="flex items-center gap-3 px-5 py-3 text-sm font-black text-black hover:bg-[#9AE600] hover:border-y-4 hover:border-black uppercase tracking-widest transition-colors"
                     >
                       {currentUser.role === 'Customer' ? <Package size={20} strokeWidth={3} /> : <LayoutDashboard size={20} strokeWidth={3} />}
                       {currentUser.role === 'Customer' ? 'My Orders' : 'Dashboard'}

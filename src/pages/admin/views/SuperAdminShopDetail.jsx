@@ -110,7 +110,7 @@ export default function SuperAdminShopDetail({ shopId, onBack, onOpenCatalog, on
           <div>
             <div className="flex items-center gap-3">
               <h1 className="text-3xl font-black uppercase">{shop.name}</h1>
-              <span className={`px-3 py-1 border-2 border-black font-black text-xs uppercase ${shop.isOpen ? 'bg-[#B0FF49]' : 'bg-red-200'}`}>
+              <span className={`px-3 py-1 border-2 border-black font-black text-xs uppercase ${shop.isOpen ? 'bg-[#9AE600]' : 'bg-red-200'}`}>
                 {shop.isOpen ? 'Active' : 'Closed'}
               </span>
             </div>
@@ -133,7 +133,7 @@ export default function SuperAdminShopDetail({ shopId, onBack, onOpenCatalog, on
               setCurrentTenantId(shopId);
               if (onOpenCatalog) onOpenCatalog();
             }}
-            className="bg-[#B0FF49] text-black border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] px-4 py-2 font-black uppercase text-xs hover:-translate-y-0.5 transition-transform flex items-center gap-1.5"
+            className="bg-[#9AE600] text-black border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] px-4 py-2 font-black uppercase text-xs hover:-translate-y-0.5 transition-transform flex items-center gap-1.5"
           >
             <Store size={16} /> Edit Catalog
           </button>
@@ -237,7 +237,7 @@ export default function SuperAdminShopDetail({ shopId, onBack, onOpenCatalog, on
             <button
               onClick={handleSaveShop}
               disabled={isSaving}
-              className="bg-[#B0FF49] hover:bg-[#9de83a] text-black border-4 border-black shadow-[4px_4px_0px_rgba(0,0,0,1)] px-8 py-3 font-black uppercase text-sm hover:translate-y-[1px] transition-all flex items-center gap-2"
+              className="bg-[#9AE600] hover:bg-[#9de83a] text-black border-4 border-black shadow-[4px_4px_0px_rgba(0,0,0,1)] px-8 py-3 font-black uppercase text-sm hover:translate-y-[1px] transition-all flex items-center gap-2"
             >
               <Save size={18} /> {isSaving ? 'Saving...' : 'Save Branch Details'}
             </button>
@@ -266,7 +266,7 @@ export default function SuperAdminShopDetail({ shopId, onBack, onOpenCatalog, on
               <p className="font-bold text-gray-500">No staff members currently assigned to this branch.</p>
               <button 
                 onClick={() => setShowAddStaffModal(true)}
-                className="mt-3 bg-[#B0FF49] text-black border-2 border-black px-4 py-2 font-black uppercase text-xs shadow-[2px_2px_0px_rgba(0,0,0,1)]"
+                className="mt-3 bg-[#9AE600] text-black border-2 border-black px-4 py-2 font-black uppercase text-xs shadow-[2px_2px_0px_rgba(0,0,0,1)]"
               >
                 Add First Staff Member
               </button>
@@ -277,7 +277,7 @@ export default function SuperAdminShopDetail({ shopId, onBack, onOpenCatalog, on
                 <div key={u._id} className="bg-white border-2 border-black p-4 rounded-lg shadow-[3px_3px_0px_rgba(0,0,0,1)] flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className={`w-10 h-10 border-2 border-black rounded-full flex items-center justify-center font-black ${
-                      u.role === 'ShopAdmin' ? 'bg-[#0D8DE3] text-white' : 'bg-[#B0FF49] text-black'
+                      u.role === 'ShopAdmin' ? 'bg-[#0D8DE3] text-white' : 'bg-[#9AE600] text-black'
                     }`}>
                       {u.role === 'ShopAdmin' ? <Store size={18} /> : <Truck size={18} />}
                     </div>
@@ -361,7 +361,7 @@ export default function SuperAdminShopDetail({ shopId, onBack, onOpenCatalog, on
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="p-4 bg-[#B0FF49] border-2 border-black shadow-[3px_3px_0px_rgba(0,0,0,1)]">
+            <div className="p-4 bg-[#9AE600] border-2 border-black shadow-[3px_3px_0px_rgba(0,0,0,1)]">
               <span className="block font-black text-xs uppercase text-gray-700">Gross Revenue</span>
               <span className="text-2xl font-black text-black">₹{totalRevenue.toLocaleString('en-IN')}</span>
             </div>
@@ -398,7 +398,7 @@ export default function SuperAdminShopDetail({ shopId, onBack, onOpenCatalog, on
       {showAddStaffModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
           <div className="bg-white border-4 border-black shadow-[12px_12px_0px_rgba(0,0,0,1)] w-full max-w-md">
-            <div className="flex justify-between items-center p-4 border-b-4 border-black bg-[#B0FF49]">
+            <div className="flex justify-between items-center p-4 border-b-4 border-black bg-[#9AE600]">
               <h2 className="text-lg font-black uppercase">Add Delivery Staff for {shop.name}</h2>
               <button onClick={() => setShowAddStaffModal(false)} className="p-1 hover:bg-black hover:text-white rounded">
                 ✕
@@ -447,7 +447,7 @@ export default function SuperAdminShopDetail({ shopId, onBack, onOpenCatalog, on
                 <button
                   type="submit"
                   disabled={isAddingStaff}
-                  className="flex-1 bg-[#B0FF49] border-2 border-black py-2.5 font-black uppercase text-xs shadow-[2px_2px_0px_rgba(0,0,0,1)] hover:translate-y-[1px]"
+                  className="flex-1 bg-[#9AE600] border-2 border-black py-2.5 font-black uppercase text-xs shadow-[2px_2px_0px_rgba(0,0,0,1)] hover:translate-y-[1px]"
                 >
                   {isAddingStaff ? 'Adding...' : 'Add Staff'}
                 </button>

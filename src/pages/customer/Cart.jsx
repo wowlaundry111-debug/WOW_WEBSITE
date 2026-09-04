@@ -136,7 +136,7 @@ export default function Cart() {
   if (cart.length === 0) {
     return (
       <div className="min-h-screen bg-[#0D8DE3] flex flex-col items-center justify-center p-4 font-outfit">
-        <div className="w-32 h-32 bg-[#B0FF49] border-2 border-black rounded-full flex items-center justify-center mb-8 shadow-[8px_8px_0px_rgba(0,0,0,1)] text-black">
+        <div className="w-32 h-32 bg-[#9AE600] border-2 border-black rounded-full flex items-center justify-center mb-8 shadow-[8px_8px_0px_rgba(0,0,0,1)] text-black">
           <Trash2 size={48} strokeWidth={3} />
         </div>
         <h2 className="text-4xl font-black text-black mb-4 lilita-one-regular uppercase tracking-widest text-center">Your cart is empty</h2>
@@ -145,7 +145,7 @@ export default function Cart() {
         </p>
         <button 
           onClick={() => navigate('/order')}
-          className="bg-black text-[#0D8DE3] font-black py-4 px-10 rounded-xl text-xl uppercase tracking-widest border-2 border-black shadow-[6px_6px_0px_#B0FF49] active:translate-y-2 active:translate-x-2 active:shadow-none transition-all"
+          className="bg-black text-[#0D8DE3] font-black py-4 px-10 rounded-xl text-xl uppercase tracking-widest border-2 border-black shadow-[6px_6px_0px_#9AE600] active:translate-y-2 active:translate-x-2 active:shadow-none transition-all"
         >
           Start Shopping
         </button>
@@ -154,7 +154,7 @@ export default function Cart() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F0FDF4] pb-40 font-outfit selection:bg-black selection:text-[#B0FF49]">
+    <div className="min-h-screen bg-[#F0FDF4] pb-40 font-outfit selection:bg-black selection:text-[#9AE600]">
       {/* Header Sticky */}
       <div className="sticky top-0 z-40 bg-[#0D8DE3] border-b-2 border-black shadow-[0_4px_0_rgba(0,0,0,1)]">
         <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
@@ -193,8 +193,8 @@ export default function Cart() {
           )}
 
           {/* Delivery Details */}
-          <div className="bg-[#B0FF49] rounded-3xl border-2 border-black p-6 shadow-[6px_6px_0px_rgba(0,0,0,1)] animate-fade-in-up" style={{ animationDelay: '100ms' }}>
-            <div className="flex items-center gap-3 mb-6 bg-black text-[#B0FF49] py-2 px-4 rounded-xl border-2 border-black shadow-[-4px_4px_0px_white] inline-flex -ml-2">
+          <div className="bg-[#9AE600] rounded-3xl border-2 border-black p-6 shadow-[6px_6px_0px_rgba(0,0,0,1)] animate-fade-in-up" style={{ animationDelay: '100ms' }}>
+            <div className="flex items-center gap-3 mb-6 bg-black text-[#9AE600] py-2 px-4 rounded-xl border-2 border-black shadow-[-4px_4px_0px_white] inline-flex -ml-2">
               <MapPin size={24} strokeWidth={3} />
               <h2 className="font-black text-xl uppercase lilita-one-regular tracking-widest">Delivery Address</h2>
             </div>
@@ -220,7 +220,7 @@ export default function Cart() {
                         onClick={() => setAddrTag(t.tag)}
                         className={`py-2 px-3 rounded-xl border-2 border-black font-black text-sm transition-all flex items-center justify-center gap-2 ${
                           isSelected
-                            ? 'bg-black text-[#B0FF49] shadow-[2px_2px_0px_rgba(0,0,0,1)]'
+                            ? 'bg-black text-[#9AE600] shadow-[2px_2px_0px_rgba(0,0,0,1)]'
                             : 'bg-white text-black hover:bg-gray-100'
                         }`}
                       >
@@ -298,13 +298,13 @@ export default function Cart() {
                       onClick={() => toggleWashPref(pref)}
                       className={`w-full text-left p-4 rounded-2xl border-2 border-black flex items-center justify-between transition-all ${
                         isSelected
-                          ? 'bg-[#B0FF49] shadow-[4px_4px_0px_rgba(0,0,0,1)] -translate-y-0.5'
+                          ? 'bg-[#9AE600] shadow-[4px_4px_0px_rgba(0,0,0,1)] -translate-y-0.5'
                           : 'bg-white hover:bg-gray-50 shadow-[2px_2px_0px_rgba(0,0,0,1)]'
                       }`}
                     >
                       <div className="flex items-center gap-3">
                         <div className={`w-6 h-6 rounded-lg border-2 border-black flex items-center justify-center transition-colors ${
-                          isSelected ? 'bg-black text-[#B0FF49]' : 'bg-white'
+                          isSelected ? 'bg-black text-[#9AE600]' : 'bg-white'
                         }`}>
                           {isSelected && <Check size={16} strokeWidth={4} />}
                         </div>
@@ -328,9 +328,9 @@ export default function Cart() {
 
           {/* Cart Items */}
           <div className="bg-white rounded-3xl border-2 border-black overflow-hidden shadow-[6px_6px_0px_rgba(0,0,0,1)] animate-fade-in-up" style={{ animationDelay: '200ms' }}>
-            <div className="p-6 border-b-2 border-black bg-[#B0FF49] flex justify-between items-center">
+            <div className="p-6 border-b-2 border-black bg-[#9AE600] flex justify-between items-center">
               <h2 className="font-black text-black text-2xl uppercase lilita-one-regular tracking-widest">Item Summary</h2>
-              <span className="bg-black text-[#B0FF49] text-sm font-black px-3 py-1.5 rounded-lg border-2 border-black tracking-widest uppercase">{cart.length} ITEMS</span>
+              <span className="bg-black text-[#9AE600] text-sm font-black px-3 py-1.5 rounded-lg border-2 border-black tracking-widest uppercase">{cart.length} ITEMS</span>
             </div>
             <div className="divide-y-4 divide-black p-2">
               {cart.map((item) => {
@@ -357,7 +357,7 @@ export default function Cart() {
                       {isKg ? (
                         <span className="font-black text-xs text-white bg-[#0D8DE3] px-2 py-1 border-2 border-black rounded-lg uppercase tracking-wider">Pending</span>
                       ) : (
-                        <span className="font-black text-black text-xl bg-[#B0FF49] px-2 py-0.5 border-2 border-black rounded-lg">₹{(item.price || 0) * item.quantity}</span>
+                        <span className="font-black text-black text-xl bg-[#9AE600] px-2 py-0.5 border-2 border-black rounded-lg">₹{(item.price || 0) * item.quantity}</span>
                       )}
                       <div className="flex items-center bg-[#0D8DE3] border-2 border-black rounded-xl shadow-[4px_4px_0px_rgba(0,0,0,1)] overflow-hidden">
                         <button onClick={() => updateCartQuantity(item.itemId, item.quantity - 1)} className="w-10 h-10 flex items-center justify-center text-black hover:bg-black hover:text-[#0D8DE3] transition-colors border-r-4 border-black">
@@ -386,7 +386,7 @@ export default function Cart() {
                 value={couponCode}
                 onChange={(e) => setCouponCode(e.target.value)}
                 placeholder="ENTER CODE"
-                className="flex-1 bg-white border-2 border-black rounded-xl px-4 py-4 text-black font-black uppercase tracking-widest focus:outline-none focus:bg-[#B0FF49] transition-colors shadow-[4px_4px_0px_rgba(0,0,0,1)]"
+                className="flex-1 bg-white border-2 border-black rounded-xl px-4 py-4 text-black font-black uppercase tracking-widest focus:outline-none focus:bg-[#9AE600] transition-colors shadow-[4px_4px_0px_rgba(0,0,0,1)]"
               />
               <button type="submit" className="absolute right-2 top-2 bottom-2 bg-black text-[#0D8DE3] px-6 rounded-lg text-sm font-black uppercase tracking-widest hover:bg-gray-800 transition-colors">
                 APPLY
@@ -398,9 +398,9 @@ export default function Cart() {
               </p>
             )}
             {activeCoupon && (
-              <div className="mt-4 flex items-center justify-between bg-[#B0FF49] border-2 border-black p-4 rounded-xl shadow-[4px_4px_0px_rgba(0,0,0,1)]">
+              <div className="mt-4 flex items-center justify-between bg-[#9AE600] border-2 border-black p-4 rounded-xl shadow-[4px_4px_0px_rgba(0,0,0,1)]">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-black flex items-center justify-center text-[#B0FF49]">
+                  <div className="w-8 h-8 rounded-full bg-black flex items-center justify-center text-[#9AE600]">
                     <CheckCircle2 size={20} strokeWidth={4} />
                   </div>
                   <span className="text-sm font-black text-black uppercase tracking-widest">{activeCoupon.code} Applied!</span>
@@ -445,7 +445,7 @@ export default function Cart() {
 
                     <div className="flex justify-between text-base">
                       <span className="font-extrabold text-gray-700 uppercase tracking-wide">Delivery Fee</span>
-                      <span className="font-black text-black bg-[#B0FF49] px-2 py-0.5 rounded-md border-2 border-black">{deliveryFee === 0 ? 'FREE' : `₹${deliveryFee.toFixed(2)}`}</span>
+                      <span className="font-black text-black bg-[#9AE600] px-2 py-0.5 rounded-md border-2 border-black">{deliveryFee === 0 ? 'FREE' : `₹${deliveryFee.toFixed(2)}`}</span>
                     </div>
                     {washPrefsCost > 0 && (
                       <div className="flex justify-between text-base">
@@ -463,7 +463,7 @@ export default function Cart() {
                     )}
                     <div className="pt-6 mt-4 border-t-4 border-black border-dashed">
                       {hasKgItems ? (
-                        <div className="bg-[#B0FF49] p-5 rounded-2xl border-2 border-black shadow-[4px_4px_0px_rgba(0,0,0,1)]">
+                        <div className="bg-[#9AE600] p-5 rounded-2xl border-2 border-black shadow-[4px_4px_0px_rgba(0,0,0,1)]">
                           <div className="flex justify-between items-center">
                             <div>
                               <span className="font-black text-black text-lg sm:text-xl uppercase tracking-widest">Grand Total</span>
@@ -477,7 +477,7 @@ export default function Cart() {
                           </div>
                         </div>
                       ) : (
-                        <div className="flex justify-between items-center bg-[#B0FF49] p-5 rounded-2xl border-2 border-black shadow-[4px_4px_0px_rgba(0,0,0,1)] transform rotate-1">
+                        <div className="flex justify-between items-center bg-[#9AE600] p-5 rounded-2xl border-2 border-black shadow-[4px_4px_0px_rgba(0,0,0,1)] transform rotate-1">
                           <span className="font-black text-black text-xl uppercase tracking-widest">Grand Total</span>
                           <span className="font-black text-3xl text-black bg-white px-3 py-1 rounded-xl border-2 border-black">₹{total.toFixed(2)}</span>
                         </div>
@@ -495,7 +495,7 @@ export default function Cart() {
       <div className="fixed bottom-0 left-0 right-0 bg-[#0D8DE3] border-t-4 border-black p-4 z-50 shadow-[0_-8px_0_rgba(0,0,0,1)]">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
           <div className="bg-white p-3 border-2 border-black rounded-2xl shadow-[4px_4px_0px_rgba(0,0,0,1)]">
-            <p className="text-xs font-black text-black uppercase tracking-widest mb-1 bg-[#B0FF49] inline-block px-2 border-2 border-black rounded">
+            <p className="text-xs font-black text-black uppercase tracking-widest mb-1 bg-[#9AE600] inline-block px-2 border-2 border-black rounded">
               {hasKgItems ? 'Pay After Weighing' : 'Pay via UPI / Cash'}
             </p>
             {hasKgItems ? (
@@ -525,7 +525,7 @@ export default function Cart() {
         )}
         {subtotal < (shop?.minOrderValue || 0) && !error && (
           <div className="max-w-4xl mx-auto mt-4">
-             <p className="text-black font-black text-center bg-[#B0FF49] p-3 border-2 border-black rounded-xl uppercase tracking-widest shadow-[4px_4px_0px_rgba(0,0,0,1)]">
+             <p className="text-black font-black text-center bg-[#9AE600] p-3 border-2 border-black rounded-xl uppercase tracking-widest shadow-[4px_4px_0px_rgba(0,0,0,1)]">
                Minimum order value is ₹{shop?.minOrderValue}
              </p>
           </div>

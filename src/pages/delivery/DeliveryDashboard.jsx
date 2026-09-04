@@ -133,7 +133,7 @@ export default function DeliveryDashboard() {
           <div className="w-1 bg-black"></div>
           <button 
             onClick={() => setActiveTab('DELIVERY')}
-            className={`flex-1 py-4 font-black uppercase transition-colors ${activeTab === 'DELIVERY' ? 'bg-[#B0FF49] text-black' : 'bg-white text-black hover:bg-gray-100'}`}
+            className={`flex-1 py-4 font-black uppercase transition-colors ${activeTab === 'DELIVERY' ? 'bg-[#9AE600] text-black' : 'bg-white text-black hover:bg-gray-100'}`}
           >
             Deliveries ({pendingDeliveries.length})
           </button>
@@ -164,7 +164,7 @@ export default function DeliveryDashboard() {
                         <p className="font-black text-[#0D8DE3] mt-1">Pickup: {order.pickupTime}</p>
                       )}
                     </div>
-                    <button className="bg-[#B0FF49] border-2 border-black p-3 hover:bg-black hover:text-[#B0FF49] transition-colors rounded-full shadow-[2px_2px_0px_rgba(0,0,0,1)]">
+                    <button className="bg-[#9AE600] border-2 border-black p-3 hover:bg-black hover:text-[#9AE600] transition-colors rounded-full shadow-[2px_2px_0px_rgba(0,0,0,1)]">
                       <Phone size={24} />
                     </button>
                   </div>
@@ -189,7 +189,7 @@ export default function DeliveryDashboard() {
                       {hasKgItems && (
                         <div className="flex items-center gap-2">
                           <span className={`text-xs font-black uppercase px-2.5 py-1 border-2 border-black rounded-lg ${
-                            order.kgPriceUpdated ? 'bg-[#B0FF49] text-black' : 'bg-yellow-300 text-black'
+                            order.kgPriceUpdated ? 'bg-[#9AE600] text-black' : 'bg-yellow-300 text-black'
                           }`}>
                             {order.kgPriceUpdated ? '⚖️ KG Weighed ✓' : '⚖️ KG Weighing Pending'}
                           </span>
@@ -212,7 +212,7 @@ export default function DeliveryDashboard() {
                             ? 'bg-[#0D8DE3] text-white' 
                             : (hasKgItems && !order.kgPriceUpdated) 
                             ? 'bg-yellow-400 text-black' 
-                            : 'bg-[#B0FF49] text-black'
+                            : 'bg-[#9AE600] text-black'
                         }`}
                       >
                         {activeTab === 'PICKUP' 
@@ -247,7 +247,7 @@ export default function DeliveryDashboard() {
                       </div>
                       <div className="flex items-center gap-2">
                         {order.paymentMode && (
-                          <span className="text-xs font-black uppercase px-2.5 py-1 bg-[#B0FF49] border-2 border-black rounded-lg text-black">
+                          <span className="text-xs font-black uppercase px-2.5 py-1 bg-[#9AE600] border-2 border-black rounded-lg text-black">
                             {order.paymentMode === 'COD' ? 'Cash (COD)' : order.paymentMode === 'UPI' ? 'UPI' : order.paymentMode}
                           </span>
                         )}
@@ -326,7 +326,7 @@ export default function DeliveryDashboard() {
       {paymentModalOrder && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
           <div className="bg-white border-4 border-black shadow-[12px_12px_0px_rgba(0,0,0,1)] w-full max-w-md text-center">
-            <div className="p-6 bg-[#B0FF49] border-b-4 border-black">
+            <div className="p-6 bg-[#9AE600] border-b-4 border-black">
               <h2 className="text-3xl font-black uppercase">Collect Payment</h2>
             </div>
             
@@ -394,7 +394,7 @@ export default function DeliveryDashboard() {
           <div className="bg-white border-4 border-black shadow-[12px_12px_0px_rgba(0,0,0,1)] w-full max-w-lg max-h-[90vh] flex flex-col animate-scale-up">
             <div className="p-5 border-b-4 border-black bg-[#0D8DE3] text-white flex justify-between items-center">
               <div>
-                <span className="text-[10px] font-black uppercase tracking-widest bg-black px-2 py-0.5 rounded text-[#B0FF49]">
+                <span className="text-[10px] font-black uppercase tracking-widest bg-black px-2 py-0.5 rounded text-[#9AE600]">
                   Weight Calculation Portal
                 </span>
                 <h2 className="text-2xl font-black uppercase mt-1 flex items-center gap-2">
@@ -429,7 +429,7 @@ export default function DeliveryDashboard() {
                           Rate: ₹{ratePerKg} / KG
                         </p>
                       </div>
-                      <span className="text-xs font-black uppercase bg-[#B0FF49] border border-black px-2 py-1 rounded">
+                      <span className="text-xs font-black uppercase bg-[#9AE600] border border-black px-2 py-1 rounded">
                         {it.quantity} bundle{it.quantity > 1 ? 's' : ''}
                       </span>
                     </div>
@@ -460,7 +460,7 @@ export default function DeliveryDashboard() {
 
                       <div className="text-right shrink-0">
                         <span className="text-[10px] font-black uppercase text-gray-500 block mb-1">Calculated</span>
-                        <span className="font-black text-lg text-black bg-[#B0FF49] border-2 border-black px-3 py-1.5 rounded-lg inline-block">
+                        <span className="font-black text-lg text-black bg-[#9AE600] border-2 border-black px-3 py-1.5 rounded-lg inline-block">
                           ₹{itemTotal}
                         </span>
                       </div>
@@ -524,7 +524,7 @@ export default function DeliveryDashboard() {
               <button 
                 onClick={handleSaveKgWeights}
                 disabled={isUpdatingKg}
-                className="flex-[2] bg-[#B0FF49] text-black border-2 border-black shadow-[3px_3px_0px_rgba(0,0,0,1)] py-3 font-black uppercase hover:translate-y-[1px] hover:shadow-[1px_1px_0px_rgba(0,0,0,1)] transition-all text-sm disabled:opacity-50 flex items-center justify-center gap-1.5"
+                className="flex-[2] bg-[#9AE600] text-black border-2 border-black shadow-[3px_3px_0px_rgba(0,0,0,1)] py-3 font-black uppercase hover:translate-y-[1px] hover:shadow-[1px_1px_0px_rgba(0,0,0,1)] transition-all text-sm disabled:opacity-50 flex items-center justify-center gap-1.5"
               >
                 {isUpdatingKg ? 'Calculating & Saving...' : 'Save & Finalize Price'}
               </button>
