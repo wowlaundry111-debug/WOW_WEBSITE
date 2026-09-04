@@ -48,7 +48,9 @@ interface AppState {
   // Async Data Fetching
   initializeAppData: () => Promise<void>;
   login: (identifier: string, password?: string) => Promise<{ success: boolean; message: string }>;
-  register: (name: string, phone: string, email: string, password?: string) => Promise<{ success: boolean; message: string }>;
+  sendLoginOtp: (identifier: string, password?: string) => Promise<{ success: boolean; requiresOtp?: boolean; message: string }>;
+  verifyLoginOtp: (email: string, otp: string) => Promise<{ success: boolean; message: string }>;
+  register: (name: string, phone: string, email: string, password?: string) => Promise<{ success: boolean; requiresOtp?: boolean; message: string }>;
   fetchCatalog: (overrideShopId?: string) => Promise<void>;
   fetchOrders: (page?: number) => Promise<void>;
   fetchUsers: () => Promise<void>;
@@ -268,6 +270,74 @@ export const useAppStore = create<AppState>()(
           }
         } catch (err: any) {
           set({ error: err.message || 'Failed to load app data', isLoading: false });
+        }
+      },
+
+      sendLoginOtp: async (identifier, password) => {
+        try {
+          set({ isLoading: true, error: null });
+          const response = await api.post('/auth/send-otp', {
+            identifier,
+            email: identifier,
+            password,
+          });
+
+          // Staff or direct login bypass: JWT returned immediately
+          if (response.data.directLogin && response.data.token) {
+            const { user, token } = response.data;
+            setAuthToken(token);
+            set({
+              currentUser: user,
+              currentRole: user.role,
+              currentTenantId: user.role === 'SuperAdmin' ? '' : (user.shopId || get().currentTenantId),
+              shopsLastFetched: 0,
+              offersLastFetched: 0,
+              isLoading: false,
+            });
+            await get().initializeAppData();
+            return { success: true, requiresOtp: false, message: 'Logged in successfully' };
+          }
+
+          set({ isLoading: false });
+          return {
+            success: true,
+            requiresOtp: true,
+            message: response.data.message || 'Verification code sent to your email',
+          };
+        } catch (err: any) {
+          const msg = err.response?.data?.error || 'Failed to send verification code';
+          set({ isLoading: false, error: msg });
+          return { success: false, message: msg };
+        }
+      },
+
+      verifyLoginOtp: async (email, otp) => {
+        try {
+          set({ isLoading: true, error: null });
+          const response = await api.post('/auth/login', {
+            identifier: email,
+            email,
+            otp,
+          });
+          const { user, token } = response.data;
+
+          if (token) setAuthToken(token);
+
+          set({
+            currentUser: user,
+            currentRole: user.role,
+            currentTenantId: user.role === 'SuperAdmin' ? '' : (user.shopId || get().currentTenantId),
+            shopsLastFetched: 0,
+            offersLastFetched: 0,
+            isLoading: false,
+          });
+
+          await get().initializeAppData();
+          return { success: true, message: 'Authenticated successfully' };
+        } catch (err: any) {
+          const msg = err.response?.data?.error || 'Invalid verification code';
+          set({ isLoading: false, error: msg });
+          return { success: false, message: msg };
         }
       },
 
