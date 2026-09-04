@@ -274,7 +274,9 @@ export const useAppStore = create<AppState>()(
       login: async (identifier, password) => {
         try {
           set({ isLoading: true, error: null });
-          const response = await api.post('/auth/login', {
+          // Use staff-login endpoint: only SuperAdmin, ShopAdmin, and Delivery roles are allowed.
+          // Customer accounts will receive a 403 and be told to use the mobile app.
+          const response = await api.post('/auth/staff-login', {
             identifier,
             email: identifier,
             password,

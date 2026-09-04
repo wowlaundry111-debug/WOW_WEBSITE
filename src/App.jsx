@@ -1,37 +1,32 @@
 import React, { Suspense, lazy } from 'react';
 import './App.css';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import Footer from './components/Footer';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
+import SocketManager from './components/SocketManager';
+import { useAppStore } from './store/useAppStore';
 
 const Home = lazy(() => import('./pages/Home'));
 const Login = lazy(() => import('./pages/auth/Login'));
-const Register = lazy(() => import('./pages/auth/Register'));
-const ShopSelect = lazy(() => import('./pages/customer/ShopSelect'));
-const CustomerHome = lazy(() => import('./pages/customer/CustomerHome'));
-const CategoryItems = lazy(() => import('./pages/customer/CategoryItems'));
-const Cart = lazy(() => import('./pages/customer/Cart'));
-const OrderHistory = lazy(() => import('./pages/customer/OrderHistory'));
+const Register = lazy(() => import('./pages/auth/Register')); // Shows "contact admin" page
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
 const DeliveryDashboard = lazy(() => import('./pages/delivery/DeliveryDashboard'));
 
-import { Navigate, Outlet } from 'react-router-dom';
-
-const ProtectedCustomerRoute = () => {
-  const { currentUser, currentTenantId } = useAppStore();
-  if (!currentUser) return <Navigate to="/login" replace />;
-  if (currentUser.role !== 'Customer') return <Navigate to="/" replace />;
-  if (!currentTenantId) return <Navigate to="/shop-select" replace />;
-  return <Outlet />;
-};
-
-const ProtectedShopSelectRoute = () => {
+// ── Staff-Only Route Guard ────────────────────────────────────────────────────
+// The website is a STAFF portal. Only SuperAdmin, ShopAdmin, and Delivery
+// roles may access protected routes. Customers use the mobile app.
+const ProtectedStaffRoute = ({ allowedRoles }) => {
   const currentUser = useAppStore((state) => state.currentUser);
+
   if (!currentUser) return <Navigate to="/login" replace />;
-  if (currentUser.role === 'SuperAdmin' || currentUser.role === 'ShopAdmin') return <Navigate to="/admin" replace />;
-  if (currentUser.role === 'Delivery') return <Navigate to="/delivery" replace />;
-  return <ShopSelect />;
+
+  if (allowedRoles && !allowedRoles.includes(currentUser.role)) {
+    // Logged-in but wrong role (e.g. Customer somehow got a token)
+    return <Navigate to="/login" replace />;
+  }
+
+  return <Outlet />;
 };
 
 function SkeletonFallback() {
@@ -48,9 +43,6 @@ function SkeletonFallback() {
   );
 }
 
-import SocketManager from './components/SocketManager';
-import { useAppStore } from './store/useAppStore';
-
 function App() {
   const initializeAppData = useAppStore((state) => state.initializeAppData);
 
@@ -64,18 +56,24 @@ function App() {
       <BrowserRouter>
         <Suspense fallback={<SkeletonFallback />}>
           <Routes>
+            {/* Public routes */}
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
+            {/* /register shows "contact admin" info — not a real registration form */}
             <Route path="/register" element={<Register />} />
-            <Route path="/shop-select" element={<ProtectedShopSelectRoute />} />
-            <Route element={<ProtectedCustomerRoute />}>
-              <Route path="/order" element={<CustomerHome />} />
-              <Route path="/order/:categoryId" element={<CategoryItems />} />
-              <Route path="/cart" element={<Cart />} />
-              <Route path="/order-history" element={<OrderHistory />} />
+
+            {/* Admin Dashboard — SuperAdmin + ShopAdmin only */}
+            <Route element={<ProtectedStaffRoute allowedRoles={['SuperAdmin', 'ShopAdmin']} />}>
+              <Route path="/admin" element={<AdminDashboard />} />
             </Route>
-            <Route path="/admin" element={<AdminDashboard />} />
-            <Route path="/delivery" element={<DeliveryDashboard />} />
+
+            {/* Delivery Dashboard — Delivery staff only */}
+            <Route element={<ProtectedStaffRoute allowedRoles={['Delivery']} />}>
+              <Route path="/delivery" element={<DeliveryDashboard />} />
+            </Route>
+
+            {/* Catch-all — redirect unknown paths to login */}
+            <Route path="*" element={<Navigate to="/login" replace />} />
           </Routes>
         </Suspense>
       </BrowserRouter>
