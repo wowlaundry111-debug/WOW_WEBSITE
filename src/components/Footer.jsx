@@ -11,6 +11,15 @@ function Footer() {
       <div className='-mt-4 md:-mt-6 flex justify-center items-center'>
         <div className='font-black uppercase tracking-widest lg:w-[70%] text-sm md:text-lg text-center text-[#9AE600]'>Wear Fresh and Feel Fresh</div>
       </div>
+
+      <div className='mt-5 flex flex-wrap justify-center gap-3 text-xs md:text-sm font-black uppercase tracking-wider text-gray-300'>
+        <span className='bg-stone-900 border border-stone-700 px-3.5 py-1 rounded-full text-white shadow-sm flex items-center gap-1.5'>
+          <span className='text-[#9AE600]'>📍</span> Branch 1: Rama Mandi, Jalandhar Cantt
+        </span>
+        <span className='bg-stone-900 border border-stone-700 px-3.5 py-1 rounded-full text-white shadow-sm flex items-center gap-1.5'>
+          <span className='text-[#9AE600]'>📍</span> Branch 2: Law Gate Maheru (Shop No. 1 Gaba PG)
+        </span>
+      </div>
       
       <div className='py-8 border-y-4 border-dashed border-gray-800 mt-8 md:mt-16 flex justify-center items-center gap-6 md:gap-16 text-white flex-wrap'>
         <a href="#hero" className='text-sm md:text-lg font-black uppercase tracking-widest cursor-pointer hover:text-[#0D8DE3] hover:-translate-y-1 transition-all'>Home</a>

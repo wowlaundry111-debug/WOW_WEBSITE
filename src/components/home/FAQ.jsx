@@ -20,7 +20,10 @@ const contactDetails = [
     {
         icon: <FaMapMarker size={28} />, 
         title: "Address", 
-        details: ["11/1 WARE HOUSE, RAMA MANDI, Jalandhar Cantt, Jalandhar, Punjab 144005"],
+        details: [
+            "Address 1: 11/1 WARE HOUSE, RAMA MANDI, Jalandhar Cantt, Jalandhar, Punjab 144005",
+            "Address 2: WOW LAUNDRY, SHOP NO. 1 GABA PG, MUGHLAI POINT LAW GATE MAHERU"
+        ],
         border: true
     },
     {
@@ -56,7 +59,7 @@ function FAQ() {
                             <div>
                                 <div className='text-xl font-black text-white uppercase tracking-widest bg-black inline-block px-2 py-0.5 rounded-lg border-2 border-black mb-2'>{item.title}</div>
                                 {item.details.map((detail, i) => (
-                                    <div key={i} className='font-bold text-white text-base md:text-lg uppercase tracking-wider'>{detail}</div>
+                                    <div key={i} className={`font-bold text-white text-sm sm:text-base md:text-lg uppercase tracking-wider ${i > 0 ? 'mt-2 pt-2 border-t border-white/20' : ''}`}>{detail}</div>
                                 ))}
                             </div>
                         </div>
