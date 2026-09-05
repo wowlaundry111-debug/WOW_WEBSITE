@@ -552,22 +552,22 @@ function Hero() {
 
                             {/* Unified Rotated Dynamic Text Group */}
                             <div className="flex flex-col items-center justify-center transform -rotate-6 z-10 select-none mt-1">
-                                <span className="font-black text-[11px] sm:text-[13px] tracking-widest uppercase text-black leading-none lilita-one-regular">
-                                    CLEANER
+                                <span className="font-black text-[10px] sm:text-[13px] tracking-widest uppercase text-black leading-none lilita-one-regular">
+                                    A LAUNDRY
+                                </span>
+
+                                <span className="font-black text-[9px] sm:text-[11px] tracking-widest uppercase text-black leading-none my-0.5 sm:my-1 lilita-one-regular">
+                                    FOR
                                 </span>
 
                                 <span 
-                                    className="font-black text-[19px] sm:text-[25px] tracking-wide uppercase text-[#9AE600] leading-tight my-0.5 lilita-one-regular" 
+                                    className="font-black text-[15px] sm:text-[21px] tracking-wide uppercase text-[#9AE600] leading-tight lilita-one-regular" 
                                     style={{ 
-                                        WebkitTextStroke: '1.4px black',
+                                        WebkitTextStroke: '1.2px black',
                                         textShadow: '1.5px 1.5px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000'
                                     }}
                                 >
-                                    FRESHER
-                                </span>
-
-                                <span className="font-black text-[11px] sm:text-[13px] tracking-widest uppercase text-black leading-none lilita-one-regular">
-                                    BETTER
+                                    EVERYONE.
                                 </span>
                             </div>
                         </div>
