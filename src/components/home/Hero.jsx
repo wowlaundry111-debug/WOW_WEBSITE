@@ -395,7 +395,7 @@ function Hero() {
                                             <div className="bg-[#9AE600] p-1 md:p-1.5 border-[2px] border-black rounded-lg shadow-[2px_2px_0px_#000] group-hover/feat:-translate-y-1 transition-transform">
                                                 <TbTruckDelivery className='text-[8px] md:text-base text-black' />
                                             </div>
-                                            <div className='text-[7px] md:text-[6px] font-black uppercase tracking-wider text-black leading-tight'>Pickup in <br /> 10 min</div>
+                                            <div className='text-[7px] md:text-[6px] font-black uppercase tracking-wider text-black leading-tight'>Fast <br /> Pickup</div>
                                         </div>
                                         <div className='w-0.5 h-5 bg-black rounded-full opacity-20'></div>
                                         <div className='flex items-center gap-1 cursor-default group/feat'>
