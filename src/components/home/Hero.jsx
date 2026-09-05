@@ -443,9 +443,8 @@ function Hero() {
                                     </div>
 
                                     {/* Pricing Box (Below) */}
-                                    <div className='bg-[#1565C0] border-[2px] md:border-[3px] border-black px-3.5 py-1.5 md:px-5 md:py-2 rounded-2xl max-w-[85%] relative z-20 shadow-[3px_3px_0px_#000] transition-transform hover:-translate-y-0.5 mt-1'>
-                                        <p className='font-black text-white uppercase text-[9.5px] md:text-xs tracking-widest leading-relaxed text-center'>
-                                            The <span className='text-[#9AE600]'>First & Best</span> Laundry. <br /> 
+                                    <div className='bg-[#1565C0] border-[2px] md:border-[3px] border-black px-4 py-1.5 md:px-5 md:py-2 rounded-2xl max-w-[85%] relative z-20 shadow-[3px_3px_0px_#000] transition-transform hover:-translate-y-0.5 mt-1'>
+                                        <p className='font-black text-white uppercase text-[10px] md:text-xs tracking-widest leading-relaxed text-center'>
                                             Always <span className='text-[#9AE600] text-xs md:text-sm font-black ml-0.5'>Affordable</span>
                                         </p>
                                     </div>
