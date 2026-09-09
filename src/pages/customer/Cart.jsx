@@ -13,11 +13,8 @@ export default function Cart() {
   // Structured Precise Delivery Address (Food App Style)
   const [addrTag, setAddrTag] = useState('Home');
   const [flatNo, setFlatNo] = useState('');
-  const [building, setBuilding] = useState('');
   const [area, setArea] = useState('');
-  const [landmark, setLandmark] = useState('');
   const [city, setCity] = useState('');
-  const [pincode, setPincode] = useState('');
 
   React.useEffect(() => {
     if (currentUser?.address) {
@@ -41,11 +38,8 @@ export default function Cart() {
   const computeFormattedAddress = () => {
     const parts = [
       flatNo.trim() ? (flatNo.trim().toLowerCase().startsWith('flat') || flatNo.trim().toLowerCase().startsWith('house') ? flatNo.trim() : `Flat/House: ${flatNo.trim()}`) : '',
-      building.trim() ? building.trim() : '',
       area.trim() ? area.trim() : '',
-      landmark.trim() ? (landmark.trim().toLowerCase().startsWith('near') ? landmark.trim() : `Near: ${landmark.trim()}`) : '',
       city.trim() ? city.trim() : '',
-      pincode.trim() ? `${pincode.trim()}` : '',
     ].filter(Boolean);
 
     if (parts.length === 0) return '';
@@ -79,7 +73,7 @@ export default function Cart() {
     if (!c) return false;
     if (c.unit === 'KG' || c.unit === 'kg') return true;
     if (typeof c.name === 'string' && (c.name.toLowerCase().includes('per kg') || c.name.toLowerCase().includes('/ kg') || c.name.toLowerCase().includes('per-kg'))) return true;
-    if (Boolean(c.pricePerKg && c.pricePerKg > 0)) return true;
+    if (c.pricePerKg && c.pricePerKg > 0) return true;
     return false;
   };
 
@@ -346,8 +340,18 @@ export default function Cart() {
                     </div>
                     <div className="flex-1 pl-2">
                       <h3 className="font-black text-black text-lg uppercase tracking-wide line-clamp-1">{item.name}</h3>
+                      {(item.categoryName || item.subCategoryName) && (
+                        <p className="text-[11px] font-black uppercase text-gray-600 bg-gray-100 px-2 py-0.5 rounded border border-gray-300 mt-1 inline-block">
+                          {item.categoryName}{item.subCategoryName ? ` › ${item.subCategoryName}` : ''}{item.isBucket ? ' • Bucket' : ''}
+                        </p>
+                      )}
+                      {item.isBucket && !item.categoryName && (
+                        <p className="text-[11px] font-black uppercase text-black bg-[#9AE600] px-2 py-0.5 rounded border border-black mt-1 inline-block">
+                          Laundry Bucket
+                        </p>
+                      )}
                       {isKg ? (
-                        <p className="text-xs font-black text-[#0D8DE3] uppercase tracking-widest mt-1 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-lg inline-block">🏋️ Weighed at delivery</p>
+                        <p className="text-xs font-black text-[#0D8DE3] uppercase tracking-widest mt-1 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-lg inline-block">Weighed at delivery</p>
                       ) : (
                         <p className="text-sm text-gray-700 font-extrabold mt-1">₹{item.price} / {item.unit || 'Item'}</p>
                       )}
@@ -434,7 +438,7 @@ export default function Cart() {
                     </div>
                     {hasKgItems && (
                       <div className="flex justify-between text-base bg-blue-50 border-2 border-[#0D8DE3] rounded-xl p-3">
-                        <span className="font-extrabold text-[#0D8DE3] uppercase tracking-wide flex items-center gap-1.5">🏋️ KG Items ({kgItems.length})</span>
+                        <span className="font-extrabold text-[#0D8DE3] uppercase tracking-wide flex items-center gap-1.5">KG Items ({kgItems.length})</span>
                         <span className="font-black text-[#0D8DE3] text-xs uppercase tracking-widest">Weighed at delivery</span>
                       </div>
                     )}

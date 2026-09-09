@@ -5,6 +5,7 @@ import Footer from './components/Footer';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import SocketManager from './components/SocketManager';
+import ScrollToTop from './components/ScrollToTop';
 import { useAppStore } from './store/useAppStore';
 
 // Pages
@@ -20,13 +21,6 @@ const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
 const DeliveryDashboard = lazy(() => import('./pages/delivery/DeliveryDashboard'));
 
 // ── Route Guards ──────────────────────────────────────────────────────────────
-
-// Requires login. After login, routes customer to /shop-select, admin to /admin, etc.
-const ProtectedRoute = () => {
-  const currentUser = useAppStore((state) => state.currentUser);
-  if (!currentUser) return <Navigate to="/login" replace />;
-  return <Outlet />;
-};
 
 // Customer-only route: must be logged in AND have a shop selected
 const ProtectedCustomerRoute = () => {
@@ -71,6 +65,7 @@ function App() {
     <>
       <SocketManager />
       <BrowserRouter>
+        <ScrollToTop />
         <Suspense fallback={<SkeletonFallback />}>
           <Routes>
             {/* Public */}

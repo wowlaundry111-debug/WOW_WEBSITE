@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Search, ChevronDown, FileText, CheckCircle2, Droplets, Sparkles, Truck, Gift, User } from 'lucide-react';
 import { useAppStore } from '../../store/useAppStore';
 import Navbar from '../../components/Navbar';
+import { resolveVectorImage } from '../../utils/vectorGallery';
 
 import imgNormal from '../../assets/normal.png';
 import imgDryClean from '../../assets/dryClean.png';
@@ -59,10 +60,12 @@ export default function CustomerHome() {
 
   const tenantCats = categories.filter((c) => {
     if (c.shopId !== currentTenantId) return false;
+    if (c.parentCategoryId) return false; // Show only top-level categories on root home grid
     if (!searchQuery) return true;
     
     const query = searchQuery.toLowerCase();
-    return items.some(item => item.categoryId === c._id && item.name.toLowerCase().includes(query));
+    const subCatIds = (c.subCategories?.length ? c.subCategories : categories.filter(sub => sub.parentCategoryId === c._id)).map(s => s._id);
+    return items.some(item => (item.categoryId === c._id || subCatIds.includes(item.categoryId)) && item.name.toLowerCase().includes(query));
   });
 
   const getGreeting = () => {
@@ -197,6 +200,7 @@ export default function CustomerHome() {
         <div className="grid grid-cols-2 sm:grid-cols-2 gap-4 sm:gap-6">
           {tenantCats.map((cat, idx) => {
             const style = getCategoryStyle(cat.name);
+            const catImg = resolveVectorImage(cat.image, cat.name) || style.img;
             
             return (
               <Link 
@@ -214,7 +218,12 @@ export default function CustomerHome() {
                 </div>
 
                 <div className="w-full flex justify-center mb-6">
-                  <img src={style.img} alt={cat.name} className="w-24 h-24 object-contain filter drop-shadow-md group-hover:scale-110 transition-transform duration-300" />
+                  <img 
+                    src={catImg} 
+                    alt={cat.name} 
+                    onError={(e) => { e.currentTarget.src = style.img; }}
+                    className="w-24 h-24 object-contain filter drop-shadow-md group-hover:scale-110 transition-transform duration-300" 
+                  />
                 </div>
                 
                 <div className="mt-auto border-t-4 border-black pt-3">

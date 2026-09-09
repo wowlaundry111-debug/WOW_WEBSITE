@@ -9,6 +9,7 @@ import { TbTruckDelivery, TbWash, TbShirt } from "react-icons/tb";
 import { MdOutlineLocalLaundryService } from "react-icons/md";
 import { GiReceiveMoney } from "react-icons/gi";
 import { Link } from 'react-router-dom';
+import { Sparkles } from 'lucide-react';
 
 function Hero() {
     const [imageLoaded, setImageLoaded] = useState(false);
@@ -514,9 +515,9 @@ function Hero() {
                         </div>
 
                         {/* Black Sparkles on the Left */}
-                        <div className="absolute top-[16%] left-[2%] sm:left-[6%] z-20 pointer-events-none flex flex-col items-center select-none">
-                            <span className="text-black text-2xl font-bold leading-none transform -rotate-12">✦</span>
-                            <span className="text-black text-base font-bold leading-none ml-4 mt-1">✦</span>
+                        <div className="absolute top-[16%] left-[2%] sm:left-[6%] z-20 pointer-events-none flex flex-col items-center select-none text-black">
+                            <Sparkles size={24} strokeWidth={2.5} className="transform -rotate-12" />
+                            <Sparkles size={16} strokeWidth={2.5} className="ml-4 mt-1" />
                         </div>
 
                         {/* Clean Poppins Typography Badge with Broken Line & Intersecting Stars */}

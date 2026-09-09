@@ -45,7 +45,7 @@ function FAQ() {
                 <div className='bg-[#0D8DE3] rounded-3xl md:rounded-[40px] border-2 border-black p-6 md:p-10 mt-6 flex flex-col shadow-[8px_8px_0px_rgba(0,0,0,1)] relative'>
                     {/* Decorative element */}
                     <div className="absolute top-8 -right-8 w-16 h-16 bg-white border-2 border-black rounded-full shadow-[2px_2px_0px_rgba(0,0,0,1)] flex items-center justify-center font-black text-3xl transform rotate-12">
-                        📞
+                        <FaPhoneAlt size={24} className="text-black" />
                     </div>
 
                     {contactDetails.map((item, index) => (

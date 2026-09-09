@@ -23,9 +23,9 @@ const FILTERS = [
 ];
 
 const SERVICE_LABEL_FOR_CATEGORY = (catName) => {
-  if (catName?.toLowerCase().includes('dry')) return { label: 'Premium Dry Clean', icon: '✦', bg: 'bg-purple-100', color: 'text-purple-600' };
-  if (catName?.toLowerCase().includes('bed')) return { label: 'Linen & Bedding', icon: '✦', bg: 'bg-teal-100', color: 'text-teal-600' };
-  return { label: 'Standard Wash & Fold', icon: '✦', bg: 'bg-blue-100', color: 'text-blue-600' };
+  if (catName?.toLowerCase().includes('dry')) return { label: 'Premium Dry Clean', icon: 'DRY', bg: 'bg-purple-100', color: 'text-purple-600' };
+  if (catName?.toLowerCase().includes('bed')) return { label: 'Linen & Bedding', icon: 'BED', bg: 'bg-teal-100', color: 'text-teal-600' };
+  return { label: 'Standard Wash & Fold', icon: 'WASH', bg: 'bg-blue-100', color: 'text-blue-600' };
 };
 
 const stripeColor = (s) => {
@@ -79,7 +79,7 @@ export default function AdminDashboard() {
     fetchOrders(1);
     fetchUsers();
     fetchCatalog();
-  }, [currentUser, navigate]);
+  }, [currentUser, navigate, fetchOrders, fetchUsers, fetchCatalog]);
 
   const activeShopId = currentTenantId || currentUser?.shopId || (!isSuperAdmin && shops.length > 0 ? shops[0]._id : '');
   const currentShop = shops.find(s => s._id === activeShopId) || null;

@@ -18,7 +18,7 @@ import weddingDressImg from '../../../assets/wedding_dress.png';
 
 import { CLOUDINARY_VECTOR_MAP, resolveVectorImage } from '../../../utils/vectorGallery';
 
-export const PRESET_VECTOR_IMAGES = [
+const PRESET_VECTOR_IMAGES = [
   { id: 'tshirt', label: 'T-Shirt', src: 'https://res.cloudinary.com/ddzre9tcd/image/upload/v1787838054/wow_laundry_vectors/v3_tshirt.png' },
   { id: 'jeans', label: 'Denim Jeans', src: 'https://res.cloudinary.com/ddzre9tcd/image/upload/v1787838056/wow_laundry_vectors/v3_jeans.png' },
   { id: 'formal_shirt', label: 'Formal Shirt', src: 'https://res.cloudinary.com/ddzre9tcd/image/upload/v1787838060/wow_laundry_vectors/v3_formal_shirt.png' },
@@ -48,6 +48,7 @@ export default function CatalogManager({ categories = [], items = [], shops = []
   } = useAppStore();
 
   const [selectedCategoryId, setSelectedCategoryId] = useState(null);
+  const [expandedCategoryId, setExpandedCategoryId] = useState(null); // which category is expanded to show sub-cats
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
@@ -57,6 +58,7 @@ export default function CatalogManager({ categories = [], items = [], shops = []
   const [editingCategory, setEditingCategory] = useState(null);
   const [catName, setCatName] = useState('');
   const [catImage, setCatImage] = useState('');
+  const [catParentId, setCatParentId] = useState(null); // null = top-level
 
   // Item Modal State
   const [itemModalOpen, setItemModalOpen] = useState(false);
@@ -67,12 +69,18 @@ export default function CatalogManager({ categories = [], items = [], shops = []
   const [itemUnit, setItemUnit] = useState('KG');
   const [itemCatId, setItemCatId] = useState('');
   const [itemImage, setItemImage] = useState('');
+  const [itemIsBucket, setItemIsBucket] = useState(false);
 
-  // Open Category Add Modal
-  const openAddCategory = () => {
+  // Derived: top-level categories and sub-categories
+  const topLevelCats = categories.filter(c => !c.parentCategoryId);
+  const getSubCats = (parentId) => categories.filter(c => c.parentCategoryId === parentId);
+
+  // Open Category Add Modal (optionally as sub-category of parentId)
+  const openAddCategory = (parentId = null) => {
     setEditingCategory(null);
     setCatName('');
     setCatImage(PRESET_VECTOR_IMAGES[0].src);
+    setCatParentId(parentId);
     setErrorMsg('');
     setCatModalOpen(true);
   };
@@ -83,6 +91,7 @@ export default function CatalogManager({ categories = [], items = [], shops = []
     setEditingCategory(cat);
     setCatName(cat.name);
     setCatImage(cat.image || PRESET_VECTOR_IMAGES[0].src);
+    setCatParentId(cat.parentCategoryId || null);
     setErrorMsg('');
     setCatModalOpen(true);
   };
@@ -100,7 +109,7 @@ export default function CatalogManager({ categories = [], items = [], shops = []
       if (editingCategory) {
         await updateCategory(editingCategory._id, { name: catName.trim(), image: catImage });
       } else {
-        await addCategory(catName.trim(), catImage);
+        await addCategory(catName.trim(), catImage, undefined, catParentId);
       }
       setCatModalOpen(false);
     } catch (err) {
@@ -113,16 +122,21 @@ export default function CatalogManager({ categories = [], items = [], shops = []
   // Handle Category Delete
   const handleDeleteCategory = async (cat, e) => {
     e?.stopPropagation();
-    const count = items.filter(i => i.categoryId === cat._id).length;
-    const confirmMsg = count > 0 
-      ? `Delete "${cat.name}"? This will also remove ${count} service item(s) in this category.`
+    const subCatCount = getSubCats(cat._id).length;
+    const directItemCount = items.filter(i => i.categoryId === cat._id).length;
+    const total = directItemCount + subCatCount;
+    const confirmMsg = total > 0
+      ? `Delete "${cat.name}"? This will also remove ${subCatCount} sub-categor${subCatCount === 1 ? 'y' : 'ies'} and ${directItemCount} direct item(s).`
       : `Are you sure you want to delete "${cat.name}"?`;
     
     if (window.confirm(confirmMsg)) {
       setLoading(true);
       try {
         await deleteCategory(cat._id);
-        if (selectedCategoryId === cat._id) setSelectedCategoryId(null);
+        if (selectedCategoryId === cat._id || expandedCategoryId === cat._id) {
+          setSelectedCategoryId(null);
+          setExpandedCategoryId(null);
+        }
       } catch (err) {
         alert(err.message || 'Failed to delete category.');
       } finally {
@@ -138,6 +152,7 @@ export default function CatalogManager({ categories = [], items = [], shops = []
     setItemDesc('');
     setItemPrice('');
     setItemUnit('KG');
+    setItemIsBucket(false);
     setItemCatId(selectedCategoryId || (categories[0]?._id || ''));
     setItemImage(PRESET_VECTOR_IMAGES[0].src);
     setErrorMsg('');
@@ -152,6 +167,7 @@ export default function CatalogManager({ categories = [], items = [], shops = []
     setItemDesc(item.description || '');
     setItemPrice(String(item.pricePerKg || item.pricePerItem || ''));
     setItemUnit(item.pricePerKg !== undefined ? 'KG' : 'ITEM');
+    setItemIsBucket(!!item.isBucket);
     setItemCatId(item.categoryId || (categories[0]?._id || ''));
     setItemImage(item.image || PRESET_VECTOR_IMAGES[0].src);
     setErrorMsg('');
@@ -181,11 +197,12 @@ export default function CatalogManager({ categories = [], items = [], shops = []
           description: itemDesc.trim(),
           image: itemImage,
           categoryId: targetCatId,
+          isBucket: itemIsBucket,
           pricePerKg: itemUnit === 'KG' ? priceNum : undefined,
           pricePerItem: itemUnit === 'ITEM' ? priceNum : undefined,
         });
       } else {
-        await addCatalogItem(targetCatId, itemName.trim(), itemDesc.trim(), priceNum, itemUnit, itemImage);
+        await addCatalogItem(targetCatId, itemName.trim(), itemDesc.trim(), priceNum, itemUnit, itemImage, itemIsBucket);
       }
       setItemModalOpen(false);
     } catch (err) {
@@ -210,9 +227,18 @@ export default function CatalogManager({ categories = [], items = [], shops = []
     }
   };
 
-  // Filtered Items
+  // Filtered Items — includes items from sub-categories when a parent is selected
   const filteredItems = items.filter(item => {
-    const matchesCat = !selectedCategoryId || item.categoryId === selectedCategoryId;
+    let matchesCat = false;
+    if (!selectedCategoryId) {
+      matchesCat = true;
+    } else {
+      // direct match
+      if (item.categoryId === selectedCategoryId) matchesCat = true;
+      // also match if item's cat is a sub-cat of selectedCategory
+      const itemCat = categories.find(c => c._id === item.categoryId);
+      if (itemCat && itemCat.parentCategoryId === selectedCategoryId) matchesCat = true;
+    }
     const matchesSearch = !searchQuery || 
       item.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.description?.toLowerCase().includes(searchQuery.toLowerCase());
@@ -313,55 +339,109 @@ export default function CatalogManager({ categories = [], items = [], shops = []
               </span>
             </div>
 
-            {/* Category Cards */}
-            {categories.map(cat => {
-              const catItemCount = items.filter(i => i.categoryId === cat._id).length;
+            {/* Top-Level Category Cards with expandable sub-categories */}
+            {topLevelCats.map(cat => {
+              const subCats = getSubCats(cat._id);
+              const directItemCount = items.filter(i => i.categoryId === cat._id).length;
+              const subCatItemCount = items.filter(i => subCats.some(s => s._id === i.categoryId)).length;
+              const totalItemCount = directItemCount + subCatItemCount;
               const isSelected = selectedCategoryId === cat._id;
+              const isExpanded = expandedCategoryId === cat._id;
               return (
-                <div 
-                  key={cat._id}
-                  onClick={() => setSelectedCategoryId(cat._id)}
-                  className={`p-3 border-2 border-black flex items-center justify-between cursor-pointer transition-all ${
-                    isSelected 
-                      ? 'bg-[#0D8DE3] text-white shadow-[4px_4px_0px_rgba(0,0,0,1)] -translate-y-0.5' 
-                      : 'bg-white text-black hover:bg-gray-50 shadow-[2px_2px_0px_rgba(0,0,0,1)]'
-                  }`}
-                >
-                  <div className="flex items-center gap-2.5 overflow-hidden">
-                    <div className="w-9 h-9 bg-white border-2 border-black flex shrink-0 items-center justify-center p-1 rounded overflow-hidden">
-                      <img 
-                        src={resolveVectorImage(cat.image, cat.name)} 
-                        alt={cat.name} 
-                        className="w-full h-full object-contain" 
-                        onError={(e) => { e.currentTarget.src = resolveVectorImage('', cat.name); }} 
-                      />
+                <div key={cat._id}>
+                  <div 
+                    onClick={() => {
+                      setSelectedCategoryId(cat._id);
+                      setExpandedCategoryId(isExpanded ? null : cat._id);
+                    }}
+                    className={`p-3 border-2 border-black flex items-center justify-between cursor-pointer transition-all ${
+                      isSelected 
+                        ? 'bg-[#0D8DE3] text-white shadow-[4px_4px_0px_rgba(0,0,0,1)] -translate-y-0.5' 
+                        : 'bg-white text-black hover:bg-gray-50 shadow-[2px_2px_0px_rgba(0,0,0,1)]'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5 overflow-hidden">
+                      <div className="w-9 h-9 bg-white border-2 border-black flex shrink-0 items-center justify-center p-1 rounded overflow-hidden">
+                        <img 
+                          src={resolveVectorImage(cat.image, cat.name)} 
+                          alt={cat.name} 
+                          className="w-full h-full object-contain" 
+                          onError={(e) => { e.currentTarget.src = resolveVectorImage('', cat.name); }} 
+                        />
+                      </div>
+                      <div className="truncate">
+                        <p className="font-black text-sm uppercase truncate">{cat.name}</p>
+                        <p className={`text-[11px] font-bold ${isSelected ? 'text-blue-100' : 'text-gray-500'}`}>
+                          {totalItemCount} items{subCats.length > 0 ? ` · ${subCats.length} sub-cat` : ''}
+                        </p>
+                      </div>
                     </div>
-                    <div className="truncate">
-                      <p className="font-black text-sm uppercase truncate">{cat.name}</p>
-                      <p className={`text-[11px] font-bold ${isSelected ? 'text-blue-100' : 'text-gray-500'}`}>
-                        {catItemCount} items
-                      </p>
+
+                    <div className="flex items-center gap-1.5 shrink-0" onClick={e => e.stopPropagation()}>
+                      <button 
+                        onClick={(e) => { e.stopPropagation(); openAddCategory(cat._id); }}
+                        className={`p-1.5 border border-black rounded transition-colors ${
+                          isSelected ? 'bg-white text-black hover:bg-[#9AE600]' : 'bg-green-100 hover:bg-[#9AE600]'
+                        }`}
+                        title="Add Sub-Category"
+                      >
+                        <Plus size={12} />
+                      </button>
+                      <button 
+                        onClick={(e) => openEditCategory(cat, e)}
+                        className={`p-1.5 border border-black rounded transition-colors ${
+                          isSelected ? 'bg-white text-black hover:bg-[#9AE600]' : 'bg-gray-100 hover:bg-[#9AE600]'
+                        }`}
+                        title="Edit Category"
+                      >
+                        <Edit2 size={13} />
+                      </button>
+                      <button 
+                        onClick={(e) => handleDeleteCategory(cat, e)}
+                        className="p-1.5 bg-red-100 hover:bg-red-500 hover:text-white text-red-700 border border-black rounded transition-colors"
+                        title="Delete Category"
+                      >
+                        <Trash2 size={13} />
+                      </button>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-1.5 shrink-0" onClick={e => e.stopPropagation()}>
-                    <button 
-                      onClick={(e) => openEditCategory(cat, e)}
-                      className={`p-1.5 border border-black rounded transition-colors ${
-                        isSelected ? 'bg-white text-black hover:bg-[#9AE600]' : 'bg-gray-100 hover:bg-[#9AE600]'
-                      }`}
-                      title="Edit Category"
-                    >
-                      <Edit2 size={13} />
-                    </button>
-                    <button 
-                      onClick={(e) => handleDeleteCategory(cat, e)}
-                      className="p-1.5 bg-red-100 hover:bg-red-500 hover:text-white text-red-700 border border-black rounded transition-colors"
-                      title="Delete Category"
-                    >
-                      <Trash2 size={13} />
-                    </button>
-                  </div>
+                  {/* Sub-categories (shown when expanded) */}
+                  {isExpanded && subCats.length > 0 && (
+                    <div className="ml-4 mt-1 space-y-1">
+                      {subCats.map(sub => {
+                        const subItemCount = items.filter(i => i.categoryId === sub._id).length;
+                        const isSubSelected = selectedCategoryId === sub._id;
+                        return (
+                          <div
+                            key={sub._id}
+                            onClick={() => setSelectedCategoryId(sub._id)}
+                            className={`p-2.5 border-2 border-black flex items-center justify-between cursor-pointer transition-all ${
+                              isSubSelected
+                                ? 'bg-[#0D8DE3] text-white shadow-[3px_3px_0px_rgba(0,0,0,1)] -translate-y-0.5'
+                                : 'bg-gray-50 text-black hover:bg-gray-100 shadow-[2px_2px_0px_rgba(0,0,0,1)]'
+                            }`}
+                          >
+                            <div className="flex items-center gap-2 overflow-hidden">
+                              <ChevronRight size={12} className={isSubSelected ? 'text-white' : 'text-gray-400'} />
+                              <div className="truncate">
+                                <p className="font-black text-xs uppercase truncate">{sub.name}</p>
+                                <p className={`text-[10px] font-bold ${isSubSelected ? 'text-blue-100' : 'text-gray-500'}`}>{subItemCount} items</p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-1" onClick={e => e.stopPropagation()}>
+                              <button onClick={(e) => openEditCategory(sub, e)} className="p-1 bg-white border border-black rounded hover:bg-[#9AE600] transition-colors" title="Edit">
+                                <Edit2 size={11} />
+                              </button>
+                              <button onClick={(e) => handleDeleteCategory(sub, e)} className="p-1 bg-red-100 hover:bg-red-500 hover:text-white text-red-700 border border-black rounded transition-colors" title="Delete">
+                                <Trash2 size={11} />
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
               );
             })}
@@ -370,7 +450,7 @@ export default function CatalogManager({ categories = [], items = [], shops = []
               <div className="bg-white border-2 border-dashed border-black p-6 text-center">
                 <p className="font-bold text-gray-500 text-sm">No categories yet.</p>
                 <button
-                  onClick={openAddCategory}
+                  onClick={() => openAddCategory()}
                   className="mt-3 bg-[#9AE600] border-2 border-black px-3 py-1 font-black uppercase text-xs shadow-[2px_2px_0px_rgba(0,0,0,1)]"
                 >
                   + Add First
@@ -409,14 +489,17 @@ export default function CatalogManager({ categories = [], items = [], shops = []
           {filteredItems.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {filteredItems.map(item => {
-                const parentCat = categories.find(c => c._id === item.categoryId);
+                const itemCat = categories.find(c => c._id === item.categoryId);
+                const parentCat = itemCat?.parentCategoryId ? categories.find(c => c._id === itemCat.parentCategoryId) : null;
                 const price = item.pricePerKg !== undefined ? item.pricePerKg : item.pricePerItem;
                 const unitLabel = item.pricePerKg !== undefined ? '/kg' : '/item';
 
                 return (
                   <div 
                     key={item._id}
-                    className="bg-white border-4 border-black shadow-[4px_4px_0px_rgba(0,0,0,1)] p-4 flex flex-col justify-between hover:-translate-y-1 hover:shadow-[6px_6px_0px_rgba(0,0,0,1)] transition-all"
+                    className={`bg-white border-4 border-black shadow-[4px_4px_0px_rgba(0,0,0,1)] p-4 flex flex-col justify-between hover:-translate-y-1 hover:shadow-[6px_6px_0px_rgba(0,0,0,1)] transition-all ${
+                      item.isBucket ? 'ring-2 ring-[#9AE600] ring-offset-1' : ''
+                    }`}
                   >
                     <div className="flex gap-3.5 items-start">
                       <div className="w-16 h-16 bg-gray-50 border-2 border-black flex shrink-0 items-center justify-center p-2 rounded-lg overflow-hidden">
@@ -429,10 +512,18 @@ export default function CatalogManager({ categories = [], items = [], shops = []
                       </div>
 
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          {/* Breadcrumb: Parent Cat > Sub Cat */}
+                          {parentCat && (
+                            <span className="bg-gray-100 border border-black px-1.5 py-0.5 text-[10px] font-black uppercase rounded">{parentCat.name}</span>
+                          )}
+                          {parentCat && <ChevronRight size={10} className="text-gray-400" />}
                           <span className="bg-[#9AE600] border border-black px-2 py-0.5 text-[10px] font-black uppercase rounded">
-                            {parentCat?.name || 'Service'}
+                            {itemCat?.name || 'Service'}
                           </span>
+                          {item.isBucket && (
+                            <span className="bg-orange-400 border border-black px-1.5 py-0.5 text-[10px] font-black uppercase rounded text-white">Bucket</span>
+                          )}
                         </div>
                         <h4 className="font-black text-base uppercase mt-1 truncate">{item.name}</h4>
                         {item.description && (
@@ -444,8 +535,11 @@ export default function CatalogManager({ categories = [], items = [], shops = []
                     <div className="mt-4 pt-3 border-t-2 border-dashed border-black flex items-center justify-between">
                       <div>
                         <span className="text-xs font-black text-gray-500 uppercase">Price: </span>
-                        <span className="text-lg font-black text-[#0D8DE3]">₹{price}</span>
-                        <span className="text-xs font-bold text-gray-600 uppercase"> {unitLabel}</span>
+                        {item.pricePerKg !== undefined ? (
+                          <><span className="text-lg font-black text-[#0D8DE3]">₹{price}</span><span className="text-xs font-bold text-gray-600 uppercase"> /kg</span><span className="ml-2 text-[10px] font-black text-amber-600 bg-amber-50 border border-amber-300 px-1 rounded">Final at delivery</span></>
+                        ) : (
+                          <><span className="text-lg font-black text-[#0D8DE3]">₹{price}</span><span className="text-xs font-bold text-gray-600 uppercase"> {unitLabel}</span></>
+                        )}
                       </div>
 
                       <div className="flex items-center gap-2">
@@ -509,12 +603,20 @@ export default function CatalogManager({ categories = [], items = [], shops = []
                 </div>
               )}
 
+              {/* Show parent context when creating sub-category */}
+              {catParentId && !editingCategory && (
+                <div className="p-3 bg-blue-50 border-2 border-[#0D8DE3] font-bold text-xs text-[#0D8DE3] flex items-center gap-2">
+                  <ChevronRight size={14} />
+                  Creating sub-category inside: <strong>{categories.find(c => c._id === catParentId)?.name || catParentId}</strong>
+                </div>
+              )}
+
               <div>
                 <label className="block font-black text-xs uppercase mb-1.5">Category Name *</label>
                 <input
                   type="text"
                   required
-                  placeholder="e.g., Premium Dry Clean, Wash & Fold"
+                  placeholder={catParentId ? 'e.g., Cotton Shirts, Denim Jeans' : 'e.g., Premium Dry Clean, Wash & Fold'}
                   value={catName}
                   onChange={(e) => setCatName(e.target.value)}
                   className="w-full p-3 border-2 border-black font-bold text-sm outline-none focus:bg-yellow-50 shadow-[2px_2px_0px_rgba(0,0,0,1)]"
@@ -661,6 +763,25 @@ export default function CatalogManager({ categories = [], items = [], shops = []
                     <option value="ITEM">Per Item (₹/pc)</option>
                   </select>
                 </div>
+              </div>
+
+              {/* Bucket Item Toggle */}
+              <div className="flex items-center justify-between p-3 border-2 border-black bg-orange-50">
+                <div>
+                  <p className="font-black text-xs uppercase">Bucket Item</p>
+                  <p className="text-[11px] font-bold text-gray-500 mt-0.5">Shown as a large tappable count card in the customer app</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setItemIsBucket(!itemIsBucket)}
+                  className={`w-12 h-6 border-2 border-black rounded-full transition-colors relative ${
+                    itemIsBucket ? 'bg-orange-400' : 'bg-gray-200'
+                  }`}
+                >
+                  <span className={`absolute top-0.5 w-4 h-4 bg-white border-2 border-black rounded-full transition-transform ${
+                    itemIsBucket ? 'left-6' : 'left-0.5'
+                  }`} />
+                </button>
               </div>
 
               {/* Vector Image Selector */}

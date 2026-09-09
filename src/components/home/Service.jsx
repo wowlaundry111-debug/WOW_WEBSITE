@@ -8,7 +8,7 @@ import first from '../../assets/firstimage.jpeg';
 import second from '../../assets/secondimage.jpeg';
 import third from '../../assets/thirdimage.jpeg';
 
-export function getDirectDownloadUrl(url) {
+function getDirectDownloadUrl(url) {
   if (!url) return '';
   const trimmed = url.trim();
   if (trimmed.includes('drive.google.com')) {

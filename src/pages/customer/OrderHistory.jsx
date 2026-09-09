@@ -126,7 +126,7 @@ export default function OrderHistory() {
                           <p className="text-xl sm:text-2xl font-black text-[#0D8DE3] lilita-one-regular tracking-wide">₹{order.totalAmount}</p>
                           {hasKgItems && order.kgPriceUpdated && (
                             <span className="text-[10px] font-black bg-[#9AE600] text-black border border-black px-1.5 py-0.5 rounded uppercase">
-                              KG Calculated ✓
+                              KG CALCULATED
                             </span>
                           )}
                         </div>
@@ -182,9 +182,16 @@ export default function OrderHistory() {
                             <div className="space-y-2">
                               {perItemProducts.map((item, idx) => (
                                 <div key={idx} className="flex justify-between items-center text-sm p-3 border-2 border-black rounded-xl bg-gray-50 shadow-[2px_2px_0px_rgba(0,0,0,1)]">
-                                  <span className="font-bold text-black uppercase">
-                                    {item.quantity}x <span className="ml-1 text-gray-800">{item.name}</span>
-                                  </span>
+                                  <div>
+                                    <span className="font-bold text-black uppercase">
+                                      {item.quantity}x <span className="ml-1 text-gray-800">{item.name}</span>
+                                    </span>
+                                    {(item.categoryName || item.subCategoryName) && (
+                                      <p className="text-[10px] font-black uppercase tracking-wider text-gray-600 bg-gray-200 px-1.5 py-0.5 rounded border border-gray-400 mt-1 inline-block">
+                                        {item.categoryName}{item.subCategoryName ? ` › ${item.subCategoryName}` : ''}{item.isBucket ? ' • Bucket' : ''}
+                                      </p>
+                                    )}
+                                  </div>
                                   <span className="font-black text-black bg-[#9AE600] border-2 border-black px-2.5 py-0.5 rounded-lg text-sm">
                                     ₹{(item.price || 0) * item.quantity}
                                   </span>
@@ -198,9 +205,6 @@ export default function OrderHistory() {
                         <div className="space-y-3">
                           <div className="flex items-center justify-between">
                             <h4 className="text-xs sm:text-sm font-black text-black flex items-center gap-2 uppercase tracking-widest bg-blue-50 px-3 py-1.5 rounded-xl border-2 border-[#0D8DE3] shadow-[2px_2px_0px_rgba(13,141,227,1)]">
-                              <div className="bg-[#0D8DE3] p-1 rounded-lg border border-black text-white">
-                                <span className="text-xs font-black">⚖️</span>
-                              </div>
                               Per-KG Category ({perKgProducts.length})
                             </h4>
                             {perKgProducts.length > 0 && (
@@ -226,6 +230,11 @@ export default function OrderHistory() {
                                     <p className="font-black text-black text-sm uppercase">
                                       {item.quantity}x {item.name}
                                     </p>
+                                    {(item.categoryName || item.subCategoryName) && (
+                                      <p className="text-[10px] font-black uppercase tracking-wider text-gray-600 bg-blue-100 px-1.5 py-0.5 rounded border border-blue-300 mt-0.5 inline-block">
+                                        {item.categoryName}{item.subCategoryName ? ` › ${item.subCategoryName}` : ''}{item.isBucket ? ' • Bucket' : ''}
+                                      </p>
+                                    )}
                                     <p className="text-[11px] font-bold text-gray-600 uppercase mt-0.5">
                                       {item.kgWeight ? `Weighed: ${item.kgWeight} KG` : 'Weight taken upon delivery'}
                                     </p>

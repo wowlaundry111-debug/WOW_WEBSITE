@@ -11,7 +11,6 @@ export default function OrderBoard({
   setActiveFilter, 
   users = [], 
   shops = [],
-  isSuperAdmin = false,
   SERVICE_LABEL_FOR_CATEGORY,
   stripeColor,
   deliveryBoys = []
@@ -186,7 +185,7 @@ export default function OrderBoard({
           <h4 style="margin: 0 0 8px 0; font-size: 11px; text-transform: uppercase; letter-spacing: 1px;">Selected Wash Add-ons & Preferences:</h4>
           ${order.washPreferences.map(p => `
             <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: bold; margin-bottom: 4px;">
-              <span>✨ ${p.name}</span>
+              <span>${p.name}</span>
               <span>+₹${p.price || 0}</span>
             </div>
           `).join('')}
@@ -196,7 +195,10 @@ export default function OrderBoard({
 
     const itemsHtml = order.items.map(it => `
       <tr>
-        <td style="padding: 10px; border-bottom: 1px solid #eee; font-weight: bold;">${it.name}</td>
+        <td style="padding: 10px; border-bottom: 1px solid #eee; font-weight: bold;">
+          ${it.name}
+          ${(it.categoryName || it.subCategoryName) ? `<div style="font-size: 11px; color: #666; font-weight: 600; margin-top: 2px;">${it.categoryName || ''}${it.subCategoryName ? ` › ${it.subCategoryName}` : ''}${it.isBucket ? ' • Bucket' : ''}</div>` : (it.isBucket ? `<div style="font-size: 11px; color: #666; font-weight: 600; margin-top: 2px;">Bucket</div>` : '')}
+        </td>
         <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: center;">${it.quantity}</td>
         <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right;">₹${it.price}</td>
         <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right; font-weight: bold;">₹${it.price * it.quantity}</td>
@@ -240,7 +242,7 @@ export default function OrderBoard({
               <div class="box">
                 <strong style="text-transform: uppercase; color: #666; font-size: 10px;">Customer Details</strong><br/>
                 <strong style="font-size: 14px;">${customerName}</strong><br/>
-                <span>📞 ${customerPhone}</span>
+                <span>Phone: ${customerPhone}</span>
               </div>
               <div class="box">
                 <strong style="text-transform: uppercase; color: #666; font-size: 10px;">Delivery Address</strong><br/>
@@ -380,8 +382,8 @@ export default function OrderBoard({
                   </div>
 
                   <div className="bg-gray-50 border-2 border-black p-3 rounded-lg flex items-center gap-3 mb-4">
-                    <div className="w-10 h-10 border-2 border-black bg-white flex items-center justify-center rounded">
-                      <span className="text-xl">{serviceInfo.icon}</span>
+                    <div className="w-10 h-10 border-2 border-black bg-white flex items-center justify-center rounded font-black text-xs text-black">
+                      {serviceInfo.icon}
                     </div>
                     <div>
                       <p className="font-bold text-sm">{serviceInfo.label}</p>
@@ -631,208 +633,266 @@ export default function OrderBoard({
             </div>
 
             <div className="p-6 space-y-6">
-              <div className="flex justify-between items-center bg-gray-50 border-2 border-black p-4">
-                <div>
-                  <h3 className="font-black text-xl">{users.find(u => u._id === selectedOrder.customerId)?.name || selectedOrder.customerName || 'Customer'}</h3>
-                  <p className="font-bold text-gray-500 text-sm flex items-center gap-1 mt-1">
-                    <Phone size={14}/> {users.find(u => u._id === selectedOrder.customerId)?.phone || selectedOrder.customerPhone || 'N/A'}
-                  </p>
-                </div>
-                <div className="flex gap-2">
-                  <a 
-                    href={`tel:${users.find(u => u._id === selectedOrder.customerId)?.phone || selectedOrder.customerPhone}`}
-                    className="p-3 bg-white border-2 border-black hover:bg-black hover:text-white transition-colors"
-                  >
-                    <Phone size={18}/>
-                  </a>
-                  <a 
-                    href={`https://wa.me/${users.find(u => u._id === selectedOrder.customerId)?.phone || selectedOrder.customerPhone}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="p-3 bg-[#9AE600] border-2 border-black hover:bg-black hover:text-white transition-colors"
-                  >
-                    <MessageCircle size={18}/>
-                  </a>
-                </div>
-              </div>
+              {/* ─── 1. ORDER ITEMS SECTION (UP) ─────────────────────── */}
+              {(() => {
+                const formatCatTitle = (it) => {
+                  const cat = (it.categoryName || '').trim();
+                  const sub = (it.subCategoryName || '').trim();
+                  if (cat && sub && cat.toLowerCase() !== sub.toLowerCase()) {
+                    return `${cat.toUpperCase()} › ${sub.toUpperCase()}`;
+                  }
+                  if (cat) return cat.toUpperCase();
+                  if (sub) return sub.toUpperCase();
+                  return 'GENERAL LAUNDRY';
+                };
 
-              {/* Payment Mode & Status Summary */}
-              <div className="flex items-center justify-between border-2 border-black p-4 bg-gray-50 rounded-xl shadow-[3px_3px_0px_rgba(0,0,0,1)]">
-                <div>
-                  <span className="font-black text-[10px] uppercase text-gray-500 block mb-0.5">Mode of Payment</span>
-                  <span className="font-black text-sm uppercase flex items-center gap-1.5 text-black">
-                    <CreditCard size={16} className="text-[#0D8DE3]" />
-                    {selectedOrder.paymentMode === 'COD' 
-                      ? 'Offline Cash (COD)' 
-                      : selectedOrder.paymentMode 
-                      ? `Online Payment (${selectedOrder.paymentMode})` 
-                      : 'Pending Payment Mode'}
-                  </span>
-                </div>
+                const itemsByCat = (selectedOrder.items || []).reduce((acc, it) => {
+                  const title = formatCatTitle(it);
+                  if (!acc[title]) acc[title] = [];
+                  acc[title].push(it);
+                  return acc;
+                }, {});
 
-                <div>
-                  <span className="font-black text-[10px] uppercase text-gray-500 block mb-0.5">Payment Status</span>
-                  <span className={`font-black text-xs uppercase px-3 py-1 border-2 border-black rounded-lg ${
-                    selectedOrder.paymentStatus === 'SUCCESS' || selectedOrder.status === 'DELIVERED'
-                      ? 'bg-[#9AE600] text-black' 
-                      : 'bg-yellow-300 text-black'
-                  }`}>
-                    {selectedOrder.paymentStatus || (selectedOrder.status === 'DELIVERED' ? 'SUCCESS' : 'PENDING')}
-                  </span>
-                </div>
-              </div>
-
-              {/* Addresses */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="border-2 border-black p-4">
-                  <span className="font-black text-xs uppercase text-gray-400 block mb-1">Pickup Address</span>
-                  <p className="font-bold text-sm flex items-start gap-1">
-                    <MapPin size={16} className="text-[#0D8DE3] shrink-0 mt-0.5"/>
-                    {selectedOrder.pickupAddress || 'Shop Branch'}
-                  </p>
-                </div>
-                <div className="border-2 border-black p-4">
-                  <span className="font-black text-xs uppercase text-gray-400 block mb-1">Delivery Address</span>
-                  <p className="font-bold text-sm flex items-start gap-1">
-                    <MapPin size={16} className="text-[#9AE600] shrink-0 mt-0.5"/>
-                    {selectedOrder.deliveryAddress || 'Customer Address'}
-                  </p>
-                </div>
-              </div>
-
-              {/* Wash Add-ons & Preferences */}
-              {selectedOrder.washPreferences && selectedOrder.washPreferences.length > 0 && (
-                <div className="border-2 border-black p-4 bg-[#9AE600]/20 rounded-xl space-y-2">
-                  <h4 className="font-black text-xs uppercase tracking-widest text-black flex items-center gap-1.5">
-                    <Sparkles size={16} className="text-[#0D8DE3]" /> Selected Wash Add-ons & Preferences
-                  </h4>
-                  <div className="flex flex-wrap gap-2 pt-1">
-                    {selectedOrder.washPreferences.map((pref, idx) => (
-                      <div key={idx} className="bg-white border-2 border-black px-3 py-1.5 rounded-lg flex items-center justify-between gap-3 text-xs font-black shadow-[2px_2px_0px_rgba(0,0,0,1)]">
-                        <span className="flex items-center gap-1.5">
-                          <Sparkles size={13} className="text-[#0D8DE3]" /> {pref.name}
-                        </span>
-                        <span className="bg-[#9AE600] px-2 py-0.5 border border-black rounded">+₹{pref.price}</span>
+                return (
+                  <div className="border-4 border-black rounded-2xl overflow-hidden shadow-[6px_6px_0px_rgba(0,0,0,1)]">
+                    <div className="bg-black text-white p-4 flex flex-wrap justify-between items-center gap-2">
+                      <div>
+                        <span className="text-[11px] font-black text-[#9AE600] uppercase tracking-widest block">ORDER PROCESSING</span>
+                        <h3 className="text-xl font-black uppercase tracking-wide lilita-one-regular">
+                          Order Items ({selectedOrder.items?.length || 0})
+                        </h3>
                       </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Items List - Split by Category (Per Item vs Per KG) */}
-              <div className="border-2 border-black rounded-xl overflow-hidden shadow-[3px_3px_0px_rgba(0,0,0,1)]">
-                <div className="bg-black text-white p-3 font-black text-sm uppercase flex justify-between items-center">
-                  <span>Order Items ({selectedOrder.items.length})</span>
-                  {selectedOrder.items.some(it => it.unit === 'KG') && (
-                    <span className={`text-[10px] px-2 py-0.5 rounded font-black uppercase ${
-                      selectedOrder.kgPriceUpdated ? 'bg-[#9AE600] text-black' : 'bg-yellow-400 text-black'
-                    }`}>
-                      {selectedOrder.kgPriceUpdated ? 'KG Weighed ✓' : 'KG Pending Weighing ⚖️'}
-                    </span>
-                  )}
-                </div>
-
-                {/* 1. Per Item Category */}
-                {(() => {
-                  const perItemProducts = selectedOrder.items.filter(it => it.unit !== 'KG');
-                  const perKgProducts = selectedOrder.items.filter(it => it.unit === 'KG');
-
-                  return (
-                    <div>
-                      {perItemProducts.length > 0 && (
-                        <div>
-                          <div className="bg-gray-100 px-3 py-1.5 border-b border-black flex justify-between items-center">
-                            <span className="text-xs font-black uppercase text-gray-700">📦 Per-Item Category (Directly Calculated)</span>
-                            <span className="text-[10px] font-bold text-gray-500">{perItemProducts.length} items</span>
-                          </div>
-                          <div className="divide-y divide-gray-200">
-                            {perItemProducts.map((it, idx) => (
-                              <div key={idx} className="p-3 flex justify-between items-center font-bold text-sm bg-white">
-                                <span>{it.quantity}x {it.name}</span>
-                                <span className="font-black text-black">₹{it.price * it.quantity}</span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
+                      {selectedOrder.items?.some(it => it.unit === 'KG') && (
+                        <span className={`text-xs px-3 py-1 rounded-lg font-black uppercase border-2 border-black ${
+                          selectedOrder.kgPriceUpdated ? 'bg-[#9AE600] text-black' : 'bg-yellow-300 text-black'
+                        }`}>
+                          {selectedOrder.kgPriceUpdated ? 'KG WEIGHED' : 'KG PENDING WEIGHING'}
+                        </span>
                       )}
+                    </div>
 
-                      {/* 2. Per KG Category */}
-                      {perKgProducts.length > 0 && (
-                        <div>
-                          <div className="bg-blue-50 px-3 py-1.5 border-t-2 border-b border-black flex justify-between items-center">
-                            <span className="text-xs font-black uppercase text-[#0D8DE3]">⚖️ Per-KG Category (Weight-Based)</span>
-                            <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded ${
-                              selectedOrder.kgPriceUpdated ? 'bg-[#9AE600] text-black' : 'bg-yellow-200 text-yellow-900'
-                            }`}>
-                              {selectedOrder.kgPriceUpdated ? 'Weighed & Added' : 'Pending Weighing'}
+                    <div className="p-4 sm:p-5 bg-white space-y-5">
+                      {Object.entries(itemsByCat).map(([catTitle, catItems], groupIdx) => (
+                        <div key={groupIdx} className="border-4 border-black rounded-2xl overflow-hidden bg-white shadow-[4px_4px_0px_rgba(0,0,0,1)]">
+                          {/* Big Words Category Header Banner */}
+                          <div className="bg-[#0D8DE3] text-white p-3.5 px-5 flex flex-wrap items-center justify-between gap-3 border-b-4 border-black">
+                            <div className="flex items-center gap-3">
+                              <span className="text-xs font-black uppercase text-black bg-[#9AE600] px-3 py-1 rounded-md border-2 border-black tracking-wider shadow-[1.5px_1.5px_0px_rgba(0,0,0,1)]">
+                                CATEGORY
+                              </span>
+                              <h4 className="text-xl sm:text-2xl md:text-3xl font-black text-white uppercase tracking-wider lilita-one-regular drop-shadow-sm">
+                                {catTitle}
+                              </h4>
+                            </div>
+                            <span className="text-xs font-black text-black bg-white border-2 border-black px-3.5 py-1 rounded-md uppercase shadow-[2px_2px_0px_rgba(0,0,0,1)]">
+                              {catItems.length} {catItems.length === 1 ? 'Item' : 'Items'}
                             </span>
                           </div>
-                          <div className="divide-y divide-gray-200">
-                            {perKgProducts.map((it, idx) => (
-                              <div key={idx} className="p-3 flex justify-between items-center font-bold text-sm bg-blue-50/30">
-                                <div>
-                                  <p>{it.quantity}x {it.name}</p>
-                                  <p className="text-[11px] text-gray-500 font-bold uppercase">
-                                    {it.kgWeight ? `Weighed: ${it.kgWeight} KG` : 'Awaiting delivery agent weight entry'}
-                                  </p>
+
+                          {/* Items in this Category */}
+                          <div className="p-4 sm:p-5 divide-y-2 divide-dashed divide-gray-200 bg-[#FAF9F6]">
+                            {catItems.map((it, idx) => {
+                              const isKg = it.unit === 'KG' || (typeof it.name === 'string' && (it.name.toLowerCase().includes('per kg') || it.name.toLowerCase().includes('/ kg'))) || Boolean(it.kgWeight && it.kgWeight > 0);
+                              return (
+                                <div key={idx} className="py-3 flex flex-wrap justify-between items-start gap-3">
+                                  <div className="flex-1 min-w-[200px]">
+                                    <div className="flex items-center gap-2 flex-wrap">
+                                      <span className="text-base sm:text-lg font-black text-black uppercase">
+                                        {it.quantity}x {it.name}
+                                      </span>
+                                      {it.isBucket && (
+                                        <span className="bg-[#0D8DE3] text-white text-[10px] font-black px-2 py-0.5 rounded border border-black uppercase tracking-wider">
+                                          Bucket (Per KG)
+                                        </span>
+                                      )}
+                                    </div>
+                                    {isKg ? (
+                                      <div className="mt-1 space-y-0.5">
+                                        <p className="text-xs font-bold text-gray-700 uppercase">
+                                          {it.kgWeight ? `Measured Weight: ${it.kgWeight} KG` : 'Awaiting delivery agent weight entry'}
+                                        </p>
+                                        {it.isBucket && (
+                                          <p className="text-xs font-black text-[#0D8DE3] uppercase">
+                                            Clothes Count: {it.quantity}
+                                          </p>
+                                        )}
+                                      </div>
+                                    ) : (
+                                      <p className="text-xs font-bold text-gray-500 uppercase mt-0.5">
+                                        ₹{it.price} / Item
+                                      </p>
+                                    )}
+                                  </div>
+
+                                  <div className="text-right shrink-0">
+                                    {isKg ? (
+                                      selectedOrder.kgPriceUpdated && it.price > 0 ? (
+                                        <span className="text-base font-black text-black bg-[#9AE600] px-3 py-1 border-2 border-black rounded-lg inline-block">
+                                          ₹{it.price}
+                                        </span>
+                                      ) : (
+                                        <span className="text-xs font-black text-yellow-900 bg-yellow-200 border-2 border-black px-2.5 py-1 rounded-lg uppercase tracking-wider inline-block">
+                                          Pending Weighing
+                                        </span>
+                                      )
+                                    ) : (
+                                      <span className="text-base font-black text-black bg-white px-3 py-1 border-2 border-black rounded-lg inline-block shadow-[2px_2px_0px_rgba(0,0,0,1)]">
+                                        ₹{it.price * it.quantity}
+                                      </span>
+                                    )}
+                                  </div>
                                 </div>
-                                <span className="font-black">
-                                  {selectedOrder.kgPriceUpdated && it.price > 0 ? `₹${it.price}` : <span className="text-yellow-800 bg-yellow-100 border border-yellow-300 px-2 py-0.5 rounded text-xs">Pending</span>}
-                                </span>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      ))}
+
+                      {/* Wash Add-ons & Preferences */}
+                      {selectedOrder.washPreferences && selectedOrder.washPreferences.length > 0 && (
+                        <div className="border-2 border-black p-3.5 bg-[#9AE600]/15 rounded-xl space-y-2">
+                          <h4 className="font-black text-xs uppercase tracking-widest text-black flex items-center gap-1.5">
+                            <Sparkles size={15} className="text-[#0D8DE3]" /> Selected Wash Add-ons & Preferences
+                          </h4>
+                          <div className="flex flex-wrap gap-2 pt-0.5">
+                            {selectedOrder.washPreferences.map((pref, idx) => (
+                              <div key={idx} className="bg-white border-2 border-black px-3 py-1 rounded-lg flex items-center gap-2 text-xs font-black shadow-[2px_2px_0px_rgba(0,0,0,1)]">
+                                <span>{pref.name}</span>
+                                <span className="bg-[#9AE600] px-1.5 py-0.5 border border-black rounded text-[11px]">+₹{pref.price}</span>
                               </div>
                             ))}
                           </div>
                         </div>
                       )}
-                    </div>
-                  );
-                })()}
 
-                <div className="bg-gray-50 p-4 border-t-2 border-black space-y-2">
-                  <div className="flex justify-between text-sm font-bold text-gray-600">
-                    <span>Items Subtotal</span>
-                    <span>
-                      ₹{selectedOrder.items
-                        .filter(it => it.unit !== 'KG')
-                        .reduce((sum, it) => sum + (it.price * it.quantity), 0)}
-                      {selectedOrder.items.some(it => it.unit === 'KG') && (
-                        <span className="text-xs text-[#0D8DE3] ml-1">
-                          {selectedOrder.kgPriceUpdated 
-                            ? `+ ₹${selectedOrder.items.filter(it => it.unit === 'KG').reduce((s, it) => s + (it.price || 0), 0)} (KG)` 
-                            : '(+ KG Pending)'}
-                        </span>
-                      )}
+                      {/* Financial / Billing Summary Card */}
+                      <div className="bg-gray-100 p-4 border-2 border-black rounded-xl space-y-2">
+                        <div className="flex justify-between text-sm font-bold text-gray-600">
+                          <span>Items Subtotal</span>
+                          <span>
+                            ₹{selectedOrder.items
+                              .filter(it => it.unit !== 'KG')
+                              .reduce((sum, it) => sum + (it.price * it.quantity), 0)}
+                            {selectedOrder.items.some(it => it.unit === 'KG') && (
+                              <span className="text-xs text-[#0D8DE3] ml-1">
+                                {selectedOrder.kgPriceUpdated 
+                                  ? `+ ₹${selectedOrder.items.filter(it => it.unit === 'KG').reduce((s, it) => s + (it.price || 0), 0)} (KG)` 
+                                  : '(+ KG Pending)'}
+                              </span>
+                            )}
+                          </span>
+                        </div>
+                        {selectedOrder.washPreferences && selectedOrder.washPreferences.length > 0 && (
+                          <div className="flex justify-between text-sm font-bold text-gray-700">
+                            <span className="flex items-center gap-1"><Sparkles size={14} className="text-[#0D8DE3]" /> Wash Add-ons ({selectedOrder.washPreferences.length})</span>
+                            <span>+₹{selectedOrder.washPreferences.reduce((sum, p) => sum + (p.price || 0), 0)}</span>
+                          </div>
+                        )}
+                        <div className="flex justify-between text-sm font-bold text-gray-600">
+                          <span>Delivery Fee</span>
+                          <span>₹{selectedOrder.deliveryFee || 0}</span>
+                        </div>
+                        <div className="flex justify-between text-sm font-bold text-gray-600">
+                          <span>Tax</span>
+                          <span>₹{selectedOrder.taxAmount || 0}</span>
+                        </div>
+                        {selectedOrder.discountAmount > 0 && (
+                          <div className="flex justify-between text-sm font-bold text-green-700">
+                            <span>Discount</span>
+                            <span>-₹{selectedOrder.discountAmount}</span>
+                          </div>
+                        )}
+                        <div className="flex justify-between text-lg font-black pt-2 border-t-2 border-black">
+                          <span className="uppercase">Total Amount</span>
+                          <span className="text-[#0D8DE3]">
+                            ₹{selectedOrder.totalAmount}
+                            {selectedOrder.items.some(it => it.unit === 'KG') && !selectedOrder.kgPriceUpdated && (
+                              <span className="text-xs font-bold text-yellow-800 bg-yellow-200 border border-black px-1.5 py-0.5 rounded ml-2">
+                                KG Pending
+                              </span>
+                            )}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {/* ─── 2. CUSTOMER & DELIVERY DETAILS SECTION (DOWN) ───── */}
+              <div className="border-3 border-black rounded-2xl p-5 bg-white space-y-4 shadow-[4px_4px_0px_rgba(0,0,0,1)]">
+                <div className="border-b-2 border-black pb-2">
+                  <span className="text-[10px] font-black uppercase text-gray-500 tracking-widest block">CONTACT & LOGISTICS</span>
+                  <h3 className="text-base font-black uppercase tracking-wide">Customer & Delivery Details</h3>
+                </div>
+
+                {/* Customer Contact Card */}
+                <div className="flex flex-wrap justify-between items-center bg-gray-50 border-2 border-black p-4 rounded-xl gap-3">
+                  <div>
+                    <span className="text-[10px] font-black uppercase text-gray-500 block">Customer Name</span>
+                    <h4 className="font-black text-lg text-black">{users.find(u => u._id === selectedOrder.customerId)?.name || selectedOrder.customerName || 'Customer'}</h4>
+                    <p className="font-bold text-gray-600 text-sm flex items-center gap-1 mt-0.5">
+                      <Phone size={14}/> {users.find(u => u._id === selectedOrder.customerId)?.phone || selectedOrder.customerPhone || 'N/A'}
+                    </p>
+                  </div>
+                  <div className="flex gap-2">
+                    <a 
+                      href={`tel:${users.find(u => u._id === selectedOrder.customerId)?.phone || selectedOrder.customerPhone}`}
+                      className="px-3.5 py-2 bg-white border-2 border-black rounded-lg hover:bg-black hover:text-white transition-colors font-black text-xs uppercase flex items-center gap-1.5 shadow-[2px_2px_0px_rgba(0,0,0,1)]"
+                    >
+                      <Phone size={14}/> Call
+                    </a>
+                    <a 
+                      href={`https://wa.me/${users.find(u => u._id === selectedOrder.customerId)?.phone || selectedOrder.customerPhone}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="px-3.5 py-2 bg-[#9AE600] text-black border-2 border-black rounded-lg hover:bg-black hover:text-white transition-colors font-black text-xs uppercase flex items-center gap-1.5 shadow-[2px_2px_0px_rgba(0,0,0,1)]"
+                    >
+                      <MessageCircle size={14}/> WhatsApp
+                    </a>
+                  </div>
+                </div>
+
+                {/* Addresses */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="border-2 border-black p-4 rounded-xl bg-white shadow-[2px_2px_0px_rgba(0,0,0,1)]">
+                    <span className="font-black text-xs uppercase text-gray-500 block mb-1">Pickup Address</span>
+                    <p className="font-bold text-sm flex items-start gap-1.5">
+                      <MapPin size={16} className="text-[#0D8DE3] shrink-0 mt-0.5"/>
+                      {selectedOrder.pickupAddress || 'Shop Branch'}
+                    </p>
+                  </div>
+                  <div className="border-2 border-black p-4 rounded-xl bg-white shadow-[2px_2px_0px_rgba(0,0,0,1)]">
+                    <span className="font-black text-xs uppercase text-gray-500 block mb-1">Delivery Address</span>
+                    <p className="font-bold text-sm flex items-start gap-1.5">
+                      <MapPin size={16} className="text-[#9AE600] shrink-0 mt-0.5"/>
+                      {selectedOrder.deliveryAddress || 'Customer Address'}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Payment Mode & Status Summary */}
+                <div className="flex flex-wrap items-center justify-between border-2 border-black p-4 bg-gray-50 rounded-xl shadow-[2px_2px_0px_rgba(0,0,0,1)] gap-3">
+                  <div>
+                    <span className="font-black text-[10px] uppercase text-gray-500 block mb-0.5">Mode of Payment</span>
+                    <span className="font-black text-sm uppercase flex items-center gap-1.5 text-black">
+                      <CreditCard size={16} className="text-[#0D8DE3]" />
+                      {selectedOrder.paymentMode === 'COD' 
+                        ? 'Offline Cash (COD)' 
+                        : selectedOrder.paymentMode 
+                        ? `Online Payment (${selectedOrder.paymentMode})` 
+                        : 'Pending Payment Mode'}
                     </span>
                   </div>
-                  {selectedOrder.washPreferences && selectedOrder.washPreferences.length > 0 && (
-                    <div className="flex justify-between text-sm font-bold text-gray-700">
-                      <span className="flex items-center gap-1"><Sparkles size={14} className="text-[#0D8DE3]" /> Wash Add-ons ({selectedOrder.washPreferences.length})</span>
-                      <span>+₹{selectedOrder.washPreferences.reduce((sum, p) => sum + (p.price || 0), 0)}</span>
-                    </div>
-                  )}
-                  <div className="flex justify-between text-sm font-bold text-gray-600">
-                    <span>Delivery Fee</span>
-                    <span>₹{selectedOrder.deliveryFee || 0}</span>
-                  </div>
-                  <div className="flex justify-between text-sm font-bold text-gray-600">
-                    <span>Tax</span>
-                    <span>₹{selectedOrder.taxAmount || 0}</span>
-                  </div>
-                  {selectedOrder.discountAmount > 0 && (
-                    <div className="flex justify-between text-sm font-bold text-green-700">
-                      <span>Discount</span>
-                      <span>-₹{selectedOrder.discountAmount}</span>
-                    </div>
-                  )}
-                  <div className="flex justify-between text-lg font-black pt-2 border-t border-gray-300">
-                    <span>Total Amount</span>
-                    <span className="text-[#0D8DE3]">
-                      ₹{selectedOrder.totalAmount}
-                      {selectedOrder.items.some(it => it.unit === 'KG') && !selectedOrder.kgPriceUpdated && (
-                        <span className="text-xs font-bold text-yellow-800 bg-yellow-200 border border-black px-1.5 py-0.5 rounded ml-2">
-                          KG Pending
-                        </span>
-                      )}
+
+                  <div>
+                    <span className="font-black text-[10px] uppercase text-gray-500 block mb-0.5">Payment Status</span>
+                    <span className={`font-black text-xs uppercase px-3 py-1 border-2 border-black rounded-lg ${
+                      selectedOrder.paymentStatus === 'SUCCESS' || selectedOrder.status === 'DELIVERED'
+                        ? 'bg-[#9AE600] text-black' 
+                        : 'bg-yellow-300 text-black'
+                    }`}>
+                      {selectedOrder.paymentStatus || (selectedOrder.status === 'DELIVERED' ? 'SUCCESS' : 'PENDING')}
                     </span>
                   </div>
                 </div>

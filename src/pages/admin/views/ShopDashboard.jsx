@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { 
   Trophy, 
   Calendar, 
@@ -12,7 +12,7 @@ import {
   Zap,
   ArrowUpRight
 } from 'lucide-react';
-import api from '../../../services/api';
+
 
 export default function ShopDashboard({ tenantOrders = [], deliveryBoys = [], users = [], currentShop }) {
   // ─── Filter States ──────────────────────────────────────────────────────────
@@ -21,29 +21,7 @@ export default function ShopDashboard({ tenantOrders = [], deliveryBoys = [], us
   const [customEndDate, setCustomEndDate] = useState('');
   const [hoveredBarIndex, setHoveredBarIndex] = useState(null);
   
-  // Backend analytics API result state (used when custom range is applied)
-  const [apiAnalytics, setApiAnalytics] = useState(null);
-  const [loadingApi, setLoadingApi] = useState(false);
 
-  // ─── Query Backend Aggregation Endpoint when 'custom' range is applied ─────
-  useEffect(() => {
-    if (timeRange === 'custom' && (customStartDate || customEndDate)) {
-      setLoadingApi(true);
-      api.get('/orders/analytics', {
-        params: {
-          range: 'custom',
-          startDate: customStartDate,
-          endDate: customEndDate,
-          shopId: currentShop?._id
-        }
-      })
-      .then(res => setApiAnalytics(res.data))
-      .catch(err => console.error('Failed to query custom backend analytics', err))
-      .finally(() => setLoadingApi(false));
-    } else {
-      setApiAnalytics(null);
-    }
-  }, [timeRange, customStartDate, customEndDate, currentShop]);
 
   // ─── Filtered Orders (Pre-saved client-side computation for preset options) ──
   const filteredOrders = useMemo(() => {
@@ -173,9 +151,9 @@ export default function ShopDashboard({ tenantOrders = [], deliveryBoys = [], us
     const step = maxBucketRevenue / 4;
     return [
       maxBucketRevenue,
-      maxBucketRevenue * 0.75,
-      maxBucketRevenue * 0.5,
-      maxBucketRevenue * 0.25,
+      step * 3,
+      step * 2,
+      step,
       0
     ];
   }, [maxBucketRevenue]);
@@ -300,11 +278,6 @@ export default function ShopDashboard({ tenantOrders = [], deliveryBoys = [], us
               </button>
             )}
           </div>
-          {loadingApi && (
-            <span className="text-xs font-black text-[#0D8DE3] bg-white border border-black px-3 py-1 rounded-lg animate-pulse flex items-center gap-1.5">
-              <Zap size={14} className="text-[#0D8DE3]" /> Executing Backend Query...
-            </span>
-          )}
         </div>
       )}
 

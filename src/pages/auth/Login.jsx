@@ -1,14 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAppStore } from '../../store/useAppStore';
-import { ArrowRight, ArrowLeft, AlertTriangle, ShieldCheck, Mail, Lock } from 'lucide-react';
+import { ArrowRight, AlertTriangle, ShieldCheck, Mail } from 'lucide-react';
 import logo from '../../assets/logo.png';
 
 export default function Login() {
   const [step, setStep] = useState('EMAIL'); // 'EMAIL' | 'OTP'
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -24,7 +22,7 @@ export default function Login() {
     setError('');
 
     try {
-      const res = await sendLoginOtp(email.trim().toLowerCase(), password ? password.trim() : undefined);
+      const res = await sendLoginOtp(email.trim().toLowerCase());
       if (res.success) {
         if (res.requiresOtp) {
           setOtpMessage(res.message);
@@ -157,39 +155,13 @@ export default function Login() {
                 </div>
               </div>
 
-              {/* Optional Staff Password Toggle */}
-              <div>
-                <div className="flex justify-between items-center mb-1.5">
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="text-xs font-black uppercase tracking-wider text-gray-500 hover:text-black underline"
-                  >
-                    {showPassword ? 'Hide Staff Password' : 'Staff Member? Enter Password'}
-                  </button>
-                </div>
-
-                {showPassword && (
-                  <div className="flex items-center bg-gray-50 border-2 border-black rounded-xl px-4 shadow-[4px_4px_0px_rgba(0,0,0,1)] focus-within:bg-[#9AE600] transition-colors mt-2">
-                    <Lock size={20} strokeWidth={2.5} className="text-black mr-2.5 shrink-0" />
-                    <input
-                      type="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="ENTER STAFF PASSWORD"
-                      className="w-full bg-transparent border-none py-3.5 outline-none text-black font-black placeholder-gray-500 tracking-widest text-sm"
-                    />
-                  </div>
-                )}
-              </div>
-
               <button
                 type="submit"
                 disabled={!isEmailValid || loading}
                 className="w-full bg-[#0D8DE3] hover:bg-blue-600 disabled:bg-gray-300 disabled:shadow-[4px_4px_0px_rgba(0,0,0,1)] text-white font-black py-4 rounded-xl flex items-center justify-center gap-3 transition-all border-2 border-black shadow-[6px_6px_0px_rgba(0,0,0,1)] active:translate-y-2 active:translate-x-2 active:shadow-none text-xl uppercase tracking-widest mt-6"
               >
-                {loading ? 'SENDING OTP...' : (
-                  <> {showPassword && password ? 'SIGN IN' : 'GET OTP'} <ArrowRight size={24} strokeWidth={4} /></>
+                {loading ? 'PROCESSING...' : (
+                  <> SIGN IN <ArrowRight size={24} strokeWidth={4} /></>
                 )}
               </button>
             </form>

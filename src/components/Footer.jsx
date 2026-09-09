@@ -21,7 +21,7 @@ function Footer() {
       
       <div className='pt-8 flex flex-col md:flex-row justify-center items-center gap-3 md:gap-5'>
         <div className='font-bold uppercase tracking-widest text-gray-400 text-sm'>
-            © Powered By <a href="https://helmer.world/" target='_blank' className='text-white hover:text-[#9AE600] underline decoration-2 underline-offset-4 transition-colors'>Helmer</a>
+          (C) {new Date().getFullYear()} WOW Laundry. All Rights Reserved.
         </div>
       </div>
     </div>

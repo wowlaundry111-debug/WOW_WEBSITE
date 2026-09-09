@@ -92,7 +92,7 @@ export default function GlobalShops({
         await deleteShop(shopId);
         if (selectedShopId === shopId) setSelectedShopId(null);
       } catch (err) {
-        alert('Failed to delete shop');
+        alert(err?.message || 'Failed to delete shop');
       }
     }
   };
@@ -312,7 +312,7 @@ export default function GlobalShops({
               className="w-full bg-gray-50 border-2 border-black p-3 font-mono text-xs font-bold outline-none focus:bg-[#9AE600]/10 rounded-xl"
             />
             <p className="text-[10px] font-bold text-gray-500 mt-1.5 uppercase">
-              💡 Tip: Paste any Google Drive link here. The website converts it to a direct download link automatically.
+              Tip: Paste any Google Drive link here. The website converts it to a direct download link automatically.
             </p>
           </div>
 
@@ -329,7 +329,7 @@ export default function GlobalShops({
               className="w-full bg-gray-50 border-2 border-black p-3 font-mono text-xs font-bold outline-none focus:bg-[#9AE600]/10 rounded-xl"
             />
             <p className="text-[10px] font-bold text-gray-500 mt-1.5 uppercase">
-              🍏 Leave blank to show the "iOS App Coming Soon!" interactive modal on website.
+              Note: Leave blank to show the "iOS App Coming Soon!" interactive modal on website.
             </p>
           </div>
         </div>

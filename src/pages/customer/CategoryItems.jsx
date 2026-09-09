@@ -38,13 +38,29 @@ const getCategoryStyle = (name) => {
 };
 
 
+import bucketImg from '../../assets/final-bucket-cropped.png';
+
 export default function CategoryItems() {
   const { categoryId } = useParams();
   const navigate = useNavigate();
-  const { items, categories, cart, addToCart } = useAppStore();
+  const { items, categories, cart, addToCart, fetchCatalog, isCatalogLoading } = useAppStore();
+
+  React.useEffect(() => {
+    fetchCatalog();
+  }, [fetchCatalog]);
 
   const category = categories.find(c => c._id === categoryId);
-  const categoryItems = items.filter(i => i.categoryId === categoryId);
+  const parentCategory = category?.parentCategoryId ? categories.find(c => c._id === category.parentCategoryId) : null;
+  const subCategories = (category?.subCategories && category.subCategories.length > 0)
+    ? category.subCategories
+    : categories.filter(c => c.parentCategoryId === categoryId);
+
+  const [selectedSubCatId, setSelectedSubCatId] = React.useState('ALL');
+
+  React.useEffect(() => {
+    setSelectedSubCatId('ALL');
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  }, [categoryId]);
 
   const getQuantity = (itemId) => {
     return cart.find(c => c.itemId === itemId)?.quantity || 0;
@@ -59,6 +75,13 @@ export default function CategoryItems() {
   const catStyle = category ? getCategoryStyle(category.name) : null;
 
   if (!category) {
+    if (isCatalogLoading) {
+      return (
+        <div className="min-h-screen bg-white flex items-center justify-center font-outfit">
+          <p className="text-xl font-black uppercase text-black animate-pulse">Loading catalog...</p>
+        </div>
+      );
+    }
     return (
       <div className="min-h-screen bg-white flex items-center justify-center font-outfit">
         <div className="text-black font-black flex flex-col items-center">
@@ -68,6 +91,16 @@ export default function CategoryItems() {
       </div>
     );
   }
+
+  const subCategoryIds = subCategories.map(s => s._id);
+  const activeSubCategory = subCategories.find(s => s._id === selectedSubCatId);
+
+  const categoryItems = items.filter(i => {
+    if (selectedSubCatId === 'ALL') {
+      return i.categoryId === categoryId || subCategoryIds.includes(i.categoryId);
+    }
+    return i.categoryId === selectedSubCatId;
+  });
 
   return (
     <div className="min-h-screen bg-white pb-32 font-outfit selection:bg-black selection:text-white">
@@ -80,33 +113,212 @@ export default function CategoryItems() {
           <img src={catStyle.img} alt="" className="absolute right-0 top-1/2 transform -translate-y-1/2 w-32 h-32 opacity-20 object-contain pointer-events-none" />
           
           <button 
-            onClick={() => navigate('/order')}
+            onClick={() => {
+              if (selectedSubCatId !== 'ALL' && subCategories.length > 0) {
+                setSelectedSubCatId('ALL');
+              } else {
+                navigate('/order');
+              }
+            }}
             className="w-12 h-12 bg-white border-2 border-black rounded-full flex items-center justify-center text-black hover:bg-black hover:text-white transition-colors shadow-[4px_4px_0px_rgba(0,0,0,1)] hover:translate-y-1 hover:translate-x-1 hover:shadow-none relative z-10"
+            title="Go Back"
           >
             <ArrowLeft size={24} strokeWidth={4} />
           </button>
           <div className="relative z-10">
+            {parentCategory && (
+              <div className="flex items-center gap-1 text-xs font-black uppercase text-gray-700 mb-0.5">
+                <Link to={`/order/${parentCategory._id}`} className="hover:underline">{parentCategory.name}</Link>
+                <span>›</span>
+              </div>
+            )}
             <h1 className={`text-2xl sm:text-3xl font-black ${catStyle.color} lilita-one-regular tracking-wide uppercase`}>{category.name}</h1>
-            <p className="text-xs font-black text-black bg-white inline-block px-2 py-1 mt-1 border-2 border-black rounded-md tracking-widest uppercase">{categoryItems.length} ITEMS</p>
+            <p className="text-xs font-black text-black bg-white inline-block px-2.5 py-1 mt-1 border-2 border-black rounded-md tracking-widest uppercase">
+              {subCategories.length > 0 && selectedSubCatId === 'ALL'
+                ? `${subCategories.length} ${subCategories.length === 1 ? 'WASH PREFERENCE' : 'WASH PREFERENCES'}`
+                : `${categoryItems.length} ${categoryItems.length === 1 ? 'ITEM' : 'ITEMS'}`}
+            </p>
           </div>
         </div>
       </div>
 
       <div className="max-w-3xl mx-auto px-4 py-8">
-        {categoryItems.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-24 text-center border-4 border-dashed border-black rounded-3xl m-4 bg-gray-50">
-            <Inbox size={64} strokeWidth={2} className="text-black mb-6" />
-            <h3 className="text-2xl font-black text-black lilita-one-regular uppercase tracking-wide">No items found</h3>
-            <p className="text-black font-bold mt-2 uppercase">There are no items in this category yet.</p>
+        {/* If this category has subcategories and ALL is active, display the sub-categories as Category Cards */}
+        {subCategories.length > 0 && selectedSubCatId === 'ALL' ? (
+          <div className="space-y-6">
+            <div className="border-b-4 border-black pb-4 flex flex-wrap justify-between items-end gap-3">
+              <div>
+                <span className="text-[11px] font-black uppercase tracking-widest text-[#16A34A] bg-emerald-50 border-2 border-black px-2.5 py-1 rounded-md shadow-[2px_2px_0px_rgba(0,0,0,1)] inline-block mb-2">
+                  WASH PREFERENCE
+                </span>
+                <h2 className="text-2xl sm:text-3xl font-black uppercase tracking-wide lilita-one-regular text-black">
+                  Select a Wash Preference
+                </h2>
+                <p className="text-xs sm:text-sm font-bold text-gray-600 uppercase mt-1">
+                  Choose a wash preference to view available buckets and clothing items
+                </p>
+              </div>
+              <span className="text-xs font-black bg-[#9AE600] border-2 border-black px-3 py-1 rounded-lg uppercase shadow-[2px_2px_0px_rgba(0,0,0,1)]">
+                {subCategories.length} {subCategories.length === 1 ? 'Option' : 'Options'} Available
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6 pt-2">
+              {subCategories.map((sub) => {
+                const style = getCategoryStyle(sub.name);
+                const subItems = items.filter(i => i.categoryId === sub._id);
+                const vectorSrc = resolveVectorImage(sub.image, sub.name) || style.img;
+                
+                return (
+                  <div
+                    key={sub._id}
+                    onClick={() => {
+                      setSelectedSubCatId(sub._id);
+                      window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+                    }}
+                    className={`${style.bg} border-4 border-black rounded-2xl p-6 flex flex-col justify-between shadow-[6px_6px_0px_rgba(0,0,0,1)] hover:shadow-[8px_8px_0px_rgba(0,0,0,1)] hover:-translate-y-1 transition-all cursor-pointer group active:translate-y-0.5`}
+                  >
+                    <div className="flex justify-between items-start mb-4">
+                      <div className="px-3 py-1.5 rounded-lg bg-black text-white border-2 border-black transform -rotate-2 group-hover:rotate-0 transition-transform">
+                        <span className="text-[10px] font-black uppercase tracking-widest">
+                          {style.badge}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="w-full flex justify-center my-4 py-2">
+                      <img 
+                        src={vectorSrc} 
+                        alt={sub.name} 
+                        onError={(e) => { e.currentTarget.src = style.img; }}
+                        className="w-24 h-24 sm:w-28 sm:h-28 object-contain filter drop-shadow-md group-hover:scale-110 transition-transform duration-300" 
+                      />
+                    </div>
+
+                    <div className="mt-auto border-t-4 border-black pt-4">
+                      <h3 className="font-extrabold text-black leading-tight text-xl sm:text-2xl uppercase tracking-wide lilita-one-regular">
+                        {sub.name}
+                      </h3>
+                      <div className="flex items-center justify-between mt-3 pt-1">
+                        <span className="text-xs font-bold text-gray-600 uppercase">
+                          {subItems.length} {subItems.length === 1 ? 'Item' : 'Items'}
+                        </span>
+                        <span className="text-xs font-black uppercase text-black bg-[#9AE600] border-2 border-black px-3 py-1.5 rounded-xl shadow-[3px_3px_0px_rgba(0,0,0,1)] group-hover:bg-black group-hover:text-[#9AE600] transition-colors flex items-center gap-1">
+                          Select & Proceed →
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         ) : (
-            <div className="space-y-6">
-            {categoryItems.map((item, idx) => {
-              const qty = getQuantity(item._id);
-              const isKg = Boolean(item.pricePerKg && item.pricePerKg > 0) || 
-                item.unit === 'KG' || 
-                (typeof item.name === 'string' && (item.name.toLowerCase().includes('per kg') || item.name.toLowerCase().includes('/ kg') || item.name.toLowerCase().includes('per-kg')));
-              const unit = isKg ? 'KG' : 'Item';
+          <div>
+            {/* Active Sub-Category Header Banner */}
+            {subCategories.length > 0 && selectedSubCatId !== 'ALL' && (
+              <div className="bg-white border-4 border-black p-4 sm:p-5 rounded-2xl shadow-[6px_6px_0px_rgba(0,0,0,1)] mb-6 flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <div className="flex items-center gap-2 text-xs font-black uppercase text-gray-500 mb-1">
+                    <span>{category.name}</span>
+                    <span>›</span>
+                    <span className="text-[#0D8DE3] font-black">{activeSubCategory?.name}</span>
+                  </div>
+                  <h2 className="text-2xl sm:text-3xl font-black uppercase tracking-wide text-black lilita-one-regular">
+                    {activeSubCategory?.name}
+                  </h2>
+                  <p className="text-xs font-bold text-gray-600 uppercase mt-0.5">
+                    Select your clothes or laundry bucket below to proceed
+                  </p>
+                </div>
+                <button
+                  onClick={() => setSelectedSubCatId('ALL')}
+                  className="bg-[#9AE600] hover:bg-black hover:text-[#9AE600] text-black border-2 border-black px-4 py-2 rounded-xl text-xs font-black uppercase shadow-[3px_3px_0px_rgba(0,0,0,1)] transition-colors flex items-center gap-1.5"
+                >
+                  ← Change Preference
+                </button>
+              </div>
+            )}
+
+            {categoryItems.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-24 text-center border-4 border-dashed border-black rounded-3xl m-4 bg-gray-50">
+                <Inbox size={64} strokeWidth={2} className="text-black mb-6" />
+                <h3 className="text-2xl font-black text-black lilita-one-regular uppercase tracking-wide">No items found</h3>
+                <p className="text-black font-bold mt-2 uppercase">There are no items in this category yet.</p>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                {categoryItems.map((item, idx) => {
+                  const qty = getQuantity(item._id);
+                  const isKg = Boolean(item.pricePerKg && item.pricePerKg > 0) || 
+                    item.unit === 'KG' || 
+                    (typeof item.name === 'string' && (item.name.toLowerCase().includes('per kg') || item.name.toLowerCase().includes('/ kg') || item.name.toLowerCase().includes('per-kg')));
+                  const isBucket = Boolean(item.isBucket);
+
+              // ── BUCKET ITEM CARD ───────────────────────────────────────────
+              if (isBucket) {
+                return (
+                  <div 
+                    key={item._id}
+                    onClick={() => handleAddToCart(item, 1)}
+                    className="bg-white rounded-2xl p-4 sm:p-6 border-3 border-black shadow-[6px_6px_0px_rgba(0,0,0,1)] hover:shadow-[8px_8px_0px_rgba(0,0,0,1)] transition-all cursor-pointer group relative overflow-hidden bg-gradient-to-br from-white via-green-50/50 to-lime-50"
+                  >
+                    <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
+                      <div className="relative w-28 h-28 sm:w-32 sm:h-32 flex-shrink-0 flex items-center justify-center bg-white rounded-xl border-2 border-black p-2 shadow-[3px_3px_0px_rgba(0,0,0,1)] group-hover:scale-105 transition-transform">
+                        <img src={bucketImg} alt="Laundry Bucket" className="w-full h-full object-contain filter drop-shadow-md" />
+                        <span className="absolute -top-2 -right-2 bg-[#9AE600] text-black font-black text-[9px] px-2 py-0.5 border-2 border-black rounded-md uppercase tracking-wider shadow-[2px_2px_0px_rgba(0,0,0,1)]">
+                          Tap to Add
+                        </span>
+                      </div>
+
+                      <div className="flex-1 text-center sm:text-left">
+                        <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 mb-1">
+                          <h3 className="font-black text-black text-lg sm:text-xl uppercase tracking-wide">{item.name}</h3>
+                          <span className="bg-[#0D8DE3] text-white text-[10px] font-black px-2.5 py-0.5 rounded-lg border-2 border-black uppercase tracking-wider">
+                            Bucket (Per KG)
+                          </span>
+                        </div>
+
+                        <p className="text-xs font-bold text-gray-600 mt-1 uppercase">
+                          {item.description || 'Add clothes to your laundry bucket. Final weight calculated at delivery.'}
+                        </p>
+
+                        <div className="mt-4 flex flex-wrap items-center justify-center sm:justify-start gap-3">
+                          <div className="bg-[#9AE600] px-3.5 py-1.5 rounded-xl border-2 border-black shadow-[3px_3px_0px_rgba(0,0,0,1)] flex items-center gap-2">
+                            <span className="text-xs font-black uppercase text-black">Count:</span>
+                            <span className="text-lg font-black text-black lilita-one-regular">{qty} Clothes</span>
+                          </div>
+
+                          {qty > 0 && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleAddToCart(item, -1);
+                              }}
+                              className="w-9 h-9 bg-white hover:bg-gray-100 text-black border-2 border-black rounded-xl flex items-center justify-center font-black shadow-[2px_2px_0px_rgba(0,0,0,1)] active:translate-y-0.5"
+                              title="Decrease"
+                            >
+                              <Minus size={16} strokeWidth={4} />
+                            </button>
+                          )}
+
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleAddToCart(item, 1);
+                            }}
+                            className="px-4 py-2 bg-black text-[#9AE600] border-2 border-black rounded-xl font-black text-xs uppercase tracking-wider shadow-[3px_3px_0px_rgba(0,0,0,1)] hover:bg-[#9AE600] hover:text-black transition-colors"
+                          >
+                            + Tap To Add ({qty})
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              }
+
+              // ── REGULAR ITEM CARD ──────────────────────────────────────────
 
               return (
                 <div 
@@ -134,7 +346,7 @@ export default function CategoryItems() {
                         // Per-KG items: price is determined at delivery by weighing
                         <div className="flex flex-col gap-1">
                           <div className="bg-[#0D8DE3] px-3 py-1 border-2 border-black rounded-xl shadow-[4px_4px_0px_rgba(0,0,0,1)] transform -rotate-2">
-                            <span className="font-black text-white text-sm uppercase tracking-wider">🏋️ Per KG</span>
+                            <span className="font-black text-white text-sm uppercase tracking-wider">Per KG</span>
                           </div>
                           <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">Priced at delivery</span>
                         </div>
@@ -145,7 +357,6 @@ export default function CategoryItems() {
                         </div>
                       )}
 
-                      
                       <div>
                         {qty > 0 ? (
                           <div className="flex items-center bg-[#9AE600] border-2 border-black rounded-xl shadow-[4px_4px_0px_rgba(0,0,0,1)] overflow-hidden">
@@ -172,6 +383,8 @@ export default function CategoryItems() {
                 </div>
               );
             })}
+              </div>
+            )}
           </div>
         )}
       </div>

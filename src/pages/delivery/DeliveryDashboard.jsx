@@ -191,7 +191,7 @@ export default function DeliveryDashboard() {
                           <span className={`text-xs font-black uppercase px-2.5 py-1 border-2 border-black rounded-lg ${
                             order.kgPriceUpdated ? 'bg-[#9AE600] text-black' : 'bg-yellow-300 text-black'
                           }`}>
-                            {order.kgPriceUpdated ? '⚖️ KG Weighed ✓' : '⚖️ KG Weighing Pending'}
+                            {order.kgPriceUpdated ? 'KG WEIGHED' : 'KG Weighing Pending'}
                           </span>
                           
                           <button
@@ -218,7 +218,7 @@ export default function DeliveryDashboard() {
                         {activeTab === 'PICKUP' 
                           ? 'Mark Picked Up' 
                           : (hasKgItems && !order.kgPriceUpdated)
-                          ? '⚖️ Weigh & Deliver'
+                          ? 'Weigh & Deliver'
                           : 'Mark Delivered'}
                       </button>
                     </div>

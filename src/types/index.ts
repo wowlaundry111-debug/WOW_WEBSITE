@@ -65,6 +65,8 @@ export interface Category {
   name: string;
   image?: string; // category image URL or base64
   isActive?: boolean;
+  parentCategoryId?: string | null;
+  subCategories?: Category[];
 }
 
 export interface Item {
@@ -78,6 +80,10 @@ export interface Item {
   pricePerItem?: number;
   price?: number;
   unit?: 'KG' | 'ITEM';
+  isBucket?: boolean;
+  categoryName?: string;
+  subCategoryName?: string;
+  isActive?: boolean;
 }
 
 
@@ -88,6 +94,9 @@ export interface OrderItem {
   unit: 'KG' | 'ITEM';
   price: number; // resolved unit price at order time; 0 for KG items until weighed
   kgWeight?: number; // set by delivery agent after weighing (KG items only)
+  categoryName?: string;
+  subCategoryName?: string;
+  isBucket?: boolean;
 }
 
 export interface CartItem {
@@ -96,7 +105,11 @@ export interface CartItem {
   quantity: number;
   unit: 'KG' | 'ITEM';
   price: number;
+  pricePerKg?: number;
   image?: string;
+  categoryName?: string;
+  subCategoryName?: string;
+  isBucket?: boolean;
 }
 
 export interface Order {

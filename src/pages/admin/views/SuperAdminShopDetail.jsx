@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Save, Trash2, User, Truck, Store, Phone, Mail, Building2, ShoppingBag, DollarSign, Calendar, Clock } from 'lucide-react';
+import { ArrowLeft, Save, Trash2, User, Truck, Store, Phone, Mail, Building2, ShoppingBag, DollarSign, Calendar, Clock, X } from 'lucide-react';
 import { useAppStore } from '../../../store/useAppStore';
 
 export default function SuperAdminShopDetail({ shopId, onBack, onOpenCatalog, onOpenOrders }) {
@@ -91,7 +91,7 @@ export default function SuperAdminShopDetail({ shopId, onBack, onOpenCatalog, on
       try {
         await deleteUser(userId);
       } catch (err) {
-        alert('Failed to remove staff member');
+        alert(err?.message || 'Failed to remove staff member');
       }
     }
   };
@@ -401,7 +401,7 @@ export default function SuperAdminShopDetail({ shopId, onBack, onOpenCatalog, on
             <div className="flex justify-between items-center p-4 border-b-4 border-black bg-[#9AE600]">
               <h2 className="text-lg font-black uppercase">Add Delivery Staff for {shop.name}</h2>
               <button onClick={() => setShowAddStaffModal(false)} className="p-1 hover:bg-black hover:text-white rounded">
-                ✕
+                <X size={20} />
               </button>
             </div>
             <form onSubmit={handleAddStaff} className="p-6 space-y-4">

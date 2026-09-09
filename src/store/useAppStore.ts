@@ -69,10 +69,10 @@ interface AppState {
   updateOrderStatus: (orderId: string, status: OrderStatus, paymentMode?: PaymentMode, paymentStatus?: PaymentStatus) => Promise<void>;
   updateOrderAdminDetails: (orderId: string, updates: { totalAmount?: number, adminNotes?: string }) => Promise<void>;
   assignDeliveryBoy: (orderId: string, deliveryBoyId: string) => Promise<void>;
-  addCategory: (name: string, image?: string, overrideShopId?: string) => Promise<void>;
+  addCategory: (name: string, image?: string, overrideShopId?: string, parentCategoryId?: string) => Promise<void>;
   updateCategory: (categoryId: string, updates: Partial<Category>) => Promise<void>;
   deleteCategory: (categoryId: string) => Promise<void>;
-  addCatalogItem: (categoryId: string, name: string, description: string, price: number, unit: 'KG' | 'ITEM', image?: string) => Promise<void>;
+  addCatalogItem: (categoryId: string, name: string, description: string, price: number, unit: 'KG' | 'ITEM', image?: string, isBucket?: boolean) => Promise<void>;
   updateCatalogItem: (itemId: string, updates: Partial<Item>) => Promise<void>;
   updateCatalogItemPrice: (itemId: string, price: number, unit: 'KG' | 'ITEM') => Promise<void>;
   deleteCatalogItem: (itemId: string) => Promise<void>;
@@ -560,35 +560,62 @@ export const useAppStore = create<AppState>()(
 
         if (existingIndex >= 0) {
           const newCart = [...cart];
-          newCart[existingIndex].quantity += quantity;
-          if (newCart[existingIndex].quantity <= 0) {
-            set({ cart: cart.filter(c => c.itemId !== item._id) });
+          const nextQty = newCart[existingIndex].quantity + quantity;
+          if (nextQty <= 0) {
+            get().removeFromCart(item._id);
           } else {
+            newCart[existingIndex] = {
+              ...newCart[existingIndex],
+              quantity: nextQty,
+            };
             set({ cart: newCart });
           }
         } else if (quantity > 0) {
+          const { categories } = get();
+          const cat = categories.find(c => c._id === item.categoryId);
+          let categoryName = item.categoryName || '';
+          let subCategoryName = item.subCategoryName || '';
+          if (cat && !categoryName) {
+            if (cat.parentCategoryId) {
+              const parentCat = categories.find(c => c._id === cat.parentCategoryId);
+              categoryName = parentCat?.name || '';
+              subCategoryName = cat.name;
+            } else {
+              categoryName = cat.name;
+            }
+          }
           set({
             cart: [...cart, {
               itemId: item._id,
               name: item.name,
               quantity,
               price: resolvedPrice,
+              pricePerKg: item.pricePerKg,
               unit: resolvedUnit,
               image: item.image,
+              categoryName,
+              subCategoryName,
+              isBucket: Boolean(item.isBucket),
             }]
           });
         }
       },
 
       removeFromCart: (itemId) => {
-        set({ cart: get().cart.filter(c => c.itemId !== itemId) });
+        const nextCart = get().cart.filter(c => c.itemId !== itemId);
         const { activeCoupon } = get();
+        let updatedCoupon = activeCoupon;
         if (activeCoupon) {
-          const subtotal = get().cart.reduce((sum, c) => sum + c.price * c.quantity, 0);
+          const isKgItemCheck = (c: any) => 
+            c.unit === 'KG' || 
+            (typeof c.name === 'string' && (c.name.toLowerCase().includes('per kg') || c.name.toLowerCase().includes('/ kg'))) || 
+            Boolean(c.pricePerKg && c.pricePerKg > 0);
+          const subtotal = nextCart.filter(c => !isKgItemCheck(c)).reduce((sum, c) => sum + (c.price || 0) * c.quantity, 0);
           if (subtotal < activeCoupon.minOrderValue) {
-            set({ activeCoupon: null });
+            updatedCoupon = null;
           }
         }
+        set({ cart: nextCart, activeCoupon: updatedCoupon });
       },
 
       updateCartQuantity: (itemId, quantity) => {
@@ -596,7 +623,20 @@ export const useAppStore = create<AppState>()(
           get().removeFromCart(itemId);
           return;
         }
-        set({ cart: get().cart.map(c => c.itemId === itemId ? { ...c, quantity } : c) });
+        const nextCart = get().cart.map(c => c.itemId === itemId ? { ...c, quantity } : c);
+        const { activeCoupon } = get();
+        let updatedCoupon = activeCoupon;
+        if (activeCoupon) {
+          const isKgItemCheck = (c: any) => 
+            c.unit === 'KG' || 
+            (typeof c.name === 'string' && (c.name.toLowerCase().includes('per kg') || c.name.toLowerCase().includes('/ kg'))) || 
+            Boolean(c.pricePerKg && c.pricePerKg > 0);
+          const subtotal = nextCart.filter(c => !isKgItemCheck(c)).reduce((sum, c) => sum + (c.price || 0) * c.quantity, 0);
+          if (subtotal < activeCoupon.minOrderValue) {
+            updatedCoupon = null;
+          }
+        }
+        set({ cart: nextCart, activeCoupon: updatedCoupon });
       },
 
       clearCart: () => set({ cart: [], activeCoupon: null, deliveryInstructions: '' }),
@@ -647,6 +687,9 @@ export const useAppStore = create<AppState>()(
             unit: isKg ? 'KG' : 'ITEM',
             // KG items are priced at 0 — delivery agent will weigh and update later
             price: isKg ? 0 : (c.price || 0),
+            categoryName: c.categoryName,
+            subCategoryName: c.subCategoryName,
+            isBucket: c.isBucket,
           };
         });
 
@@ -738,7 +781,7 @@ export const useAppStore = create<AppState>()(
         }
       },
 
-      addCategory: async (name, image, overrideShopId) => {
+      addCategory: async (name, image, overrideShopId, parentCategoryId) => {
         const shopId = overrideShopId || get().currentTenantId || get().currentUser?.shopId;
         if (!shopId) throw new Error('No shop context — select a shop branch before adding categories.');
         try {
@@ -748,7 +791,7 @@ export const useAppStore = create<AppState>()(
           }
           // Do NOT push to state here — SocketManager's category_created event is the single source of truth
           // to prevent double-push race condition when socket fires before/after API response updates state.
-          await api.post('/catalog/categories', { shopId, name, image: finalImage });
+          await api.post('/catalog/categories', { shopId, name, image: finalImage, parentCategoryId: parentCategoryId || null });
         } catch (err) {
           console.error('Failed to add category', err);
           throw err;
@@ -797,7 +840,7 @@ export const useAppStore = create<AppState>()(
         }
       },
 
-      addCatalogItem: async (categoryId, name, description, price, unit, image) => {
+      addCatalogItem: async (categoryId, name, description, price, unit, image, isBucket) => {
         const { categories, currentTenantId, currentUser } = get();
         const cat = categories.find(c => c._id === categoryId);
         const shopId = cat ? cat.shopId : (currentTenantId || currentUser?.shopId);
@@ -814,6 +857,7 @@ export const useAppStore = create<AppState>()(
             name,
             description,
             image: finalImage,
+            isBucket: !!isBucket,
             ...(unit === 'KG' ? { pricePerKg: price } : { pricePerItem: price }),
           });
         } catch (err) {
