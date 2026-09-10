@@ -49,11 +49,11 @@ export default function CategoryItems() {
     fetchCatalog();
   }, [fetchCatalog]);
 
-  const category = categories.find(c => c._id === categoryId);
-  const parentCategory = category?.parentCategoryId ? categories.find(c => c._id === category.parentCategoryId) : null;
+  const category = categories.find(c => String(c._id) === String(categoryId));
+  const parentCategory = category?.parentCategoryId ? categories.find(c => String(c._id) === String(category.parentCategoryId)) : null;
   const subCategories = (category?.subCategories && category.subCategories.length > 0)
     ? category.subCategories
-    : categories.filter(c => c.parentCategoryId === categoryId);
+    : categories.filter(c => String(c.parentCategoryId) === String(categoryId));
 
   const [selectedSubCatId, setSelectedSubCatId] = React.useState('ALL');
 
@@ -92,14 +92,14 @@ export default function CategoryItems() {
     );
   }
 
-  const subCategoryIds = subCategories.map(s => s._id);
-  const activeSubCategory = subCategories.find(s => s._id === selectedSubCatId);
+  const subCategoryIds = subCategories.map(s => String(s._id));
+  const activeSubCategory = subCategories.find(s => String(s._id) === String(selectedSubCatId));
 
   const categoryItems = items.filter(i => {
     if (selectedSubCatId === 'ALL') {
-      return i.categoryId === categoryId || subCategoryIds.includes(i.categoryId);
+      return String(i.categoryId) === String(categoryId) || subCategoryIds.includes(String(i.categoryId));
     }
-    return i.categoryId === selectedSubCatId;
+    return String(i.categoryId) === String(selectedSubCatId);
   });
 
   return (
@@ -166,7 +166,7 @@ export default function CategoryItems() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6 pt-2">
               {subCategories.map((sub) => {
                 const style = getCategoryStyle(sub.name);
-                const subItems = items.filter(i => i.categoryId === sub._id);
+                const subItems = items.filter(i => String(i.categoryId) === String(sub._id));
                 const vectorSrc = resolveVectorImage(sub.image, sub.name) || style.img;
                 
                 return (

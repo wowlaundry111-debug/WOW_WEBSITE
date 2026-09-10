@@ -511,12 +511,12 @@ export const useAppStore = create<AppState>()(
       fetchUsers: async () => {
         const role = get().currentUser?.role;
         // Only admin roles are permitted to fetch all users
-        if (!['SuperAdmin', 'ShopAdmin'].includes(role || '')) return;
+        if (!['SuperAdmin', 'ShopAdmin', 'Admin'].includes(role || '')) return;
         try {
           const shopId = get().currentTenantId || get().currentUser?.shopId;
           const url = shopId ? `/auth/users?limit=100&shopId=${shopId}` : '/auth/users?limit=100';
           const res = await api.get(url);
-          if (Array.isArray(res.data.users)) {
+          if (Array.isArray(res.data?.users)) {
             set({ users: res.data.users });
           }
         } catch (err) {
@@ -789,9 +789,13 @@ export const useAppStore = create<AppState>()(
           if (image && (image.startsWith('data:') || (image as any) instanceof File)) {
             finalImage = await uploadImageToCloudinary(image);
           }
-          // Do NOT push to state here — SocketManager's category_created event is the single source of truth
-          // to prevent double-push race condition when socket fires before/after API response updates state.
-          await api.post('/catalog/categories', { shopId, name, image: finalImage, parentCategoryId: parentCategoryId || null });
+          const res = await api.post('/catalog/categories', { shopId, name, image: finalImage, parentCategoryId: parentCategoryId || null });
+          if (res.data) {
+            set(state => ({
+              categories: state.categories.some(c => c._id === res.data._id) ? state.categories : [...state.categories, res.data]
+            }));
+          }
+          return res.data;
         } catch (err) {
           console.error('Failed to add category', err);
           throw err;
@@ -850,8 +854,7 @@ export const useAppStore = create<AppState>()(
           if (image && (image.startsWith('data:') || (image as any) instanceof File)) {
             finalImage = await uploadImageToCloudinary(image);
           }
-          // Do NOT push to state here — SocketManager's item_created event is source of truth
-          await api.post('/catalog/items', {
+          const res = await api.post('/catalog/items', {
             shopId,
             categoryId,
             name,
@@ -860,6 +863,12 @@ export const useAppStore = create<AppState>()(
             isBucket: !!isBucket,
             ...(unit === 'KG' ? { pricePerKg: price } : { pricePerItem: price }),
           });
+          if (res.data) {
+            set(state => ({
+              items: state.items.some(i => i._id === res.data._id) ? state.items : [...state.items, res.data]
+            }));
+          }
+          return res.data;
         } catch (err) {
           console.error('Failed to add item', err);
           throw err;

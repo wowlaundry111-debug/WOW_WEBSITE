@@ -73,7 +73,8 @@ export default function CatalogManager({ categories = [], items = [], shops = []
 
   // Derived: top-level categories and sub-categories
   const topLevelCats = categories.filter(c => !c.parentCategoryId);
-  const getSubCats = (parentId) => categories.filter(c => c.parentCategoryId === parentId);
+  const allSubCats = categories.filter(c => Boolean(c.parentCategoryId));
+  const getSubCats = (parentId) => categories.filter(c => String(c.parentCategoryId) === String(parentId));
 
   // Open Category Add Modal (optionally as sub-category of parentId)
   const openAddCategory = (parentId = null) => {
@@ -123,10 +124,12 @@ export default function CatalogManager({ categories = [], items = [], shops = []
   const handleDeleteCategory = async (cat, e) => {
     e?.stopPropagation();
     const subCatCount = getSubCats(cat._id).length;
-    const directItemCount = items.filter(i => i.categoryId === cat._id).length;
-    const total = directItemCount + subCatCount;
+    const subCatIds = getSubCats(cat._id).map(s => String(s._id));
+    const directItemCount = items.filter(i => String(i.categoryId) === String(cat._id)).length;
+    const subCatItemCount = items.filter(i => subCatIds.includes(String(i.categoryId))).length;
+    const total = directItemCount + subCatItemCount;
     const confirmMsg = total > 0
-      ? `Delete "${cat.name}"? This will also remove ${subCatCount} sub-categor${subCatCount === 1 ? 'y' : 'ies'} and ${directItemCount} direct item(s).`
+      ? `Delete "${cat.name}"? This will also remove ${subCatCount} sub-categor${subCatCount === 1 ? 'y' : 'ies'} and ${total} item(s).`
       : `Are you sure you want to delete "${cat.name}"?`;
     
     if (window.confirm(confirmMsg)) {
@@ -145,15 +148,39 @@ export default function CatalogManager({ categories = [], items = [], shops = []
     }
   };
 
-  // Open Item Add Modal
-  const openAddItem = () => {
+  // Open Item Add Modal — items can ONLY be created inside sub-categories
+  const openAddItem = (preferredSubCatId = null) => {
+    if (allSubCats.length === 0) {
+      alert('Items can only be created inside a sub-category.\n\nPlease click "+ Add Category" (or "+" inside a category) to create a sub-category first.');
+      return;
+    }
+
+    let defaultCatId = '';
+    if (preferredSubCatId && allSubCats.some(s => String(s._id) === String(preferredSubCatId))) {
+      defaultCatId = preferredSubCatId;
+    } else if (selectedCategoryId) {
+      // Check if selected is already a subcategory
+      const isSub = allSubCats.some(s => String(s._id) === String(selectedCategoryId));
+      if (isSub) {
+        defaultCatId = selectedCategoryId;
+      } else {
+        // If parent category selected, pre-select its first sub-category
+        const childSub = allSubCats.find(s => String(s.parentCategoryId) === String(selectedCategoryId));
+        if (childSub) defaultCatId = childSub._id;
+      }
+    }
+
+    if (!defaultCatId && allSubCats.length > 0) {
+      defaultCatId = allSubCats[0]._id;
+    }
+
     setEditingItem(null);
     setItemName('');
     setItemDesc('');
     setItemPrice('');
     setItemUnit('KG');
     setItemIsBucket(false);
-    setItemCatId(selectedCategoryId || (categories[0]?._id || ''));
+    setItemCatId(defaultCatId);
     setItemImage(PRESET_VECTOR_IMAGES[0].src);
     setErrorMsg('');
     setItemModalOpen(true);
@@ -168,22 +195,29 @@ export default function CatalogManager({ categories = [], items = [], shops = []
     setItemPrice(String(item.pricePerKg || item.pricePerItem || ''));
     setItemUnit(item.pricePerKg !== undefined ? 'KG' : 'ITEM');
     setItemIsBucket(!!item.isBucket);
-    setItemCatId(item.categoryId || (categories[0]?._id || ''));
+    setItemCatId(item.categoryId || (allSubCats[0]?._id || ''));
     setItemImage(item.image || PRESET_VECTOR_IMAGES[0].src);
     setErrorMsg('');
     setItemModalOpen(true);
   };
 
-  // Handle Item Save
+  // Handle Item Save — validates target is strictly a sub-category
   const handleSaveItem = async (e) => {
     e.preventDefault();
     if (!itemName.trim() || !itemPrice || isNaN(Number(itemPrice))) {
       setErrorMsg('Valid item name and price are required.');
       return;
     }
-    const targetCatId = itemCatId || selectedCategoryId || categories[0]?._id;
+
+    const targetCatId = itemCatId || allSubCats[0]?._id;
     if (!targetCatId) {
-      setErrorMsg('Please select or create a category first.');
+      setErrorMsg('No sub-category available. Please create a sub-category first.');
+      return;
+    }
+
+    const targetSub = categories.find(c => String(c._id) === String(targetCatId));
+    if (!targetSub || !targetSub.parentCategoryId) {
+      setErrorMsg('Items can only be created inside a sub-category. Please select a valid sub-category.');
       return;
     }
 
@@ -227,17 +261,22 @@ export default function CatalogManager({ categories = [], items = [], shops = []
     }
   };
 
-  // Filtered Items — includes items from sub-categories when a parent is selected
+  // Filtered Items — includes items from sub-categories when a parent is selected, or direct subcategory items
   const filteredItems = items.filter(item => {
     let matchesCat = false;
     if (!selectedCategoryId) {
       matchesCat = true;
     } else {
-      // direct match
-      if (item.categoryId === selectedCategoryId) matchesCat = true;
-      // also match if item's cat is a sub-cat of selectedCategory
-      const itemCat = categories.find(c => c._id === item.categoryId);
-      if (itemCat && itemCat.parentCategoryId === selectedCategoryId) matchesCat = true;
+      // direct match (sub-category selected)
+      if (String(item.categoryId) === String(selectedCategoryId)) {
+        matchesCat = true;
+      } else {
+        // parent category selected: match any item belonging to its sub-categories
+        const itemCat = categories.find(c => String(c._id) === String(item.categoryId));
+        if (itemCat && String(itemCat.parentCategoryId) === String(selectedCategoryId)) {
+          matchesCat = true;
+        }
+      }
     }
     const matchesSearch = !searchQuery || 
       item.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -430,6 +469,13 @@ export default function CatalogManager({ categories = [], items = [], shops = []
                               </div>
                             </div>
                             <div className="flex items-center gap-1" onClick={e => e.stopPropagation()}>
+                              <button 
+                                onClick={(e) => { e.stopPropagation(); openAddItem(sub._id); }} 
+                                className="px-1.5 py-1 bg-[#9AE600] hover:bg-black hover:text-[#9AE600] text-black border border-black rounded transition-colors flex items-center gap-0.5 text-[10px] font-black uppercase" 
+                                title="Add Item to this Sub-Category"
+                              >
+                                <Plus size={10} /> Item
+                              </button>
                               <button onClick={(e) => openEditCategory(sub, e)} className="p-1 bg-white border border-black rounded hover:bg-[#9AE600] transition-colors" title="Edit">
                                 <Edit2 size={11} />
                               </button>
@@ -704,16 +750,33 @@ export default function CatalogManager({ categories = [], items = [], shops = []
               )}
 
               <div>
-                <label className="block font-black text-xs uppercase mb-1">Target Category *</label>
-                <select
-                  value={itemCatId}
-                  onChange={(e) => setItemCatId(e.target.value)}
-                  className="w-full p-2.5 border-2 border-black font-bold text-sm bg-white outline-none focus:bg-yellow-50 shadow-[2px_2px_0px_rgba(0,0,0,1)]"
-                >
-                  {categories.map(c => (
-                    <option key={c._id} value={c._id}>{c.name}</option>
-                  ))}
-                </select>
+                <label className="block font-black text-xs uppercase mb-1">
+                  Target Sub-Category * <span className="text-gray-500 font-bold normal-case">(Items can only be created inside sub-categories)</span>
+                </label>
+                {allSubCats.length > 0 ? (
+                  <select
+                    value={itemCatId}
+                    onChange={(e) => setItemCatId(e.target.value)}
+                    required
+                    className="w-full p-2.5 border-2 border-black font-bold text-sm bg-white outline-none focus:bg-yellow-50 shadow-[2px_2px_0px_rgba(0,0,0,1)]"
+                  >
+                    {allSubCats.map(sub => {
+                      const parent = categories.find(c => String(c._id) === String(sub.parentCategoryId));
+                      return (
+                        <option key={sub._id} value={sub._id}>
+                          {parent ? `${parent.name} › ${sub.name}` : sub.name}
+                        </option>
+                      );
+                    })}
+                  </select>
+                ) : (
+                  <div className="p-3 bg-amber-50 border-2 border-amber-500 text-amber-900 rounded-lg text-xs font-bold">
+                    No sub-categories available. Items can only be added inside a sub-category. Please create a sub-category under a parent category first.
+                  </div>
+                )}
+                <p className="text-[11px] font-bold text-gray-500 mt-1">
+                  Items belong to specific wash preference sub-categories.
+                </p>
               </div>
 
               <div>
@@ -830,8 +893,8 @@ export default function CatalogManager({ categories = [], items = [], shops = []
                 </button>
                 <button
                   type="submit"
-                  disabled={loading}
-                  className="flex-1 bg-[#0D8DE3] text-white border-2 border-black shadow-[3px_3px_0px_rgba(0,0,0,1)] py-3 font-black uppercase text-xs hover:translate-y-[1px] transition-all flex justify-center items-center gap-1.5"
+                  disabled={loading || allSubCats.length === 0}
+                  className="flex-1 bg-[#0D8DE3] disabled:bg-gray-300 disabled:cursor-not-allowed text-white border-2 border-black shadow-[3px_3px_0px_rgba(0,0,0,1)] py-3 font-black uppercase text-xs hover:translate-y-[1px] transition-all flex justify-center items-center gap-1.5"
                 >
                   {loading ? 'Saving...' : editingItem ? 'Save Changes' : 'Create Item'}
                 </button>
