@@ -36,7 +36,7 @@ const contactDetails = [
 
 function FAQ() {
     return (
-        <div className='px-4 md:px-10 lg:px-20 py-16 mt-20 flex flex-col md:flex-row justify-between gap-10 bg-white font-outfit selection:bg-black selection:text-[#9AE600]'>
+        <div className='px-4 md:px-10 lg:px-20 py-16 mt-20 flex flex-col md:flex-row justify-between gap-10 bg-[#FAF7F2] font-outfit selection:bg-black selection:text-[#9AE600]'>
             <div className='w-full lg:w-[45%]'>
                 <div className="inline-block bg-[#9AE600] border-2 border-black px-6 py-2 rounded-2xl shadow-[4px_4px_0px_rgba(0,0,0,1)] mb-8 transform -rotate-1">
                     <div className='text-4xl md:text-5xl lilita-one-regular text-black uppercase tracking-wider'>Contact <span className='text-[#0D8DE3]'>Us</span></div>

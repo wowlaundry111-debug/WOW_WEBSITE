@@ -144,8 +144,8 @@ html,
 body {
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
-  background-color: #FAF8F5;
-  color: #111827;
+  background-color: #FAF7F2;
+  color: #1C1917;
 }
 
 
@@ -171,6 +171,16 @@ html {
 }
 
 @theme {
+  --color-warm-canvas: #FAF7F2;
+  --color-warm-surface: #FFFDF9;
+  --color-gray-50: #FAF7F2;
+  --color-gray-100: #F4EFE6;
+  --color-gray-200: #EBE3D5;
+  --color-gray-300: #D8CEBE;
+  --color-gray-400: #A89F91;
+  --color-gray-500: #786F62;
+  --color-gray-600: #575045;
+
   --animate-fade-in-up: fade-in-up 0.4s ease-out forwards;
   --animate-slide-in-right: slide-in-right 0.4s ease-out forwards;
   --animate-bounce-soft: bounce-soft 2s infinite ease-in-out;

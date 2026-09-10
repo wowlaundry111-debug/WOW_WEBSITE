@@ -18,7 +18,7 @@ export default function OrderHistory() {
 
   if (!currentUser) {
     return (
-      <div className="min-h-screen bg-white flex flex-col font-outfit selection:bg-black selection:text-[#9AE600]">
+      <div className="min-h-screen bg-[#FAF7F2] flex flex-col font-outfit selection:bg-black selection:text-[#9AE600]">
         <Navbar />
         <div className="flex-1 flex flex-col items-center justify-center p-4">
           <p className="text-black font-black uppercase tracking-widest mb-6">Please login to view your orders</p>
@@ -43,7 +43,7 @@ export default function OrderHistory() {
   };
 
   return (
-    <div className="min-h-screen bg-white flex flex-col font-outfit selection:bg-black selection:text-[#9AE600]">
+    <div className="min-h-screen bg-[#FAF7F2] flex flex-col font-outfit selection:bg-black selection:text-[#9AE600]">
       <Navbar />
 
       <div className="max-w-4xl w-full mx-auto px-4 py-8 flex-1">

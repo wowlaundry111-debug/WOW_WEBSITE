@@ -14,7 +14,7 @@ export default function ShopSelect() {
   };
 
   return (
-    <div className="min-h-screen bg-white flex flex-col font-outfit selection:bg-black selection:text-white">
+    <div className="min-h-screen bg-[#FAF7F2] flex flex-col font-outfit selection:bg-black selection:text-white">
       <Navbar />
       
       <div className="flex-1 w-full max-w-2xl mx-auto px-4 py-10">

@@ -8,7 +8,7 @@ import Footer from '../components/Footer';
 
 function Home() {
   return (
-    <div className='bg-stone-50 text-stone-900'>
+    <div className='bg-[#FAF7F2] text-stone-900'>
       <div id="hero">
         <Hero />
       </div>

@@ -148,7 +148,7 @@ export default function Cart() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F0FDF4] pb-40 font-outfit selection:bg-black selection:text-[#9AE600]">
+    <div className="min-h-screen bg-[#FAF7F2] pb-40 font-outfit selection:bg-black selection:text-[#9AE600]">
       {/* Header Sticky */}
       <div className="sticky top-0 z-40 bg-[#0D8DE3] border-b-2 border-black shadow-[0_4px_0_rgba(0,0,0,1)]">
         <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">

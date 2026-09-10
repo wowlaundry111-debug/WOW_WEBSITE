@@ -42,7 +42,7 @@ const ProtectedShopSelectRoute = () => {
 
 function SkeletonFallback() {
   return (
-    <div className="flex flex-col justify-center items-center h-screen bg-blue-50">
+    <div className="flex flex-col justify-center items-center h-screen bg-[#FAF7F2]">
       <div className="w-full max-w-4xl p-5">
         <Skeleton height={50} width="40%" className="mb-5" />
         <Skeleton height={30} width="60%" className="mb-3" />

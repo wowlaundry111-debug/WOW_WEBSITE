@@ -16,7 +16,7 @@ function Hero() {
     const [bucketLoaded, setBucketLoaded] = useState(false);
 
     return (
-        <div className="bg-white font-outfit selection:bg-black selection:text-[#9AE600] min-h-screen relative overflow-hidden flex flex-col items-center w-full">
+        <div className="bg-[#FAF7F2] font-outfit selection:bg-black selection:text-[#9AE600] min-h-screen relative overflow-hidden flex flex-col items-center w-full">
 
             <style>
                 {`

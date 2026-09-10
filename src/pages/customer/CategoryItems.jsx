@@ -103,7 +103,7 @@ export default function CategoryItems() {
   });
 
   return (
-    <div className="min-h-screen bg-white pb-32 font-outfit selection:bg-black selection:text-white">
+    <div className="min-h-screen bg-[#FAF7F2] pb-32 font-outfit selection:bg-black selection:text-white">
       <Navbar />
       
       {/* Header Sticky (Neo-brutalist) */}

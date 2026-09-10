@@ -76,7 +76,7 @@ export default function CustomerHome() {
   };
 
   return (
-    <div className="min-h-screen bg-white flex flex-col pb-24 font-outfit selection:bg-black selection:text-white">
+    <div className="min-h-screen bg-[#FAF7F2] flex flex-col pb-24 font-outfit selection:bg-black selection:text-white">
       <Navbar />
       
       <div className="flex-1 w-full max-w-3xl mx-auto px-4 sm:px-6 pt-8">

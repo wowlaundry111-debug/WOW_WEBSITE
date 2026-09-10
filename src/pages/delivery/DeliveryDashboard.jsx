@@ -111,7 +111,7 @@ export default function DeliveryDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-white flex flex-col font-sans">
+    <div className="min-h-screen bg-[#FAF7F2] flex flex-col font-sans">
       <Navbar />
       
       <div className="max-w-3xl w-full mx-auto px-4 py-8 flex-1">

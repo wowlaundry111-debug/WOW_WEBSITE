@@ -69,7 +69,7 @@ function Service() {
 
 
   return (
-    <div className='p-6 lg:px-20 lg:py-16 mt-10 bg-white font-outfit selection:bg-black selection:text-[#9AE600]'>
+    <div className='p-6 lg:px-20 lg:py-16 mt-10 bg-[#FAF7F2] font-outfit selection:bg-black selection:text-[#9AE600]'>
       <div className='lg:flex justify-between items-center'>
         <div className='lg:w-1/2'>
           <div className="inline-block bg-[#0D8DE3] border-2 border-black px-4 py-2 rounded-2xl shadow-[4px_4px_0px_rgba(0,0,0,1)] mb-6 transform -rotate-2">

@@ -217,7 +217,7 @@ export default function AdminDashboard() {
   const navTabs = getNavTabs();
 
   return (
-    <div className="min-h-screen bg-[#FDFDFD] flex flex-col font-sans">
+    <div className="min-h-screen bg-[#FAF7F2] flex flex-col font-sans">
       <Navbar />
       
       <div className="flex-1 flex flex-col md:flex-row max-w-7xl w-full mx-auto px-4 py-8 gap-8">
