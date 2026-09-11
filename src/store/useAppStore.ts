@@ -782,18 +782,25 @@ export const useAppStore = create<AppState>()(
       },
 
       addCategory: async (name, image, overrideShopId, parentCategoryId) => {
-        const shopId = overrideShopId || get().currentTenantId || get().currentUser?.shopId;
+        const shopId = overrideShopId || get().currentTenantId || get().currentUser?.shopId || get().shops[0]?._id;
         if (!shopId) throw new Error('No shop context — select a shop branch before adding categories.');
         try {
           let finalImage = image;
           if (image && (image.startsWith('data:') || (image as any) instanceof File)) {
             finalImage = await uploadImageToCloudinary(image);
           }
-          const res = await api.post('/catalog/categories', { shopId, name, image: finalImage, parentCategoryId: parentCategoryId || null });
+          const res = await api.post('/catalog/categories', { 
+            shopId, 
+            name, 
+            image: finalImage, 
+            parentCategoryId: parentCategoryId || null 
+          });
           if (res.data) {
             set(state => ({
               categories: state.categories.some(c => c._id === res.data._id) ? state.categories : [...state.categories, res.data]
             }));
+            // Invalidate cache and refetch catalog to keep hierarchy in sync
+            await get().fetchCatalog(shopId);
           }
           return res.data;
         } catch (err) {
@@ -804,6 +811,7 @@ export const useAppStore = create<AppState>()(
 
       updateCategory: async (categoryId, updates) => {
         const prevCategories = get().categories;
+        const shopId = get().currentTenantId || get().currentUser?.shopId || get().shops[0]?._id;
         try {
           let finalUpdates = { ...updates };
           if (finalUpdates.image && (finalUpdates.image.startsWith('data:') || (finalUpdates.image as any) instanceof File)) {
@@ -818,6 +826,9 @@ export const useAppStore = create<AppState>()(
             set(state => ({
               categories: state.categories.map(c => c._id === categoryId ? res.data : c),
             }));
+            if (shopId) {
+              await get().fetchCatalog(shopId);
+            }
           }
           return res.data;
         } catch (err) {
@@ -830,13 +841,20 @@ export const useAppStore = create<AppState>()(
       deleteCategory: async (categoryId) => {
         const prevCategories = get().categories;
         const prevItems = get().items;
-        // Optimistic update
+        const shopId = get().currentTenantId || get().currentUser?.shopId || get().shops[0]?._id;
+        // Optimistic update: remove category and any child sub-categories plus their items
+        const subCatIds = prevCategories
+          .filter(c => String(c.parentCategoryId) === String(categoryId))
+          .map(c => String(c._id));
         set(state => ({
-          categories: state.categories.filter(c => c._id !== categoryId),
-          items: state.items.filter(i => i.categoryId !== categoryId),
+          categories: state.categories.filter(c => c._id !== categoryId && c.parentCategoryId !== categoryId),
+          items: state.items.filter(i => i.categoryId !== categoryId && !subCatIds.includes(String(i.categoryId))),
         }));
         try {
           await api.delete(`/catalog/categories/${categoryId}`);
+          if (shopId) {
+            await get().fetchCatalog(shopId);
+          }
         } catch (err) {
           set({ categories: prevCategories, items: prevItems });
           console.error('Failed to delete category', err);
@@ -845,9 +863,9 @@ export const useAppStore = create<AppState>()(
       },
 
       addCatalogItem: async (categoryId, name, description, price, unit, image, isBucket) => {
-        const { categories, currentTenantId, currentUser } = get();
+        const { categories, currentTenantId, currentUser, shops } = get();
         const cat = categories.find(c => c._id === categoryId);
-        const shopId = cat ? cat.shopId : (currentTenantId || currentUser?.shopId);
+        const shopId = cat ? cat.shopId : (currentTenantId || currentUser?.shopId || shops[0]?._id);
         if (!shopId) throw new Error('No shop context — select a shop branch before adding items.');
         try {
           let finalImage = image;
@@ -867,6 +885,9 @@ export const useAppStore = create<AppState>()(
             set(state => ({
               items: state.items.some(i => i._id === res.data._id) ? state.items : [...state.items, res.data]
             }));
+            if (shopId) {
+              await get().fetchCatalog(shopId);
+            }
           }
           return res.data;
         } catch (err) {

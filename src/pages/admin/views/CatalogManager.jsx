@@ -58,7 +58,8 @@ export default function CatalogManager({ categories = [], items = [], shops = []
   const [editingCategory, setEditingCategory] = useState(null);
   const [catName, setCatName] = useState('');
   const [catImage, setCatImage] = useState('');
-  const [catParentId, setCatParentId] = useState(null); // null = top-level
+  const [catType, setCatType] = useState('main'); // 'main' = Top-Level, 'sub' = Sub-Category
+  const [catParentId, setCatParentId] = useState(null); // ID of parent category when catType === 'sub'
 
   // Item Modal State
   const [itemModalOpen, setItemModalOpen] = useState(false);
@@ -78,41 +79,76 @@ export default function CatalogManager({ categories = [], items = [], shops = []
 
   // Open Category Add Modal (optionally as sub-category of parentId)
   const openAddCategory = (parentId = null) => {
+    const safeParentId = (typeof parentId === 'string' && parentId.trim().length > 0)
+      ? parentId.trim()
+      : null;
     setEditingCategory(null);
     setCatName('');
     setCatImage(PRESET_VECTOR_IMAGES[0].src);
-    setCatParentId(parentId);
+    if (safeParentId) {
+      setCatType('sub');
+      setCatParentId(safeParentId);
+    } else {
+      setCatType('main');
+      setCatParentId(topLevelCats[0]?._id || null);
+    }
     setErrorMsg('');
     setCatModalOpen(true);
   };
 
   // Open Category Edit Modal
   const openEditCategory = (cat, e) => {
-    e?.stopPropagation();
+    e?.stopPropagation?.();
     setEditingCategory(cat);
     setCatName(cat.name);
     setCatImage(cat.image || PRESET_VECTOR_IMAGES[0].src);
-    setCatParentId(cat.parentCategoryId || null);
+    if (cat.parentCategoryId) {
+      setCatType('sub');
+      setCatParentId(String(cat.parentCategoryId));
+    } else {
+      setCatType('main');
+      setCatParentId(topLevelCats.find(c => c._id !== cat._id)?._id || null);
+    }
     setErrorMsg('');
     setCatModalOpen(true);
   };
 
-  // Handle Category Save
-  const handleSaveCategory = async (e) => {
-    e.preventDefault();
+  // Handle Category Save — supports "Save & Add Another" for rapid multiple creations
+  const handleSaveCategory = async (e, keepOpen = false) => {
+    if (e && e.preventDefault) e.preventDefault();
     if (!catName.trim()) {
       setErrorMsg('Category name is required.');
+      return;
+    }
+    const finalParentId = catType === 'sub' ? catParentId : null;
+    if (catType === 'sub' && !finalParentId) {
+      setErrorMsg('Please select a parent category for this sub-category.');
       return;
     }
     setLoading(true);
     setErrorMsg('');
     try {
+      const activeShopId = currentTenantId || shops[0]?._id;
       if (editingCategory) {
-        await updateCategory(editingCategory._id, { name: catName.trim(), image: catImage });
+        await updateCategory(editingCategory._id, { 
+          name: catName.trim(), 
+          image: catImage,
+          parentCategoryId: finalParentId
+        });
       } else {
-        await addCategory(catName.trim(), catImage, undefined, catParentId);
+        await addCategory(catName.trim(), catImage, activeShopId, finalParentId);
+        if (finalParentId) {
+          setExpandedCategoryId(finalParentId);
+        }
       }
-      setCatModalOpen(false);
+
+      if (keepOpen) {
+        setCatName('');
+        setEditingCategory(null);
+        setErrorMsg('');
+      } else {
+        setCatModalOpen(false);
+      }
     } catch (err) {
       setErrorMsg(err.message || 'Failed to save category.');
     } finally {
@@ -122,7 +158,7 @@ export default function CatalogManager({ categories = [], items = [], shops = []
 
   // Handle Category Delete
   const handleDeleteCategory = async (cat, e) => {
-    e?.stopPropagation();
+    e?.stopPropagation?.();
     const subCatCount = getSubCats(cat._id).length;
     const subCatIds = getSubCats(cat._id).map(s => String(s._id));
     const directItemCount = items.filter(i => String(i.categoryId) === String(cat._id)).length;
@@ -150,14 +186,17 @@ export default function CatalogManager({ categories = [], items = [], shops = []
 
   // Open Item Add Modal — items can ONLY be created inside sub-categories
   const openAddItem = (preferredSubCatId = null) => {
+    const safeSubCatId = (typeof preferredSubCatId === 'string' && preferredSubCatId.trim().length > 0)
+      ? preferredSubCatId.trim()
+      : null;
     if (allSubCats.length === 0) {
-      alert('Items can only be created inside a sub-category.\n\nPlease click "+ Add Category" (or "+" inside a category) to create a sub-category first.');
+      alert('Items can only be created inside a sub-category.\n\nPlease click "+ Add Category" to create a sub-category under a parent category first.');
       return;
     }
 
     let defaultCatId = '';
-    if (preferredSubCatId && allSubCats.some(s => String(s._id) === String(preferredSubCatId))) {
-      defaultCatId = preferredSubCatId;
+    if (safeSubCatId && allSubCats.some(s => String(s._id) === String(safeSubCatId))) {
+      defaultCatId = safeSubCatId;
     } else if (selectedCategoryId) {
       // Check if selected is already a subcategory
       const isSub = allSubCats.some(s => String(s._id) === String(selectedCategoryId));
@@ -188,11 +227,11 @@ export default function CatalogManager({ categories = [], items = [], shops = []
 
   // Open Item Edit Modal
   const openEditItem = (item, e) => {
-    e?.stopPropagation();
+    e?.stopPropagation?.();
     setEditingItem(item);
     setItemName(item.name);
     setItemDesc(item.description || '');
-    setItemPrice(String(item.pricePerKg || item.pricePerItem || ''));
+    setItemPrice(String(item.pricePerKg !== undefined ? item.pricePerKg : (item.pricePerItem !== undefined ? item.pricePerItem : '')));
     setItemUnit(item.pricePerKg !== undefined ? 'KG' : 'ITEM');
     setItemIsBucket(!!item.isBucket);
     setItemCatId(item.categoryId || (allSubCats[0]?._id || ''));
@@ -298,13 +337,13 @@ export default function CatalogManager({ categories = [], items = [], shops = []
         </div>
         <div className="flex flex-wrap gap-2">
           <button
-            onClick={openAddCategory}
+            onClick={() => openAddCategory()}
             className="bg-[#9AE600] text-black border-2 border-black shadow-[3px_3px_0px_rgba(0,0,0,1)] px-4 py-2 font-black uppercase text-xs sm:text-sm hover:translate-y-[1px] hover:shadow-[1px_1px_0px_rgba(0,0,0,1)] transition-all flex items-center gap-1.5"
           >
             <Plus size={16} /> Add Category
           </button>
           <button
-            onClick={openAddItem}
+            onClick={() => openAddItem()}
             className="bg-[#0D8DE3] text-white border-2 border-black shadow-[3px_3px_0px_rgba(0,0,0,1)] px-4 py-2 font-black uppercase text-xs sm:text-sm hover:translate-y-[1px] hover:shadow-[1px_1px_0px_rgba(0,0,0,1)] transition-all flex items-center gap-1.5"
           >
             <Plus size={16} /> New Service Item
@@ -350,11 +389,11 @@ export default function CatalogManager({ categories = [], items = [], shops = []
           <div className="flex justify-between items-center bg-[#9AE600] border-4 border-black p-3 shadow-[4px_4px_0px_rgba(0,0,0,1)]">
             <span className="font-black uppercase text-sm">Categories ({categories.length})</span>
             <button 
-              onClick={openAddCategory}
-              className="p-1 bg-white border-2 border-black hover:bg-black hover:text-white transition-colors"
+              onClick={() => openAddCategory()}
+              className="p-1.5 bg-white border-2 border-black hover:bg-black hover:text-white transition-colors flex items-center gap-1 text-xs font-black uppercase shadow-[2px_2px_0px_rgba(0,0,0,1)]"
               title="Add Category"
             >
-              <Plus size={14} />
+              <Plus size={14} /> Add
             </button>
           </div>
 
@@ -387,16 +426,16 @@ export default function CatalogManager({ categories = [], items = [], shops = []
               const isSelected = selectedCategoryId === cat._id;
               const isExpanded = expandedCategoryId === cat._id;
               return (
-                <div key={cat._id}>
+                <div key={cat._id} className="border-2 border-black bg-white shadow-[2px_2px_0px_rgba(0,0,0,1)]">
                   <div 
                     onClick={() => {
                       setSelectedCategoryId(cat._id);
                       setExpandedCategoryId(isExpanded ? null : cat._id);
                     }}
-                    className={`p-3 border-2 border-black flex items-center justify-between cursor-pointer transition-all ${
+                    className={`p-3 flex items-center justify-between cursor-pointer transition-all ${
                       isSelected 
-                        ? 'bg-[#0D8DE3] text-white shadow-[4px_4px_0px_rgba(0,0,0,1)] -translate-y-0.5' 
-                        : 'bg-white text-black hover:bg-gray-50 shadow-[2px_2px_0px_rgba(0,0,0,1)]'
+                        ? 'bg-[#0D8DE3] text-white' 
+                        : 'bg-white text-black hover:bg-gray-50'
                     }`}
                   >
                     <div className="flex items-center gap-2.5 overflow-hidden">
@@ -411,7 +450,7 @@ export default function CatalogManager({ categories = [], items = [], shops = []
                       <div className="truncate">
                         <p className="font-black text-sm uppercase truncate">{cat.name}</p>
                         <p className={`text-[11px] font-bold ${isSelected ? 'text-blue-100' : 'text-gray-500'}`}>
-                          {totalItemCount} items{subCats.length > 0 ? ` · ${subCats.length} sub-cat` : ''}
+                          {totalItemCount} items · {subCats.length} sub-cat{subCats.length === 1 ? '' : 's'}
                         </p>
                       </div>
                     </div>
@@ -422,7 +461,7 @@ export default function CatalogManager({ categories = [], items = [], shops = []
                         className={`p-1.5 border border-black rounded transition-colors ${
                           isSelected ? 'bg-white text-black hover:bg-[#9AE600]' : 'bg-green-100 hover:bg-[#9AE600]'
                         }`}
-                        title="Add Sub-Category"
+                        title={`Add Sub-Category inside ${cat.name}`}
                       >
                         <Plus size={12} />
                       </button>
@@ -446,46 +485,61 @@ export default function CatalogManager({ categories = [], items = [], shops = []
                   </div>
 
                   {/* Sub-categories (shown when expanded) */}
-                  {isExpanded && subCats.length > 0 && (
-                    <div className="ml-4 mt-1 space-y-1">
-                      {subCats.map(sub => {
-                        const subItemCount = items.filter(i => i.categoryId === sub._id).length;
-                        const isSubSelected = selectedCategoryId === sub._id;
-                        return (
-                          <div
-                            key={sub._id}
-                            onClick={() => setSelectedCategoryId(sub._id)}
-                            className={`p-2.5 border-2 border-black flex items-center justify-between cursor-pointer transition-all ${
-                              isSubSelected
-                                ? 'bg-[#0D8DE3] text-white shadow-[3px_3px_0px_rgba(0,0,0,1)] -translate-y-0.5'
-                                : 'bg-gray-50 text-black hover:bg-gray-100 shadow-[2px_2px_0px_rgba(0,0,0,1)]'
-                            }`}
-                          >
-                            <div className="flex items-center gap-2 overflow-hidden">
-                              <ChevronRight size={12} className={isSubSelected ? 'text-white' : 'text-gray-400'} />
-                              <div className="truncate">
-                                <p className="font-black text-xs uppercase truncate">{sub.name}</p>
-                                <p className={`text-[10px] font-bold ${isSubSelected ? 'text-blue-100' : 'text-gray-500'}`}>{subItemCount} items</p>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-1" onClick={e => e.stopPropagation()}>
-                              <button 
-                                onClick={(e) => { e.stopPropagation(); openAddItem(sub._id); }} 
-                                className="px-1.5 py-1 bg-[#9AE600] hover:bg-black hover:text-[#9AE600] text-black border border-black rounded transition-colors flex items-center gap-0.5 text-[10px] font-black uppercase" 
-                                title="Add Item to this Sub-Category"
+                  {isExpanded && (
+                    <div className="p-2.5 bg-gray-50 border-t-2 border-dashed border-black space-y-2">
+                      {subCats.length > 0 ? (
+                        <div className="space-y-1.5">
+                          {subCats.map(sub => {
+                            const subItemCount = items.filter(i => i.categoryId === sub._id).length;
+                            const isSubSelected = selectedCategoryId === sub._id;
+                            return (
+                              <div
+                                key={sub._id}
+                                onClick={() => setSelectedCategoryId(sub._id)}
+                                className={`p-2 border-2 border-black flex items-center justify-between cursor-pointer transition-all ${
+                                  isSubSelected
+                                    ? 'bg-[#0D8DE3] text-white shadow-[2px_2px_0px_rgba(0,0,0,1)] -translate-y-0.5'
+                                    : 'bg-white text-black hover:bg-gray-100 shadow-[1px_1px_0px_rgba(0,0,0,1)]'
+                                }`}
                               >
-                                <Plus size={10} /> Item
-                              </button>
-                              <button onClick={(e) => openEditCategory(sub, e)} className="p-1 bg-white border border-black rounded hover:bg-[#9AE600] transition-colors" title="Edit">
-                                <Edit2 size={11} />
-                              </button>
-                              <button onClick={(e) => handleDeleteCategory(sub, e)} className="p-1 bg-red-100 hover:bg-red-500 hover:text-white text-red-700 border border-black rounded transition-colors" title="Delete">
-                                <Trash2 size={11} />
-                              </button>
-                            </div>
-                          </div>
-                        );
-                      })}
+                                <div className="flex items-center gap-1.5 overflow-hidden">
+                                  <ChevronRight size={12} className={isSubSelected ? 'text-white' : 'text-gray-400'} />
+                                  <div className="truncate">
+                                    <p className="font-black text-xs uppercase truncate">{sub.name}</p>
+                                    <p className={`text-[10px] font-bold ${isSubSelected ? 'text-blue-100' : 'text-gray-500'}`}>{subItemCount} items</p>
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-1 shrink-0" onClick={e => e.stopPropagation()}>
+                                  <button 
+                                    onClick={(e) => { e.stopPropagation(); openAddItem(sub._id); }} 
+                                    className="px-1.5 py-1 bg-[#9AE600] hover:bg-black hover:text-[#9AE600] text-black border border-black rounded transition-colors flex items-center gap-0.5 text-[10px] font-black uppercase" 
+                                    title="Add Item to this Sub-Category"
+                                  >
+                                    <Plus size={10} /> Item
+                                  </button>
+                                  <button onClick={(e) => openEditCategory(sub, e)} className="p-1 bg-white border border-black rounded hover:bg-[#9AE600] transition-colors" title="Edit">
+                                    <Edit2 size={11} />
+                                  </button>
+                                  <button onClick={(e) => handleDeleteCategory(sub, e)} className="p-1 bg-red-100 hover:bg-red-500 hover:text-white text-red-700 border border-black rounded transition-colors" title="Delete">
+                                    <Trash2 size={11} />
+                                  </button>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      ) : (
+                        <div className="text-center py-2">
+                          <p className="text-[11px] font-bold text-gray-500 mb-1">No sub-categories in "{cat.name}" yet.</p>
+                        </div>
+                      )}
+
+                      <button
+                        onClick={(e) => { e.stopPropagation(); openAddCategory(cat._id); }}
+                        className="w-full py-1.5 px-2 bg-[#9AE600] hover:bg-black hover:text-[#9AE600] text-black border border-black text-xs font-black uppercase flex items-center justify-center gap-1 transition-all shadow-[1px_1px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-y-[1px]"
+                      >
+                        <Plus size={12} /> Add Sub-Category to {cat.name}
+                      </button>
                     </div>
                   )}
                 </div>
@@ -508,6 +562,38 @@ export default function CatalogManager({ categories = [], items = [], shops = []
 
         {/* Service Items Section */}
         <div className="lg:col-span-3 space-y-4">
+          {/* Sub-Category Filter Pills Bar (when a top-level category is selected) */}
+          {selectedCategoryId && topLevelCats.some(c => c._id === selectedCategoryId) && (
+            <div className="bg-white p-3 border-4 border-black shadow-[4px_4px_0px_rgba(0,0,0,1)] flex flex-wrap items-center justify-between gap-2">
+              <div className="flex flex-wrap items-center gap-1.5">
+                <span className="text-xs font-black uppercase text-gray-500 mr-1 flex items-center gap-1">
+                  <Layers size={14} className="text-[#0D8DE3]" /> Sub-Categories:
+                </span>
+                <button
+                  onClick={() => setSelectedCategoryId(selectedCategoryId)}
+                  className="px-2.5 py-1 text-xs font-black uppercase border-2 border-black bg-black text-white shadow-[2px_2px_0px_rgba(0,0,0,1)] transition-all"
+                >
+                  All ({filteredItems.length})
+                </button>
+                {getSubCats(selectedCategoryId).map(sub => (
+                  <button
+                    key={sub._id}
+                    onClick={() => setSelectedCategoryId(sub._id)}
+                    className="px-2.5 py-1 text-xs font-black uppercase border-2 border-black bg-gray-50 hover:bg-gray-100 transition-all"
+                  >
+                    {sub.name} ({items.filter(i => String(i.categoryId) === String(sub._id)).length})
+                  </button>
+                ))}
+              </div>
+              <button
+                onClick={() => openAddCategory(selectedCategoryId)}
+                className="px-3 py-1 text-xs font-black uppercase border-2 border-black bg-[#9AE600] hover:bg-black hover:text-[#9AE600] transition-all flex items-center gap-1 shadow-[2px_2px_0px_rgba(0,0,0,1)]"
+              >
+                <Plus size={12} /> Add Sub-Category
+              </button>
+            </div>
+          )}
+
           {/* Search & Filter Bar */}
           <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 bg-white p-3 border-4 border-black shadow-[4px_4px_0px_rgba(0,0,0,1)]">
             <div className="relative flex-1">
@@ -523,7 +609,7 @@ export default function CatalogManager({ categories = [], items = [], shops = []
             <div className="flex items-center justify-between sm:justify-end gap-2 text-xs font-black uppercase">
               <span>Showing: {filteredItems.length} items</span>
               <button
-                onClick={openAddItem}
+                onClick={() => openAddItem()}
                 className="bg-[#0D8DE3] text-white border-2 border-black px-3 py-2 shadow-[2px_2px_0px_rgba(0,0,0,1)] hover:translate-y-[1px] transition-all flex items-center gap-1"
               >
                 <Plus size={14} /> Add Item
@@ -616,7 +702,7 @@ export default function CatalogManager({ categories = [], items = [], shops = []
                 {searchQuery ? 'Try changing your search keyword.' : 'Add your first laundry item or service.'}
               </p>
               <button
-                onClick={openAddItem}
+                onClick={() => openAddItem()}
                 className="mt-4 bg-[#0D8DE3] text-white border-2 border-black shadow-[3px_3px_0px_rgba(0,0,0,1)] px-6 py-2.5 font-black uppercase text-sm hover:translate-y-[1px] transition-all inline-flex items-center gap-2"
               >
                 <Plus size={16} /> Create Service Item
@@ -629,10 +715,12 @@ export default function CatalogManager({ categories = [], items = [], shops = []
       {/* ─── CATEGORY MODAL (Add / Edit) ─────────────────────────── */}
       {catModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-white border-4 border-black shadow-[10px_10px_0px_rgba(0,0,0,1)] w-full max-w-lg overflow-hidden animate-scale-up">
+          <div className="bg-white border-4 border-black shadow-[10px_10px_0px_rgba(0,0,0,1)] w-full max-w-lg max-h-[92vh] overflow-y-auto animate-scale-up">
             <div className="flex justify-between items-center p-4 border-b-4 border-black bg-[#9AE600]">
               <h3 className="font-black text-lg uppercase flex items-center gap-2">
-                <Layers size={18} /> {editingCategory ? 'Edit Category' : 'New Category'}
+                <Layers size={18} /> {editingCategory 
+                  ? (catType === 'sub' ? 'Edit Sub-Category' : 'Edit Category') 
+                  : (catType === 'sub' ? 'New Sub-Category' : 'New Main Category')}
               </h3>
               <button 
                 onClick={() => setCatModalOpen(false)}
@@ -649,20 +737,82 @@ export default function CatalogManager({ categories = [], items = [], shops = []
                 </div>
               )}
 
-              {/* Show parent context when creating sub-category */}
-              {catParentId && !editingCategory && (
-                <div className="p-3 bg-blue-50 border-2 border-[#0D8DE3] font-bold text-xs text-[#0D8DE3] flex items-center gap-2">
-                  <ChevronRight size={14} />
-                  Creating sub-category inside: <strong>{categories.find(c => c._id === catParentId)?.name || catParentId}</strong>
+              {/* Category Level Switcher: Main vs Sub-Category */}
+              <div>
+                <label className="block font-black text-xs uppercase mb-1.5">Category Level *</label>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCatType('main');
+                      setCatParentId(null);
+                    }}
+                    className={`p-2.5 border-2 border-black font-black uppercase text-xs flex items-center justify-center gap-2 transition-all ${
+                      catType === 'main'
+                        ? 'bg-black text-white shadow-[2px_2px_0px_rgba(0,0,0,1)]'
+                        : 'bg-gray-100 text-black hover:bg-gray-200'
+                    }`}
+                  >
+                    <Layers size={14} /> Main Category
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCatType('sub');
+                      if (!catParentId && topLevelCats.length > 0) {
+                        setCatParentId(topLevelCats[0]._id);
+                      }
+                    }}
+                    disabled={topLevelCats.length === 0}
+                    className={`p-2.5 border-2 border-black font-black uppercase text-xs flex items-center justify-center gap-2 transition-all ${
+                      catType === 'sub'
+                        ? 'bg-[#0D8DE3] text-white shadow-[2px_2px_0px_rgba(0,0,0,1)]'
+                        : 'bg-gray-100 text-black hover:bg-gray-200 disabled:opacity-40 disabled:cursor-not-allowed'
+                    }`}
+                  >
+                    <ChevronRight size={14} /> Sub-Category
+                  </button>
+                </div>
+                {topLevelCats.length === 0 && (
+                  <p className="text-[11px] font-bold text-amber-700 mt-1">
+                    Create at least one Main Category first before adding sub-categories.
+                  </p>
+                )}
+              </div>
+
+              {/* Parent Category Dropdown (when Sub-Category is selected) */}
+              {catType === 'sub' && (
+                <div className="p-3 bg-blue-50 border-2 border-[#0D8DE3] space-y-1.5">
+                  <label className="block font-black text-xs uppercase text-[#0D8DE3]">Select Parent Category *</label>
+                  <select
+                    value={catParentId || ''}
+                    onChange={(e) => setCatParentId(e.target.value)}
+                    required={catType === 'sub'}
+                    className="w-full p-2.5 border-2 border-black font-bold text-sm bg-white outline-none focus:bg-yellow-50 shadow-[2px_2px_0px_rgba(0,0,0,1)]"
+                  >
+                    <option value="" disabled>-- Choose Main Category --</option>
+                    {topLevelCats
+                      .filter(c => !editingCategory || c._id !== editingCategory._id)
+                      .map(parent => (
+                        <option key={parent._id} value={parent._id}>
+                          {parent.name}
+                        </option>
+                      ))}
+                  </select>
+                  <p className="text-[11px] font-bold text-gray-600">
+                    This sub-category will be organized inside the selected main category.
+                  </p>
                 </div>
               )}
 
               <div>
-                <label className="block font-black text-xs uppercase mb-1.5">Category Name *</label>
+                <label className="block font-black text-xs uppercase mb-1.5">
+                  {catType === 'sub' ? 'Sub-Category Name *' : 'Category Name *'}
+                </label>
                 <input
                   type="text"
                   required
-                  placeholder={catParentId ? 'e.g., Cotton Shirts, Denim Jeans' : 'e.g., Premium Dry Clean, Wash & Fold'}
+                  placeholder={catType === 'sub' ? 'e.g., Cotton Shirts, Denim Jeans, Sarees' : 'e.g., Everyday Wash & Fold, Premium Dry Clean'}
                   value={catName}
                   onChange={(e) => setCatName(e.target.value)}
                   className="w-full p-3 border-2 border-black font-bold text-sm outline-none focus:bg-yellow-50 shadow-[2px_2px_0px_rgba(0,0,0,1)]"
@@ -705,20 +855,30 @@ export default function CatalogManager({ categories = [], items = [], shops = []
                 />
               </div>
 
-              <div className="flex gap-3 pt-2">
+              <div className="flex flex-col sm:flex-row gap-2.5 pt-2">
                 <button
                   type="button"
                   onClick={() => setCatModalOpen(false)}
-                  className="flex-1 bg-gray-100 border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] py-3 font-black uppercase text-xs hover:bg-gray-200 transition-all"
+                  className="sm:w-28 bg-gray-100 border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] py-2.5 font-black uppercase text-xs hover:bg-gray-200 transition-all"
                 >
                   Cancel
                 </button>
+                {!editingCategory && (
+                  <button
+                    type="button"
+                    disabled={loading}
+                    onClick={(e) => handleSaveCategory(e, true)}
+                    className="flex-1 bg-yellow-300 hover:bg-yellow-400 text-black border-2 border-black shadow-[3px_3px_0px_rgba(0,0,0,1)] py-2.5 font-black uppercase text-xs hover:translate-y-[1px] transition-all flex justify-center items-center gap-1"
+                  >
+                    {loading ? 'Saving...' : '+ Save & Add Another'}
+                  </button>
+                )}
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex-1 bg-[#9AE600] text-black border-2 border-black shadow-[3px_3px_0px_rgba(0,0,0,1)] py-3 font-black uppercase text-xs hover:translate-y-[1px] transition-all flex justify-center items-center gap-1.5"
+                  className="flex-1 bg-[#9AE600] text-black border-2 border-black shadow-[3px_3px_0px_rgba(0,0,0,1)] py-2.5 font-black uppercase text-xs hover:translate-y-[1px] transition-all flex justify-center items-center gap-1.5"
                 >
-                  {loading ? 'Saving...' : editingCategory ? 'Save Changes' : 'Create Category'}
+                  {loading ? 'Saving...' : editingCategory ? 'Save Changes' : (catType === 'sub' ? 'Create Sub-Category' : 'Create Category')}
                 </button>
               </div>
             </form>
