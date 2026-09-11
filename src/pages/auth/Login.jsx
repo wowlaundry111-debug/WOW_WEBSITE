@@ -30,9 +30,10 @@ export default function Login() {
         } else {
           // Direct login (staff member or password authenticated)
           const user = useAppStore.getState().currentUser;
-          if (user?.role === 'SuperAdmin' || user?.role === 'ShopAdmin') {
+          const role = user?.role === 'Admin' ? 'ShopAdmin' : user?.role;
+          if (role === 'SuperAdmin' || role === 'ShopAdmin') {
             navigate('/admin');
-          } else if (user?.role === 'Delivery') {
+          } else if (role === 'Delivery') {
             navigate('/delivery');
           } else {
             navigate('/shop-select');
@@ -58,9 +59,10 @@ export default function Login() {
       const res = await verifyLoginOtp(email.trim().toLowerCase(), code);
       if (res.success) {
         const user = useAppStore.getState().currentUser;
-        if (user?.role === 'SuperAdmin' || user?.role === 'ShopAdmin') {
+        const role = user?.role === 'Admin' ? 'ShopAdmin' : user?.role;
+        if (role === 'SuperAdmin' || role === 'ShopAdmin') {
           navigate('/admin');
-        } else if (user?.role === 'Delivery') {
+        } else if (role === 'Delivery') {
           navigate('/delivery');
         } else {
           navigate('/shop-select');
