@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, ChevronDown, FileText, CheckCircle2, Droplets, Sparkles, Truck, Gift, User } from 'lucide-react';
+import { Search, ChevronDown, FileText, CheckCircle2, Droplets, Sparkles, Truck, Gift, User, Store } from 'lucide-react';
 import { useAppStore } from '../../store/useAppStore';
 import Navbar from '../../components/Navbar';
 import { resolveVectorImage } from '../../utils/vectorGallery';
@@ -25,7 +25,7 @@ const getCategoryStyle = (name) => {
     return { img: imgBedding, bg: 'bg-white', color: 'text-black', badge: 'Express' };
   }
   if (lowerName.includes('winter') || lowerName.includes('coat') || lowerName.includes('leather') || lowerName.includes('jacket')) {
-    return { img: imgLeather, bg: 'bg-white', color: 'text-black', badge: 'Save ₹99' };
+    return { img: imgLeather, bg: 'bg-[#061E38]', color: 'text-black', badge: 'Save ₹99' };
   }
   if (lowerName.includes('dryclean') || lowerName.includes('premium')) {
     return { img: imgDryClean, bg: 'bg-white', color: 'text-black', badge: 'Sanitized' };
@@ -47,7 +47,7 @@ const ORDER_STEPS = [
 ];
 
 export default function CustomerHome() {
-  const { categories, items, currentTenantId, cart, currentUser, orders, shops } = useAppStore();
+  const { categories, items, currentTenantId, setCurrentTenantId, cart, currentUser, orders, shops } = useAppStore();
   const [searchQuery, setSearchQuery] = useState('');
 
   const currentShop = shops.find((s) => s._id === currentTenantId) || shops[0];
@@ -64,8 +64,8 @@ export default function CustomerHome() {
     if (!searchQuery) return true;
     
     const query = searchQuery.toLowerCase();
-    const subCatIds = (c.subCategories?.length ? c.subCategories : categories.filter(sub => sub.parentCategoryId === c._id)).map(s => s._id);
-    return items.some(item => (item.categoryId === c._id || subCatIds.includes(item.categoryId)) && item.name.toLowerCase().includes(query));
+    const subCatIds = (c.subCategories?.length ? c.subCategories : categories.filter(sub => String(sub.parentCategoryId) === String(c._id))).map(s => String(s._id));
+    return items.some(item => (String(item.categoryId) === String(c._id) || subCatIds.includes(String(item.categoryId))) && item.name.toLowerCase().includes(query));
   });
 
   const getGreeting = () => {
@@ -97,6 +97,26 @@ export default function CustomerHome() {
               </h1>
             </div>
           </div>
+
+          {shops.length > 0 && (
+            <div className="flex items-center gap-2 bg-white border-2 border-black rounded-xl px-3 py-2 shadow-[3px_3px_0px_rgba(0,0,0,1)]">
+              <Store size={18} strokeWidth={2.5} className="text-[#0D8DE3]" />
+              <div className="flex flex-col">
+                <span className="text-[10px] font-black uppercase text-gray-500 tracking-wider">Branch</span>
+                <select
+                  value={currentTenantId || currentShop?._id || ''}
+                  onChange={(e) => setCurrentTenantId(e.target.value)}
+                  className="bg-transparent font-extrabold text-xs uppercase tracking-wider text-black cursor-pointer focus:outline-none"
+                >
+                  {shops.map((s) => (
+                    <option key={s._id} value={s._id}>
+                      {s.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Search */}

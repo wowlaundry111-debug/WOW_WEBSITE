@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAppStore } from '../store/useAppStore';
-import { ShoppingCart, User, LogOut, LayoutDashboard, Package } from 'lucide-react';
+import { ShoppingCart, User, LogOut, LayoutDashboard, Package, Store } from 'lucide-react';
 import logo from '../assets/logo.png';
 import { setAuthToken } from '../services/api';
 
 export default function Navbar() {
-  const { currentUser, cart, setCurrentUser } = useAppStore();
+  const { currentUser, cart, shops, currentTenantId, setCurrentTenantId } = useAppStore();
   const navigate = useNavigate();
   const [showMenu, setShowMenu] = useState(false);
 
@@ -26,12 +26,14 @@ export default function Navbar() {
     return '/order-history';
   };
 
+  const activeShopId = currentTenantId || (shops.length > 0 ? shops[0]._id : '');
+
   return (
     <nav className="bg-[#9AE600] border-b-2 border-black sticky top-0 z-50 shadow-[0_4px_0_rgba(0,0,0,1)] w-full">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
           
-          <div className="flex items-center">
+          <div className="flex items-center gap-3 sm:gap-4">
             <Link to="/" className="flex items-center gap-3 transition-colors">
               <div className="bg-black border-2 sm:border-3 border-black rounded-full shadow-[3px_3px_0px_rgba(0,0,0,1)] flex items-center justify-center w-14 h-14 sm:w-18 sm:h-18 overflow-hidden shrink-0">
                 <img src={logo} alt="WOW Laundry" className="w-16 h-16 sm:w-22 sm:h-22 object-contain scale-125" />
@@ -40,6 +42,25 @@ export default function Navbar() {
                 WOW Laundry
               </span>
             </Link>
+
+            {/* Shop Switcher Dropdown */}
+            {shops.length > 0 && (
+              <div className="hidden md:flex items-center gap-1.5 bg-white border-2 border-black rounded-xl px-3 py-1.5 shadow-[2px_2px_0px_rgba(0,0,0,1)]">
+                <Store size={16} strokeWidth={2.5} className="text-[#0D8DE3]" />
+                <select
+                  value={activeShopId}
+                  onChange={(e) => setCurrentTenantId(e.target.value)}
+                  className="bg-transparent font-black text-xs uppercase tracking-wider text-black cursor-pointer focus:outline-none"
+                  title="Select Shop Branch"
+                >
+                  {shops.map((s) => (
+                    <option key={s._id} value={s._id}>
+                      {s.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
           </div>
 
 

@@ -253,7 +253,7 @@ export default function CategoryItems() {
                   const isKg = Boolean(item.pricePerKg && item.pricePerKg > 0) || 
                     item.unit === 'KG' || 
                     (typeof item.name === 'string' && (item.name.toLowerCase().includes('per kg') || item.name.toLowerCase().includes('/ kg') || item.name.toLowerCase().includes('per-kg')));
-                  const isBucket = Boolean(item.isBucket);
+                  const isBucket = Boolean(item.isBucket || (item.pricePerKg && item.pricePerKg > 0) || (typeof item.name === 'string' && (item.name.toLowerCase().includes('per kg') || item.name.toLowerCase().includes('/ kg') || item.name.toLowerCase().includes('per-kg'))));
 
               // ── BUCKET ITEM CARD ───────────────────────────────────────────
               if (isBucket) {
