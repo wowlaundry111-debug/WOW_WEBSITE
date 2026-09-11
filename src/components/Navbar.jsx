@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAppStore } from '../store/useAppStore';
 import { ShoppingCart, User, LogOut, LayoutDashboard, Package, Store } from 'lucide-react';
@@ -6,17 +6,37 @@ import logo from '../assets/logo.png';
 import { setAuthToken } from '../services/api';
 
 export default function Navbar() {
-  const { currentUser, cart, shops, currentTenantId, setCurrentTenantId } = useAppStore();
+  const { currentUser, setCurrentUser, cart, shops, currentTenantId, setCurrentTenantId } = useAppStore();
   const navigate = useNavigate();
   const [showMenu, setShowMenu] = useState(false);
+  const menuRef = useRef(null);
 
   const cartItemsCount = cart.reduce((total, item) => total + item.quantity, 0);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setShowMenu(false);
+      }
+    };
+    if (showMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showMenu]);
 
   const handleLogout = () => {
     setCurrentUser(null);
     setAuthToken(null);
+    try {
+      localStorage.removeItem('auth-token');
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+    } catch {}
     setShowMenu(false);
-    navigate('/');
+    navigate('/login');
   };
 
   const getDashboardLink = () => {
@@ -84,7 +104,7 @@ export default function Navbar() {
             )}
 
             {currentUser ? (
-              <div className="relative">
+              <div className="relative" ref={menuRef}>
                 <button 
                   onClick={() => setShowMenu(!showMenu)}
                   className="flex items-center gap-3 bg-white border-2 border-black rounded-full py-1.5 px-3 hover:bg-gray-100 shadow-[4px_4px_0px_rgba(0,0,0,1)] transition-colors"
