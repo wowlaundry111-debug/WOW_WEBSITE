@@ -203,17 +203,18 @@ function Hero() {
                             <div className="hidden absolute left-[16%] md:left-[18%] top-[45%] w-16 md:w-24 h-10 md:h-12 bg-gradient-to-b from-[#9AE600] to-[#8cd927] border-[4px] border-black rounded-l-full shadow-[inset_2px_2px_0px_rgba(255,255,255,0.5)] z-[-1] transition-transform duration-300 group-hover:-translate-x-3"></div>
                             <div className="hidden absolute right-[16%] md:right-[18%] top-[45%] w-16 md:w-24 h-10 md:h-12 bg-gradient-to-b from-[#9AE600] to-[#8cd927] border-[4px] border-black rounded-r-full shadow-[inset_2px_2px_0px_rgba(255,255,255,0.5)] z-[-1] transition-transform duration-300 group-hover:translate-x-3"></div>
 
-                            <img
-                                src="/bucket.webp"
-                                srcSet="/bucket-sm.webp 400w, /bucket.webp 700w"
-                                sizes="(max-width: 640px) 384px, 700px"
-                                alt="Clean Laundry Basket - Doorstep Pickup WOW Laundry"
-                                width="700"
-                                height="655"
-                                fetchPriority="high"
-                                decoding="async"
-                                className="w-full h-auto object-contain relative z-0 drop-shadow-[0_15px_15px_rgba(0,0,0,0.15)] group-hover:scale-[1.02] transition-transform origin-bottom"
-                            />
+                            <picture className="w-full">
+                                <source media="(max-width: 640px)" srcSet="/bucket-sm.webp" width="400" height="374" />
+                                <img
+                                    src="/bucket.webp"
+                                    alt="Clean Laundry Basket - Doorstep Pickup WOW Laundry"
+                                    width="700"
+                                    height="655"
+                                    fetchPriority="high"
+                                    decoding="async"
+                                    className="w-full h-auto object-contain relative z-0 drop-shadow-[0_15px_15px_rgba(0,0,0,0.15)] group-hover:scale-[1.02] transition-transform origin-bottom"
+                                />
+                            </picture>
 
                             {/* Rich Soap Foam with billowing mounds and cartoon suds textures */}
                             <div className="absolute -top-[4.5%] sm:-top-[5.5%] md:-top-[6%] left-[5.5%] w-[89%] h-[24%] sm:h-[27%] z-10 pointer-events-none select-none transition-transform duration-300 group-hover:scale-[1.02] origin-bottom">
@@ -548,17 +549,18 @@ function Hero() {
                             </div>
                         </div>
 
-                        <img
-                            src="/heroimage.webp"
-                            srcSet="/heroimage-sm.webp 384w, /heroimage.webp 476w"
-                            sizes="(max-width: 640px) 384px, 476px"
-                            alt="WOW Laundry Professional Garment Care and Dry Cleaning Specialist"
-                            width="476"
-                            height="600"
-                            fetchPriority="high"
-                            decoding="async"
-                            className="w-full h-auto max-w-[430px] lg:max-w-[530px] object-contain relative z-20 drop-shadow-[0_20px_20px_rgba(0,0,0,0.15)] scale-110 transform -translate-y-8 md:-translate-y-12 mb-4"
-                        />
+                        <picture className="w-full max-w-[430px] lg:max-w-[530px] flex justify-center">
+                            <source media="(max-width: 640px)" srcSet="/heroimage-sm.webp" width="384" height="484" />
+                            <img
+                                src="/heroimage.webp"
+                                alt="WOW Laundry Professional Garment Care and Dry Cleaning Specialist"
+                                width="476"
+                                height="600"
+                                fetchPriority="high"
+                                decoding="async"
+                                className="w-full h-auto object-contain relative z-20 drop-shadow-[0_20px_20px_rgba(0,0,0,0.15)] scale-110 transform -translate-y-8 md:-translate-y-12 mb-4"
+                            />
+                        </picture>
 
 
 

@@ -25,14 +25,8 @@ function getDirectDownloadUrl(url) {
 }
 
 function Service() {
-  const { shops, currentTenantId, initializeAppData } = useAppStore();
+  const { shops, currentTenantId } = useAppStore();
   const [iosModalOpen, setIosModalOpen] = useState(false);
-
-  React.useEffect(() => {
-    if (!shops || shops.length === 0) {
-      initializeAppData();
-    }
-  }, [shops, initializeAppData]);
 
   // Find any shop that has androidAppUrl or iosAppUrl configured by SuperAdmin
   const globalAndroid = shops?.find(s => s.androidAppUrl && s.androidAppUrl.trim())?.androidAppUrl || '';
@@ -191,17 +185,26 @@ function Service() {
             <div className='mt-12 md:mt-20 grid grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10'>
                 <div className='rounded-3xl overflow-hidden border-2 border-black shadow-[8px_8px_0px_rgba(0,0,0,1)] transform hover:-translate-y-2 hover:rotate-1 transition-all group'>
                     <div className="bg-[#9AE600] border-b-2 border-black p-3 text-center font-black uppercase tracking-widest text-black">Modern Wash</div>
-                    <img src={first} srcSet={`${firstSm} 260w, ${first} 480w`} sizes="(max-width: 640px) 50vw, 366px" alt="Commercial Washing Machines - WOW Laundry Jalandhar" width="480" height="358" loading="lazy" decoding="async" className='w-full h-48 md:h-64 object-cover group-hover:scale-110 transition-transform duration-500' />
+                    <picture>
+                        <source media="(max-width: 640px)" srcSet={firstSm} width="260" height="193" />
+                        <img src={first} alt="Commercial Washing Machines - WOW Laundry Jalandhar" width="480" height="358" loading="lazy" decoding="async" className='w-full h-48 md:h-64 object-cover group-hover:scale-110 transition-transform duration-500' />
+                    </picture>
                 </div>
 
                 <div className='rounded-3xl overflow-hidden border-2 border-black shadow-[8px_8px_0px_rgba(0,0,0,1)] transform hover:-translate-y-2 hover:-rotate-1 transition-all group'>
                     <div className="bg-black border-b-2 border-black p-3 text-center font-black uppercase tracking-widest text-white">Premium Press</div>
-                    <img src={second} srcSet={`${secondSm} 260w, ${second} 480w`} sizes="(max-width: 640px) 50vw, 366px" alt="Garment Steam Ironing and Press Service" width="480" height="358" loading="lazy" decoding="async" className='w-full h-48 md:h-64 object-cover group-hover:scale-110 transition-transform duration-500' />
+                    <picture>
+                        <source media="(max-width: 640px)" srcSet={secondSm} width="260" height="193" />
+                        <img src={second} alt="Garment Steam Ironing and Press Service" width="480" height="358" loading="lazy" decoding="async" className='w-full h-48 md:h-64 object-cover group-hover:scale-110 transition-transform duration-500' />
+                    </picture>
                 </div>
 
                 <div className='rounded-3xl overflow-hidden border-2 border-black shadow-[8px_8px_0px_rgba(0,0,0,1)] transform hover:-translate-y-2 hover:rotate-2 transition-all group col-span-2 lg:col-span-1'>
                     <div className="bg-black border-b-2 border-black p-3 text-center font-black uppercase tracking-widest text-[#9AE600]">Care & Quality</div>
-                    <img src={third} srcSet={`${thirdSm} 260w, ${third} 480w`} sizes="(max-width: 640px) 50vw, 366px" alt="Hygienic Clothes Wash and Dry Cleaning Care" width="480" height="358" loading="lazy" decoding="async" className='w-full h-48 md:h-64 object-cover group-hover:scale-110 transition-transform duration-500' />
+                    <picture>
+                        <source media="(max-width: 640px)" srcSet={thirdSm} width="260" height="193" />
+                        <img src={third} alt="Hygienic Clothes Wash and Dry Cleaning Care" width="480" height="358" loading="lazy" decoding="async" className='w-full h-48 md:h-64 object-cover group-hover:scale-110 transition-transform duration-500' />
+                    </picture>
                 </div>
             </div>
         </div>

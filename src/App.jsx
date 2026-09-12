@@ -4,9 +4,10 @@ import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom
 import Footer from './components/Footer';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
-import SocketManager from './components/SocketManager';
 import ScrollToTop from './components/ScrollToTop';
 import { useAppStore } from './store/useAppStore';
+
+const SocketManager = lazy(() => import('./components/SocketManager'));
 
 import Home from './pages/Home';
 const Login = lazy(() => import('./pages/auth/Login'));
@@ -55,6 +56,7 @@ function SkeletonFallback() {
 
 function App() {
   const initializeAppData = useAppStore((state) => state.initializeAppData);
+  const currentUser = useAppStore((state) => state.currentUser);
 
   React.useEffect(() => {
     initializeAppData();
@@ -62,7 +64,11 @@ function App() {
 
   return (
     <>
-      <SocketManager />
+      {currentUser && (
+        <Suspense fallback={null}>
+          <SocketManager />
+        </Suspense>
+      )}
       <BrowserRouter>
         <ScrollToTop />
         <Suspense fallback={<SkeletonFallback />}>

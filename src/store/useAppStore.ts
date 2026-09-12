@@ -101,8 +101,9 @@ interface AppState {
   archiveDeliveredOrders: () => Promise<{ success: boolean; archivedCount?: number; message?: string }>;
 }
 
-// Catalog fetch deduplication guard
+// In-flight deduplication guards
 let catalogFetchInFlight: Promise<void> | null = null;
+let initAppDataInFlight: Promise<void> | null = null;
 
 export const useAppStore = create<AppState>()(
   persist(
@@ -219,59 +220,71 @@ export const useAppStore = create<AppState>()(
 
       // App initialization — lean startup: shops + offers only, no all-users dump
       initializeAppData: async () => {
-        const GLOBAL_TTL = 5 * 60_000; // 5 minutes
-        const now = Date.now();
-        const { shopsLastFetched, offersLastFetched, shops } = get();
-
-        const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
-        if (!token && get().currentUser) {
-          set({ currentUser: null });
+        if (initAppDataInFlight) {
+          return initAppDataInFlight;
         }
 
-        // Skip re-fetch if shops/offers data is still fresh and we already have data
-        const isShopsFresh = shops.length > 0 && (now - shopsLastFetched) < GLOBAL_TTL;
-        const isOffersFresh = (now - offersLastFetched) < GLOBAL_TTL;
+        const runInit = async () => {
+          const GLOBAL_TTL = 5 * 60_000; // 5 minutes
+          const now = Date.now();
+          const { shopsLastFetched, offersLastFetched, shops } = get();
 
-        if (isShopsFresh && isOffersFresh) {
-          if (token && get().currentUser) {
-            const promises: Promise<any>[] = [get().fetchCatalog(), get().fetchOrders()];
-            if (['SuperAdmin', 'ShopAdmin'].includes(get().currentUser!.role)) {
-              promises.push(get().fetchUsers());
-            }
-            await Promise.all(promises);
+          const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+          if (!token && get().currentUser) {
+            set({ currentUser: null });
           }
-          return;
-        }
 
-        set({ isLoading: true, error: null });
-        try {
-          const shopId = get().currentTenantId;
-          const offersUrl = shopId ? `/catalog/offers?shopId=${shopId}` : '/catalog/offers';
+          // Skip re-fetch if shops/offers data is still fresh and we already have data
+          const isShopsFresh = shops.length > 0 && (now - shopsLastFetched) < GLOBAL_TTL;
+          const isOffersFresh = (now - offersLastFetched) < GLOBAL_TTL;
 
-          const [shopsRes, offersRes] = await Promise.all([
-            api.get('/catalog/shops'),
-            api.get(offersUrl),
-          ]);
-
-          set({
-            shops: shopsRes.data,
-            offers: offersRes.data,
-            shopsLastFetched: Date.now(),
-            offersLastFetched: Date.now(),
-            isLoading: false,
-          });
-
-          // If logged in with active token, fetch their specific data
-          if (token && get().currentUser) {
-            const promises: Promise<any>[] = [get().fetchCatalog(), get().fetchOrders()];
-            if (['SuperAdmin', 'ShopAdmin'].includes(get().currentUser!.role)) {
-              promises.push(get().fetchUsers());
+          if (isShopsFresh && isOffersFresh) {
+            if (token && get().currentUser) {
+              const promises: Promise<any>[] = [get().fetchCatalog(), get().fetchOrders()];
+              if (['SuperAdmin', 'ShopAdmin'].includes(get().currentUser!.role)) {
+                promises.push(get().fetchUsers());
+              }
+              await Promise.all(promises);
             }
-            await Promise.all(promises);
+            return;
           }
-        } catch (err: any) {
-          set({ error: err.message || 'Failed to load app data', isLoading: false });
-        }
+
+          set({ isLoading: true, error: null });
+          try {
+            const shopId = get().currentTenantId;
+            const offersUrl = shopId ? `/catalog/offers?shopId=${shopId}` : '/catalog/offers';
+
+            const [shopsRes, offersRes] = await Promise.all([
+              api.get('/catalog/shops'),
+              api.get(offersUrl),
+            ]);
+
+            set({
+              shops: shopsRes.data,
+              offers: offersRes.data,
+              shopsLastFetched: Date.now(),
+              offersLastFetched: Date.now(),
+              isLoading: false,
+            });
+
+            // If logged in with active token, fetch their specific data
+            if (token && get().currentUser) {
+              const promises: Promise<any>[] = [get().fetchCatalog(), get().fetchOrders()];
+              if (['SuperAdmin', 'ShopAdmin'].includes(get().currentUser!.role)) {
+                promises.push(get().fetchUsers());
+              }
+              await Promise.all(promises);
+            }
+          } catch (err: any) {
+            set({ error: err.message || 'Failed to load app data', isLoading: false });
+          }
+        };
+
+        initAppDataInFlight = runInit().finally(() => {
+          initAppDataInFlight = null;
+        });
+
+        return initAppDataInFlight;
       },
 
       sendLoginOtp: async (identifier, password) => {
