@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '../../store/useAppStore';
-import { ArrowLeft, Trash2, Plus, Minus, MapPin, CheckCircle2, Receipt, AlertTriangle, Sparkles, Check, Home, Briefcase } from 'lucide-react';
+import { ArrowLeft, Trash2, Plus, Minus, MapPin, CheckCircle2, Receipt, AlertTriangle, Sparkles, Check, Home, Briefcase, Scale } from 'lucide-react';
 
 export default function Cart() {
   const navigate = useNavigate();
@@ -106,12 +106,10 @@ export default function Cart() {
       return;
     }
     const minOrderValue = shop?.minOrderValue || 0;
-    // Only enforce minimum order check if there are no KG items (since KG items are weighed later)
     if (!hasKgItems && subtotal < minOrderValue) {
       setError(`Minimum order value is ₹${minOrderValue}. Please add more items.`);
       return;
     }
-
 
     setLoading(true);
     setError('');
@@ -130,16 +128,16 @@ export default function Cart() {
   if (cart.length === 0) {
     return (
       <div className="min-h-screen bg-[#0D8DE3] flex flex-col items-center justify-center p-4 font-outfit">
-        <div className="w-32 h-32 bg-[#9AE600] border-2 border-black rounded-full flex items-center justify-center mb-8 shadow-[8px_8px_0px_rgba(0,0,0,1)] text-black">
-          <Trash2 size={48} strokeWidth={3} />
+        <div className="w-24 h-24 sm:w-32 sm:h-32 bg-[#9AE600] border-2 border-black rounded-full flex items-center justify-center mb-6 sm:mb-8 shadow-[6px_6px_0px_rgba(0,0,0,1)] text-black">
+          <Trash2 size={40} strokeWidth={3} />
         </div>
-        <h2 className="text-4xl font-black text-black mb-4 lilita-one-regular uppercase tracking-widest text-center">Your cart is empty</h2>
-        <p className="text-black mb-10 text-center max-w-sm font-black text-lg bg-white p-4 border-2 border-black rounded-2xl shadow-[4px_4px_0px_rgba(0,0,0,1)] uppercase">
+        <h2 className="text-3xl sm:text-4xl font-black text-black mb-3 lilita-one-regular uppercase tracking-widest text-center">Your cart is empty</h2>
+        <p className="text-black mb-8 text-center max-w-sm font-black text-sm sm:text-base bg-white p-3 sm:p-4 border-2 border-black rounded-2xl shadow-[4px_4px_0px_rgba(0,0,0,1)] uppercase">
           Looks like you haven't added any items to your cart yet.
         </p>
         <button 
           onClick={() => navigate('/order')}
-          className="bg-black text-[#0D8DE3] font-black py-4 px-10 rounded-xl text-xl uppercase tracking-widest border-2 border-black shadow-[6px_6px_0px_#9AE600] active:translate-y-2 active:translate-x-2 active:shadow-none transition-all"
+          className="bg-black text-[#0D8DE3] font-black py-3 sm:py-4 px-8 sm:px-10 rounded-xl text-base sm:text-xl uppercase tracking-widest border-2 border-black shadow-[4px_4px_0px_#9AE600] active:translate-y-1 active:translate-x-1 active:shadow-none transition-all"
         >
           Start Shopping
         </button>
@@ -148,55 +146,58 @@ export default function Cart() {
   }
 
   return (
-    <div className="min-h-screen bg-[#FAF7F2] pb-40 font-outfit selection:bg-black selection:text-[#9AE600]">
+    <div className="min-h-screen bg-[#FAF7F2] pb-28 sm:pb-36 font-outfit selection:bg-black selection:text-[#9AE600]">
       {/* Header Sticky */}
-      <div className="sticky top-0 z-40 bg-[#0D8DE3] border-b-2 border-black shadow-[0_4px_0_rgba(0,0,0,1)]">
-        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
+      <div className="sticky top-0 z-40 bg-[#0D8DE3] border-b-2 border-black shadow-[0_3px_0_rgba(0,0,0,1)]">
+        <div className="max-w-4xl mx-auto px-3.5 py-2.5 sm:px-4 sm:py-3.5 flex items-center justify-between">
+          <div className="flex items-center gap-3">
             <button 
               onClick={() => navigate('/order')}
-              className="w-12 h-12 bg-white border-2 border-black rounded-full flex items-center justify-center text-black hover:bg-black hover:text-[#0D8DE3] shadow-[4px_4px_0px_rgba(0,0,0,1)] active:translate-y-1 active:translate-x-1 active:shadow-none transition-all"
+              className="w-9 h-9 sm:w-11 sm:h-11 bg-white border-2 border-black rounded-full flex items-center justify-center text-black hover:bg-black hover:text-[#0D8DE3] shadow-[3px_3px_0px_rgba(0,0,0,1)] active:translate-y-0.5 active:translate-x-0.5 active:shadow-none transition-all"
             >
-              <ArrowLeft size={24} strokeWidth={4} />
+              <ArrowLeft size={20} strokeWidth={3.5} />
             </button>
-            <div>
-              <h1 className="text-3xl font-black text-black lilita-one-regular uppercase tracking-widest">Checkout</h1>
-            </div>
+            <h1 className="text-2xl sm:text-3xl font-black text-white lilita-one-regular uppercase tracking-wider drop-shadow-[2px_2px_0px_rgba(0,0,0,1)]">
+              Checkout
+            </h1>
           </div>
-          <button onClick={clearCart} className="bg-[#0D8DE3] text-black font-black text-sm uppercase tracking-widest px-4 py-2 rounded-xl border-2 border-black shadow-[4px_4px_0px_rgba(0,0,0,1)] active:translate-y-1 active:translate-x-1 active:shadow-none transition-all">
+          <button 
+            onClick={clearCart} 
+            className="bg-white hover:bg-gray-100 text-black font-black text-xs uppercase tracking-wider px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl border-2 border-black shadow-[3px_3px_0px_rgba(0,0,0,1)] active:translate-y-0.5 active:translate-x-0.5 active:shadow-none transition-all"
+          >
             Clear All
           </button>
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-4 py-8 grid grid-cols-1 md:grid-cols-12 gap-8">
-        <div className="md:col-span-7 space-y-8">
+      <div className="max-w-4xl mx-auto px-3.5 sm:px-4 py-4 sm:py-6 grid grid-cols-1 md:grid-cols-12 gap-4 sm:gap-6">
+        <div className="md:col-span-7 space-y-4 sm:space-y-6">
           
           {isClosed && (
-            <div className="bg-[#0D8DE3] border-2 border-black rounded-3xl p-6 shadow-[6px_6px_0px_rgba(0,0,0,1)] animate-fade-in-up" style={{ animationDelay: '0ms' }}>
-              <div className="flex items-center gap-4 mb-4">
-                <div className="bg-white rounded-full w-12 h-12 flex items-center justify-center border-2 border-black">
-                  <AlertTriangle size={24} strokeWidth={2.5} className="text-black" />
+            <div className="bg-[#0D8DE3] border-2 border-black rounded-2xl sm:rounded-3xl p-4 sm:p-5 shadow-[4px_4px_0px_rgba(0,0,0,1)]">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="bg-white rounded-full w-9 h-9 flex items-center justify-center border-2 border-black shrink-0">
+                  <AlertTriangle size={20} strokeWidth={2.5} className="text-black" />
                 </div>
-                <h3 className="font-black text-black text-2xl uppercase lilita-one-regular">Branch Closed</h3>
+                <h3 className="font-black text-black text-xl uppercase lilita-one-regular">Branch Closed</h3>
               </div>
-              <p className="text-black font-extrabold uppercase bg-white p-3 border-2 border-black rounded-xl">
+              <p className="text-black font-extrabold uppercase bg-white p-2.5 border-2 border-black rounded-xl text-xs sm:text-sm">
                 This branch ("{shop?.name || 'WOW Express'}") is temporarily closed. You cannot place new orders until this branch re-opens.
               </p>
             </div>
           )}
 
           {/* Delivery Details */}
-          <div className="bg-[#9AE600] rounded-3xl border-2 border-black p-6 shadow-[6px_6px_0px_rgba(0,0,0,1)] animate-fade-in-up" style={{ animationDelay: '100ms' }}>
-            <div className="flex items-center gap-3 mb-6 bg-black text-[#9AE600] py-2 px-4 rounded-xl border-2 border-black shadow-[-4px_4px_0px_white] inline-flex -ml-2">
-              <MapPin size={24} strokeWidth={3} />
-              <h2 className="font-black text-xl uppercase lilita-one-regular tracking-widest">Delivery Address</h2>
+          <div className="bg-[#9AE600] rounded-2xl sm:rounded-3xl border-2 border-black p-4 sm:p-5 shadow-[4px_4px_0px_rgba(0,0,0,1)]">
+            <div className="flex items-center gap-2 mb-3.5 bg-black text-[#9AE600] py-1.5 px-3 rounded-lg border-2 border-black shadow-[-2px_2px_0px_white] inline-flex">
+              <MapPin size={18} strokeWidth={3} />
+              <h2 className="font-black text-sm sm:text-base uppercase lilita-one-regular tracking-wider">Delivery Address</h2>
             </div>
             
-            <div className="space-y-4">
+            <div className="space-y-3">
               {/* Address Tag Selector */}
               <div>
-                <label className="block text-xs font-black text-black mb-1.5 uppercase tracking-wider">
+                <label className="block text-[11px] font-black text-black mb-1 uppercase tracking-wider">
                   Save Address As
                 </label>
                 <div className="grid grid-cols-3 gap-2">
@@ -212,13 +213,13 @@ export default function Cart() {
                         key={t.tag}
                         type="button"
                         onClick={() => setAddrTag(t.tag)}
-                        className={`py-2 px-3 rounded-xl border-2 border-black font-black text-sm transition-all flex items-center justify-center gap-2 ${
+                        className={`py-1.5 px-2 rounded-xl border-2 border-black font-black text-xs transition-all flex items-center justify-center gap-1.5 ${
                           isSelected
                             ? 'bg-black text-[#9AE600] shadow-[2px_2px_0px_rgba(0,0,0,1)]'
                             : 'bg-white text-black hover:bg-gray-100'
                         }`}
                       >
-                        <IconComponent size={15} strokeWidth={2.5} />
+                        <IconComponent size={13} strokeWidth={2.5} />
                         <span>{t.label}</span>
                       </button>
                     );
@@ -228,7 +229,7 @@ export default function Cart() {
 
               {/* Field 1: Flat / House No */}
               <div>
-                <label className="block text-xs font-black text-black mb-1 uppercase tracking-wider">
+                <label className="block text-[11px] font-black text-black mb-1 uppercase tracking-wider">
                   House / Flat / Building
                 </label>
                 <input 
@@ -236,27 +237,27 @@ export default function Cart() {
                   value={flatNo}
                   onChange={(e) => setFlatNo(e.target.value)}
                   placeholder="e.g. Flat 402, Palm Heights"
-                  className="w-full bg-white border-2 border-black rounded-xl p-3 text-black font-extrabold focus:outline-none focus:bg-white text-sm shadow-[3px_3px_0px_rgba(0,0,0,1)]"
+                  className="w-full bg-white border-2 border-black rounded-xl p-2.5 text-black font-extrabold focus:outline-none text-xs sm:text-sm shadow-[2px_2px_0px_rgba(0,0,0,1)]"
                 />
               </div>
 
               {/* Field 2: Area & Street */}
               <div>
-                <label className="block text-xs font-black text-black mb-1 uppercase tracking-wider">
+                <label className="block text-[11px] font-black text-black mb-1 uppercase tracking-wider">
                   Area, Street & City
                 </label>
                 <input 
                   type="text"
                   value={area}
                   onChange={(e) => setArea(e.target.value)}
-                  placeholder="e.g. 100ft Road, Near Metro, Indiranagar"
-                  className="w-full bg-white border-2 border-black rounded-xl p-3 text-black font-extrabold focus:outline-none focus:bg-white text-sm shadow-[3px_3px_0px_rgba(0,0,0,1)]"
+                  placeholder="e.g. Lawgate, Hostel Block 1"
+                  className="w-full bg-white border-2 border-black rounded-xl p-2.5 text-black font-extrabold focus:outline-none text-xs sm:text-sm shadow-[2px_2px_0px_rgba(0,0,0,1)]"
                 />
               </div>
 
               {/* Pickup Slot */}
-              <div className="pt-2">
-                <label className="block text-xs font-black text-black mb-1 uppercase tracking-wider">
+              <div>
+                <label className="block text-[11px] font-black text-black mb-1 uppercase tracking-wider">
                   Pickup Time Slot
                 </label>
                 <input 
@@ -264,7 +265,7 @@ export default function Cart() {
                   value={pickupTime}
                   onChange={(e) => setPickupTime(e.target.value)}
                   placeholder="e.g. Today 4:00 PM - 6:00 PM, Tomorrow Morning"
-                  className="w-full bg-white border-2 border-black rounded-xl p-3 text-black font-extrabold focus:outline-none focus:bg-white text-sm shadow-[3px_3px_0px_rgba(0,0,0,1)]"
+                  className="w-full bg-white border-2 border-black rounded-xl p-2.5 text-black font-extrabold focus:outline-none text-xs sm:text-sm shadow-[2px_2px_0px_rgba(0,0,0,1)]"
                 />
               </div>
             </div>
@@ -272,17 +273,16 @@ export default function Cart() {
 
           {/* Wash Add-ons & Preferences */}
           {availableWashPrefs.length > 0 && (
-            <div className="bg-[#0D8DE3]/10 rounded-3xl border-2 border-black p-6 shadow-[6px_6px_0px_rgba(0,0,0,1)] animate-fade-in-up" style={{ animationDelay: '150ms' }}>
-              <div className="flex items-center justify-between mb-4">
+            <div className="bg-[#0D8DE3]/10 rounded-2xl sm:rounded-3xl border-2 border-black p-4 sm:p-5 shadow-[4px_4px_0px_rgba(0,0,0,1)]">
+              <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
-                  <Sparkles size={22} className="text-[#0D8DE3]" strokeWidth={3} />
-                  <h2 className="font-black text-black text-xl uppercase lilita-one-regular tracking-wide">Wash Add-ons & Preferences</h2>
+                  <Sparkles size={18} className="text-[#0D8DE3]" strokeWidth={3} />
+                  <h2 className="font-black text-black text-base sm:text-lg uppercase lilita-one-regular tracking-wide">Wash Add-ons</h2>
                 </div>
-                <span className="text-xs font-black uppercase bg-[#0D8DE3] text-white px-2.5 py-1 rounded-full border border-black">Optional</span>
+                <span className="text-[10px] font-black uppercase bg-[#0D8DE3] text-white px-2 py-0.5 rounded-full border border-black">Optional</span>
               </div>
-              <p className="text-xs font-bold text-gray-600 mb-4 uppercase">Customize your wash care with premium shop add-ons:</p>
 
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {availableWashPrefs.map((pref) => {
                   const isSelected = selectedWashPrefs.some(p => p.name === pref.name);
                   return (
@@ -290,27 +290,27 @@ export default function Cart() {
                       type="button"
                       key={pref.id || pref.name}
                       onClick={() => toggleWashPref(pref)}
-                      className={`w-full text-left p-4 rounded-2xl border-2 border-black flex items-center justify-between transition-all ${
+                      className={`w-full text-left p-2.5 sm:p-3 rounded-xl border-2 border-black flex items-center justify-between transition-all ${
                         isSelected
-                          ? 'bg-[#9AE600] shadow-[4px_4px_0px_rgba(0,0,0,1)] -translate-y-0.5'
-                          : 'bg-white hover:bg-gray-50 shadow-[2px_2px_0px_rgba(0,0,0,1)]'
+                          ? 'bg-[#9AE600] shadow-[2px_2px_0px_rgba(0,0,0,1)]'
+                          : 'bg-white hover:bg-gray-50 shadow-[1px_1px_0px_rgba(0,0,0,1)]'
                       }`}
                     >
-                      <div className="flex items-center gap-3">
-                        <div className={`w-6 h-6 rounded-lg border-2 border-black flex items-center justify-center transition-colors ${
+                      <div className="flex items-center gap-2.5 min-w-0 pr-2">
+                        <div className={`w-5 h-5 rounded-md border-2 border-black shrink-0 flex items-center justify-center transition-colors ${
                           isSelected ? 'bg-black text-[#9AE600]' : 'bg-white'
                         }`}>
-                          {isSelected && <Check size={16} strokeWidth={4} />}
+                          {isSelected && <Check size={14} strokeWidth={4} />}
                         </div>
-                        <div>
-                          <h4 className="font-black text-sm uppercase text-black">{pref.name}</h4>
+                        <div className="truncate">
+                          <h4 className="font-black text-xs uppercase text-black truncate">{pref.name}</h4>
                           {pref.description && (
-                            <p className="text-xs font-bold text-gray-600 mt-0.5">{pref.description}</p>
+                            <p className="text-[10px] font-bold text-gray-600 truncate">{pref.description}</p>
                           )}
                         </div>
                       </div>
 
-                      <span className="font-black text-xs uppercase bg-white px-2.5 py-1 rounded-lg border-2 border-black text-black shrink-0 ml-2">
+                      <span className="font-black text-xs uppercase bg-white px-2 py-0.5 rounded-lg border-2 border-black text-black shrink-0">
                         +₹{pref.price}
                       </span>
                     </button>
@@ -321,55 +321,52 @@ export default function Cart() {
           )}
 
           {/* Cart Items */}
-          <div className="bg-white rounded-3xl border-2 border-black overflow-hidden shadow-[6px_6px_0px_rgba(0,0,0,1)] animate-fade-in-up" style={{ animationDelay: '200ms' }}>
-            <div className="p-6 border-b-2 border-black bg-[#9AE600] flex justify-between items-center">
-              <h2 className="font-black text-black text-2xl uppercase lilita-one-regular tracking-widest">Item Summary</h2>
-              <span className="bg-black text-[#9AE600] text-sm font-black px-3 py-1.5 rounded-lg border-2 border-black tracking-widest uppercase">{cart.length} ITEMS</span>
+          <div className="bg-white rounded-2xl sm:rounded-3xl border-2 border-black overflow-hidden shadow-[4px_4px_0px_rgba(0,0,0,1)]">
+            <div className="p-3.5 sm:p-4 border-b-2 border-black bg-[#9AE600] flex justify-between items-center">
+              <h2 className="font-black text-black text-lg sm:text-xl uppercase lilita-one-regular tracking-wide">Item Summary</h2>
+              <span className="bg-black text-[#9AE600] text-xs font-black px-2.5 py-1 rounded-lg border-2 border-black tracking-wider uppercase">{cart.length} ITEMS</span>
             </div>
-            <div className="divide-y-4 divide-black p-2">
+            <div className="divide-y-2 divide-gray-200">
               {cart.map((item) => {
                 const isKg = isKgItem(item);
                 return (
-                  <div key={item.itemId} className="p-4 flex gap-4 items-center group hover:bg-gray-50 transition-colors">
-                    <div className="w-20 h-20 bg-[#0D8DE3] rounded-2xl overflow-hidden flex-shrink-0 flex items-center justify-center border-2 border-black shadow-[4px_4px_0px_rgba(0,0,0,1)] group-hover:scale-105 transition-transform">
+                  <div key={item.itemId} className="p-3 sm:p-3.5 flex gap-3 items-center hover:bg-gray-50 transition-colors">
+                    <div className="w-14 h-14 sm:w-16 sm:h-16 bg-[#0D8DE3] rounded-xl overflow-hidden flex-shrink-0 flex items-center justify-center border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)]">
                       {item.image ? (
                         <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
                       ) : (
-                        <span className="text-black text-3xl font-black lilita-one-regular">{item.name.charAt(0)}</span>
+                        <span className="text-white text-xl sm:text-2xl font-black lilita-one-regular">{item.name.charAt(0)}</span>
                       )}
                     </div>
-                    <div className="flex-1 pl-2">
-                      <h3 className="font-black text-black text-lg uppercase tracking-wide line-clamp-1">{item.name}</h3>
+                    <div className="flex-1 min-w-0 pr-1">
+                      <h3 className="font-black text-black text-sm uppercase tracking-wide truncate">{item.name}</h3>
                       {(item.categoryName || item.subCategoryName) && (
-                        <p className="text-[11px] font-black uppercase text-gray-600 bg-gray-100 px-2 py-0.5 rounded border border-gray-300 mt-1 inline-block">
-                          {item.categoryName}{item.subCategoryName ? ` › ${item.subCategoryName}` : ''}{item.isBucket ? ' • Bucket' : ''}
-                        </p>
-                      )}
-                      {item.isBucket && !item.categoryName && (
-                        <p className="text-[11px] font-black uppercase text-black bg-[#9AE600] px-2 py-0.5 rounded border border-black mt-1 inline-block">
-                          Laundry Bucket
+                        <p className="text-[10px] font-black uppercase text-gray-600 bg-gray-100 px-1.5 py-0.5 rounded border border-gray-300 mt-0.5 inline-block truncate max-w-full">
+                          {item.categoryName}{item.subCategoryName ? ` › ${item.subCategoryName}` : ''}
                         </p>
                       )}
                       {isKg ? (
-                        <p className="text-xs font-black text-[#0D8DE3] uppercase tracking-widest mt-1 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-lg inline-block">Weighed at delivery</p>
+                        <div className="flex items-center gap-1 text-[10px] font-black text-[#0D8DE3] uppercase mt-0.5">
+                          <Scale size={11} strokeWidth={2.5} /> Weighed at pickup
+                        </div>
                       ) : (
-                        <p className="text-sm text-gray-700 font-extrabold mt-1">₹{item.price} / {item.unit || 'Item'}</p>
+                        <p className="text-xs text-gray-700 font-extrabold mt-0.5">₹{item.price} / {item.unit || 'Item'}</p>
                       )}
                     </div>
                     
-                    <div className="flex flex-col items-end gap-3">
+                    <div className="flex flex-col items-end gap-2 shrink-0">
                       {isKg ? (
-                        <span className="font-black text-xs text-white bg-[#0D8DE3] px-2 py-1 border-2 border-black rounded-lg uppercase tracking-wider">Pending</span>
+                        <span className="font-black text-[10px] text-white bg-[#0D8DE3] px-2 py-0.5 border-2 border-black rounded-md uppercase tracking-wider">Pending</span>
                       ) : (
-                        <span className="font-black text-black text-xl bg-[#9AE600] px-2 py-0.5 border-2 border-black rounded-lg">₹{(item.price || 0) * item.quantity}</span>
+                        <span className="font-black text-black text-sm sm:text-base bg-[#9AE600] px-2 py-0.5 border-2 border-black rounded-lg">₹{(item.price || 0) * item.quantity}</span>
                       )}
-                      <div className="flex items-center bg-[#0D8DE3] border-2 border-black rounded-xl shadow-[4px_4px_0px_rgba(0,0,0,1)] overflow-hidden">
-                        <button onClick={() => updateCartQuantity(item.itemId, item.quantity - 1)} className="w-10 h-10 flex items-center justify-center text-black hover:bg-black hover:text-[#0D8DE3] transition-colors border-r-4 border-black">
-                          <Minus size={20} strokeWidth={5} />
+                      <div className="flex items-center bg-[#0D8DE3] border-2 border-black rounded-lg shadow-[2px_2px_0px_rgba(0,0,0,1)] overflow-hidden">
+                        <button onClick={() => updateCartQuantity(item.itemId, item.quantity - 1)} className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-black hover:bg-black hover:text-[#0D8DE3] transition-colors border-r-2 border-black">
+                          <Minus size={14} strokeWidth={3.5} />
                         </button>
-                        <span className="w-10 text-center font-black text-black text-lg bg-white h-10 flex items-center justify-center">{item.quantity}</span>
-                        <button onClick={() => updateCartQuantity(item.itemId, item.quantity + 1)} className="w-10 h-10 flex items-center justify-center text-black hover:bg-black hover:text-[#0D8DE3] transition-colors border-l-4 border-black">
-                          <Plus size={20} strokeWidth={5} />
+                        <span className="w-7 sm:w-8 text-center font-black text-black text-xs sm:text-sm bg-white h-7 sm:h-8 flex items-center justify-center">{item.quantity}</span>
+                        <button onClick={() => updateCartQuantity(item.itemId, item.quantity + 1)} className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-black hover:bg-black hover:text-[#0D8DE3] transition-colors border-l-2 border-black">
+                          <Plus size={14} strokeWidth={3.5} />
                         </button>
                       </div>
                     </div>
@@ -380,110 +377,112 @@ export default function Cart() {
           </div>
         </div>
 
-        <div className="md:col-span-5 space-y-8">
+        <div className="md:col-span-5 space-y-4 sm:space-y-6">
           {/* Coupon Code */}
-          <div className="bg-[#0D8DE3] rounded-3xl border-2 border-black p-6 shadow-[6px_6px_0px_rgba(0,0,0,1)] animate-fade-in-up" style={{ animationDelay: '300ms' }}>
-            <h3 className="font-black text-black mb-4 text-lg uppercase lilita-one-regular tracking-widest bg-white inline-block px-3 py-1 border-2 border-black rounded-xl shadow-[-4px_4px_0px_rgba(0,0,0,1)] -rotate-2">Apply Promo Code</h3>
-            <form onSubmit={handleApplyCoupon} className="flex gap-2 relative mt-2">
+          <div className="bg-[#0D8DE3] rounded-2xl sm:rounded-3xl border-2 border-black p-4 sm:p-5 shadow-[4px_4px_0px_rgba(0,0,0,1)]">
+            <h3 className="font-black text-black mb-3 text-sm sm:text-base uppercase lilita-one-regular tracking-wide bg-white inline-block px-2.5 py-0.5 border-2 border-black rounded-lg shadow-[-2px_2px_0px_rgba(0,0,0,1)]">
+              Apply Promo Code
+            </h3>
+            <form onSubmit={handleApplyCoupon} className="flex gap-2 relative mt-1">
               <input 
                 type="text"
                 value={couponCode}
                 onChange={(e) => setCouponCode(e.target.value)}
                 placeholder="ENTER CODE"
-                className="flex-1 bg-white border-2 border-black rounded-xl px-4 py-4 text-black font-black uppercase tracking-widest focus:outline-none focus:bg-[#9AE600] transition-colors shadow-[4px_4px_0px_rgba(0,0,0,1)]"
+                className="flex-1 bg-white border-2 border-black rounded-xl px-3 py-2.5 text-black font-black uppercase tracking-wider text-xs sm:text-sm focus:outline-none focus:bg-[#9AE600] transition-colors shadow-[2px_2px_0px_rgba(0,0,0,1)]"
               />
-              <button type="submit" className="absolute right-2 top-2 bottom-2 bg-black text-[#0D8DE3] px-6 rounded-lg text-sm font-black uppercase tracking-widest hover:bg-gray-800 transition-colors">
+              <button type="submit" className="bg-black text-[#0D8DE3] px-4 rounded-xl text-xs font-black uppercase tracking-wider hover:bg-gray-800 transition-colors border-2 border-black">
                 APPLY
               </button>
             </form>
             {couponMsg.text && (
-              <p className={`mt-4 text-sm font-black bg-white inline-block px-3 py-1 rounded-lg border-2 border-black uppercase ${couponMsg.type === 'error' ? 'text-red-600' : 'text-green-600'}`}>
+              <p className={`mt-2 text-xs font-black bg-white inline-block px-2.5 py-0.5 rounded-md border border-black uppercase ${couponMsg.type === 'error' ? 'text-red-600' : 'text-green-600'}`}>
                 {couponMsg.text}
               </p>
             )}
             {activeCoupon && (
-              <div className="mt-4 flex items-center justify-between bg-[#9AE600] border-2 border-black p-4 rounded-xl shadow-[4px_4px_0px_rgba(0,0,0,1)]">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-black flex items-center justify-center text-[#9AE600]">
-                    <CheckCircle2 size={20} strokeWidth={4} />
-                  </div>
-                  <span className="text-sm font-black text-black uppercase tracking-widest">{activeCoupon.code} Applied!</span>
+              <div className="mt-3 flex items-center justify-between bg-[#9AE600] border-2 border-black p-2.5 rounded-xl shadow-[2px_2px_0px_rgba(0,0,0,1)]">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 size={16} strokeWidth={3} className="text-black" />
+                  <span className="text-xs font-black text-black uppercase tracking-wider">{activeCoupon.code} Applied!</span>
                 </div>
-                <button type="button" onClick={removeCoupon} className="text-xs text-white bg-black px-3 py-1.5 rounded-lg border-2 border-black font-black uppercase tracking-widest hover:bg-red-600">Remove</button>
+                <button type="button" onClick={removeCoupon} className="text-[10px] text-white bg-black px-2 py-1 rounded-md border border-black font-black uppercase tracking-wider hover:bg-red-600">Remove</button>
               </div>
             )}
           </div>
 
           {/* Bill Details */}
-          <div className="bg-white rounded-3xl border-2 border-black p-6 shadow-[6px_6px_0px_rgba(0,0,0,1)] animate-fade-in-up" style={{ animationDelay: '400ms' }}>
-            <div className="flex items-center gap-3 mb-6 pb-4 border-b-2 border-black">
-              <div className="bg-black text-[#0D8DE3] p-2 rounded-xl border-2 border-black">
-                <Receipt size={24} strokeWidth={3} />
+          <div className="bg-white rounded-2xl sm:rounded-3xl border-2 border-black p-4 sm:p-5 shadow-[4px_4px_0px_rgba(0,0,0,1)]">
+            <div className="flex items-center gap-2.5 mb-4 pb-3 border-b-2 border-black">
+              <div className="bg-black text-[#0D8DE3] p-1.5 rounded-lg border-2 border-black">
+                <Receipt size={18} strokeWidth={3} />
               </div>
-              <h2 className="font-black text-black text-2xl uppercase lilita-one-regular tracking-widest">Bill Details</h2>
+              <h2 className="font-black text-black text-lg sm:text-xl uppercase lilita-one-regular tracking-wide">Bill Details</h2>
             </div>
             
-            <div className="space-y-5">
+            <div className="space-y-3">
               {(() => {
                 const perItemSubtotal = cart.filter(c => !isKgItem(c)).reduce((s, c) => s + (c.price || 0) * c.quantity, 0);
                 const kgItems = cart.filter(isKgItem);
                 const hasKgItems = kgItems.length > 0;
                 return (
                   <>
-                    <div className="flex justify-between text-base">
+                    <div className="flex justify-between text-xs sm:text-sm">
                       <span className="font-extrabold text-gray-700 uppercase tracking-wide">Item Total</span>
                       <span className="font-black text-black">
                         {perItemSubtotal > 0 ? `₹${perItemSubtotal.toFixed(2)}` : (hasKgItems ? 'Pending Weighing' : '₹0.00')}
                       </span>
                     </div>
                     {hasKgItems && (
-                      <div className="flex justify-between text-base bg-blue-50 border-2 border-[#0D8DE3] rounded-xl p-3">
-                        <span className="font-extrabold text-[#0D8DE3] uppercase tracking-wide flex items-center gap-1.5">KG Items ({kgItems.length})</span>
-                        <span className="font-black text-[#0D8DE3] text-xs uppercase tracking-widest">Weighed at delivery</span>
+                      <div className="flex justify-between text-xs sm:text-sm bg-blue-50 border-2 border-[#0D8DE3] rounded-lg p-2">
+                        <span className="font-extrabold text-[#0D8DE3] uppercase tracking-wide flex items-center gap-1">
+                          <Scale size={13} /> KG Items ({kgItems.length})
+                        </span>
+                        <span className="font-black text-[#0D8DE3] text-[10px] sm:text-xs uppercase tracking-wider">Weighed at pickup</span>
                       </div>
                     )}
-                    <div className="flex justify-between text-base">
+                    <div className="flex justify-between text-xs sm:text-sm">
                       <span className="font-extrabold text-gray-700 uppercase tracking-wide">Taxes &amp; Charges ({taxPercent}%)</span>
                       <span className="font-black text-black">₹{tax.toFixed(2)}</span>
                     </div>
 
-                    <div className="flex justify-between text-base">
+                    <div className="flex justify-between text-xs sm:text-sm">
                       <span className="font-extrabold text-gray-700 uppercase tracking-wide">Delivery Fee</span>
-                      <span className="font-black text-black bg-[#9AE600] px-2 py-0.5 rounded-md border-2 border-black">{deliveryFee === 0 ? 'FREE' : `₹${deliveryFee.toFixed(2)}`}</span>
+                      <span className="font-black text-black bg-[#9AE600] px-2 py-0.5 rounded-md border border-black">{deliveryFee === 0 ? 'FREE' : `₹${deliveryFee.toFixed(2)}`}</span>
                     </div>
                     {washPrefsCost > 0 && (
-                      <div className="flex justify-between text-base">
-                        <span className="font-extrabold text-gray-700 uppercase tracking-wide flex items-center gap-1.5">
-                          <Sparkles size={16} className="text-[#0D8DE3]" /> Wash Add-ons ({selectedWashPrefs.length})
+                      <div className="flex justify-between text-xs sm:text-sm">
+                        <span className="font-extrabold text-gray-700 uppercase tracking-wide flex items-center gap-1">
+                          <Sparkles size={13} className="text-[#0D8DE3]" /> Wash Add-ons ({selectedWashPrefs.length})
                         </span>
                         <span className="font-black text-black">+₹{washPrefsCost.toFixed(2)}</span>
                       </div>
                     )}
                     {discount > 0 && (
-                      <div className="flex justify-between text-base">
-                        <span className="font-black text-[#0D8DE3] uppercase tracking-wide bg-black px-2 py-0.5 rounded-md">Promo Applied</span>
+                      <div className="flex justify-between text-xs sm:text-sm">
+                        <span className="font-black text-[#0D8DE3] uppercase tracking-wide bg-black px-1.5 py-0.5 rounded-md">Promo</span>
                         <span className="font-black text-black">-₹{discount.toFixed(2)}</span>
                       </div>
                     )}
-                    <div className="pt-6 mt-4 border-t-4 border-black border-dashed">
+                    <div className="pt-3 mt-2 border-t-2 border-black border-dashed">
                       {hasKgItems ? (
-                        <div className="bg-[#9AE600] p-5 rounded-2xl border-2 border-black shadow-[4px_4px_0px_rgba(0,0,0,1)]">
+                        <div className="bg-[#9AE600] p-3 sm:p-4 rounded-xl border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)]">
                           <div className="flex justify-between items-center">
                             <div>
-                              <span className="font-black text-black text-lg sm:text-xl uppercase tracking-widest">Grand Total</span>
-                              <p className="text-[10px] font-black text-gray-700 uppercase tracking-widest mt-0.5">
-                                Final price calculated upon delivery weighing
+                              <span className="font-black text-black text-sm sm:text-base uppercase tracking-wider">Grand Total</span>
+                              <p className="text-[10px] font-black text-gray-800 uppercase tracking-wider mt-0.5">
+                                Final price locked upon pickup weighing
                               </p>
                             </div>
-                            <span className="font-black text-base sm:text-lg text-black bg-white px-3 py-1.5 rounded-xl border-2 border-black uppercase shadow-[2px_2px_0px_rgba(0,0,0,1)]">
+                            <span className="font-black text-xs sm:text-sm text-black bg-white px-2 py-1 rounded-lg border-2 border-black uppercase shadow-[1px_1px_0px_rgba(0,0,0,1)]">
                               Pending Calculation
                             </span>
                           </div>
                         </div>
                       ) : (
-                        <div className="flex justify-between items-center bg-[#9AE600] p-5 rounded-2xl border-2 border-black shadow-[4px_4px_0px_rgba(0,0,0,1)] transform rotate-1">
-                          <span className="font-black text-black text-xl uppercase tracking-widest">Grand Total</span>
-                          <span className="font-black text-3xl text-black bg-white px-3 py-1 rounded-xl border-2 border-black">₹{total.toFixed(2)}</span>
+                        <div className="flex justify-between items-center bg-[#9AE600] p-3 sm:p-4 rounded-xl border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)]">
+                          <span className="font-black text-black text-base sm:text-lg uppercase tracking-wider">Grand Total</span>
+                          <span className="font-black text-xl sm:text-2xl text-black bg-white px-2.5 py-0.5 rounded-lg border-2 border-black">₹{total.toFixed(2)}</span>
                         </div>
                       )}
                     </div>
@@ -495,41 +494,40 @@ export default function Cart() {
         </div>
       </div>
 
-      {/* Floating Checkout Footer */}
-      <div className="fixed bottom-0 left-0 right-0 bg-[#0D8DE3] border-t-4 border-black p-4 z-50 shadow-[0_-8px_0_rgba(0,0,0,1)]">
-        <div className="max-w-4xl mx-auto flex items-center justify-between">
-          <div className="bg-white p-3 border-2 border-black rounded-2xl shadow-[4px_4px_0px_rgba(0,0,0,1)]">
-            <p className="text-xs font-black text-black uppercase tracking-widest mb-1 bg-[#9AE600] inline-block px-2 border-2 border-black rounded">
-              {hasKgItems ? 'Pay After Weighing' : 'Pay via UPI / Cash'}
+      {/* Modern Compact Floating Checkout Dock */}
+      <div className="fixed bottom-0 left-0 right-0 bg-[#0D8DE3] border-t-2 sm:border-t-4 border-black px-3.5 py-2 sm:px-6 sm:py-3.5 z-50 shadow-[0_-4px_0_rgba(0,0,0,1)]">
+        <div className="max-w-4xl mx-auto flex items-center justify-between gap-3">
+          <div className="bg-white py-1 px-3 sm:py-2 sm:px-4 border-2 border-black rounded-xl shadow-[2px_2px_0px_rgba(0,0,0,1)] shrink-0">
+            <p className="text-[10px] font-black text-black uppercase tracking-wider bg-[#9AE600] px-1.5 py-0.5 rounded border border-black inline-block">
+              {hasKgItems ? 'Pay After Pickup Weighing' : 'Pay via UPI / Cash'}
             </p>
             {hasKgItems ? (
-              <p className="font-black text-xl sm:text-2xl text-black lilita-one-regular uppercase tracking-wider">
-                Pending Calculation
+              <p className="font-black text-sm sm:text-lg text-black lilita-one-regular uppercase tracking-wider mt-0.5">
+                Pending Weighing
               </p>
             ) : (
-              <p className="font-black text-3xl text-black lilita-one-regular">₹{total.toFixed(2)}</p>
+              <p className="font-black text-xl sm:text-2xl text-black lilita-one-regular mt-0.5">₹{total.toFixed(2)}</p>
             )}
           </div>
           
           <button 
             onClick={handlePlaceOrder}
             disabled={loading || isClosed || (!hasKgItems && subtotal < (shop?.minOrderValue || 0))}
-            className="bg-[#0D8DE3] hover:bg-blue-600 disabled:bg-gray-300 disabled:shadow-[4px_4px_0px_rgba(0,0,0,1)] text-white font-black py-5 px-8 sm:px-12 rounded-2xl border-2 border-black shadow-[6px_6px_0px_rgba(0,0,0,1)] flex items-center gap-3 active:translate-y-2 active:translate-x-2 active:shadow-none transition-all text-xl uppercase tracking-widest"
+            className="flex-1 max-w-xs bg-[#9AE600] hover:bg-[#86d000] disabled:bg-gray-300 disabled:shadow-none text-black font-black py-3 sm:py-3.5 px-4 sm:px-8 rounded-xl border-2 border-black shadow-[3px_3px_0px_rgba(0,0,0,1)] flex items-center justify-center gap-2 active:translate-y-0.5 active:translate-x-0.5 active:shadow-none transition-all text-sm sm:text-lg uppercase tracking-wider"
           >
             {loading ? 'Processing...' : isClosed ? 'Shop Closed' : 'Place Order'}
-            {!loading && !isClosed && <CheckCircle2 size={28} strokeWidth={4} />}
+            {!loading && !isClosed && <CheckCircle2 size={20} strokeWidth={3} />}
           </button>
         </div>
 
-        
         {error && (
-          <div className="max-w-4xl mx-auto mt-4">
-             <p className="text-white font-black text-center bg-red-600 p-3 border-2 border-black rounded-xl uppercase tracking-widest shadow-[4px_4px_0px_rgba(0,0,0,1)]">{error}</p>
+          <div className="max-w-4xl mx-auto mt-2">
+             <p className="text-white font-black text-center bg-red-600 py-1.5 px-3 border-2 border-black rounded-lg uppercase tracking-wider text-xs shadow-[2px_2px_0px_rgba(0,0,0,1)]">{error}</p>
           </div>
         )}
         {subtotal < (shop?.minOrderValue || 0) && !error && (
-          <div className="max-w-4xl mx-auto mt-4">
-             <p className="text-black font-black text-center bg-[#9AE600] p-3 border-2 border-black rounded-xl uppercase tracking-widest shadow-[4px_4px_0px_rgba(0,0,0,1)]">
+          <div className="max-w-4xl mx-auto mt-2">
+             <p className="text-black font-black text-center bg-[#9AE600] py-1.5 px-3 border-2 border-black rounded-lg uppercase tracking-wider text-xs shadow-[2px_2px_0px_rgba(0,0,0,1)]">
                Minimum order value is ₹{shop?.minOrderValue}
              </p>
           </div>

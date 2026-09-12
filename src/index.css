@@ -149,9 +149,19 @@ body {
 }
 
 
+html {
+  scroll-behavior: smooth;
+}
+
+@media (max-width: 640px) {
+  html {
+    font-size: 14px; /* Proportionally scales down rem units so mobile view is clean and comfortably zoomed out */
+  }
+}
+
 @media (max-width: 768px) {
   body {
-    font-size: 16px;
+    font-size: 15px;
   }
 }
 
@@ -159,15 +169,6 @@ body {
   body {
     font-size: 18px;
   }
-}
-
-/* Button Hover Effect */
-button:hover {
-  filter: brightness(1.1);
-}
-
-html {
-  scroll-behavior: smooth;
 }
 
 @theme {
