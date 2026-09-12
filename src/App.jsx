@@ -8,8 +8,7 @@ import SocketManager from './components/SocketManager';
 import ScrollToTop from './components/ScrollToTop';
 import { useAppStore } from './store/useAppStore';
 
-// Pages
-const Home = lazy(() => import('./pages/Home'));
+import Home from './pages/Home';
 const Login = lazy(() => import('./pages/auth/Login'));
 const Register = lazy(() => import('./pages/auth/Register'));
 const ShopSelect = lazy(() => import('./pages/customer/ShopSelect'));

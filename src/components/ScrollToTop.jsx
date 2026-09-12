@@ -1,21 +1,20 @@
-import { useLayoutEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 
 /**
  * ScrollToTop ensures that whenever the URL route changes,
- * the window and document scroll positions are immediately reset to the top.
+ * the window scroll position is reset to the top without forcing a layout reflow on initial mount.
  */
 export default function ScrollToTop() {
   const { pathname, search } = useLocation();
+  const isFirstMount = useRef(true);
 
-  useLayoutEffect(() => {
-    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
-    if (document.documentElement) {
-      document.documentElement.scrollTop = 0;
+  useEffect(() => {
+    if (isFirstMount.current) {
+      isFirstMount.current = false;
+      return;
     }
-    if (document.body) {
-      document.body.scrollTop = 0;
-    }
+    window.scrollTo(0, 0);
   }, [pathname, search]);
 
   return null;
