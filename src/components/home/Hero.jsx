@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import Navbar from '../Navbar';
-import heroimage from '../../assets/heroimage.webp';
 import bucketImage from '../../assets/final-bucket-cropped.webp';
 
 import { TbTruckDelivery, TbWash, TbShirt } from "react-icons/tb";
@@ -208,8 +207,8 @@ function Hero() {
                             <img
                                 src={bucketImage}
                                 alt="Clean Laundry Basket - Doorstep Pickup WOW Laundry"
-                                width="936"
-                                height="876"
+                                width="700"
+                                height="655"
                                 fetchPriority="high"
                                 decoding="async"
                                 className="w-full h-auto object-contain relative z-0 drop-shadow-[0_15px_15px_rgba(0,0,0,0.15)] group-hover:scale-[1.02] transition-transform origin-bottom"
@@ -549,13 +548,13 @@ function Hero() {
                         </div>
 
                         <img
-                            src={heroimage}
+                            src="/heroimage.webp"
                             alt="WOW Laundry Professional Garment Care and Dry Cleaning Specialist"
-                            width="896"
-                            height="1128"
+                            width="476"
+                            height="600"
                             fetchPriority="high"
                             decoding="async"
-                            className="w-full max-w-[430px] lg:max-w-[530px] object-contain relative z-20 drop-shadow-[0_20px_20px_rgba(0,0,0,0.15)] scale-110 transform -translate-y-8 md:-translate-y-12 mb-4"
+                            className="w-full h-auto max-w-[430px] lg:max-w-[530px] object-contain relative z-20 drop-shadow-[0_20px_20px_rgba(0,0,0,0.15)] scale-110 transform -translate-y-8 md:-translate-y-12 mb-4"
                         />
 
 
