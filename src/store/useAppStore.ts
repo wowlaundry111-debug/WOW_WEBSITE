@@ -83,7 +83,7 @@ interface AppState {
   // Actions - Delivery Boy Operations
   verifyOrderItems: (orderId: string, itemsCount: Record<string, number>) => Promise<void>;
   recordPayment: (orderId: string, paymentMode: PaymentMode) => Promise<void>;
-  updateKgWeight: (orderId: string, items: { itemId: string; kgWeight: number }[]) => Promise<void>;
+  updateKgWeight: (orderId: string, items: { itemId: string; kgWeight: number }[], markPickedUp?: boolean) => Promise<void>;
 
   // Actions - Super Admin Operations
   createShop: (name: string, branches: string[], upiId: string, bankName: string, accountNo: string, adminEmail: string) => Promise<void>;
@@ -1058,10 +1058,10 @@ export const useAppStore = create<AppState>()(
         }
       },
 
-      // updateKgWeight — delivery agent submits weights for KG items; backend recalculates total
-      updateKgWeight: async (orderId, items) => {
+      // updateKgWeight — delivery agent submits weights for KG items; backend recalculates total and can mark picked up
+      updateKgWeight: async (orderId, items, markPickedUp = false) => {
         try {
-          const res = await api.patch(`/orders/${orderId}/kg-weight`, { items });
+          const res = await api.patch(`/orders/${orderId}/kg-weight`, { items, markPickedUp });
           if (res.data) {
             set(state => ({
               orders: state.orders.map(o => o._id === orderId ? res.data : o),

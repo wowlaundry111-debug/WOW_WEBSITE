@@ -50,7 +50,7 @@ export default function DeliveryDashboard() {
     setWeighModalOrder(order);
   };
 
-  const handleSaveKgWeights = async () => {
+  const handleSaveKgWeights = async (andConfirmPickup = false) => {
     if (!weighModalOrder) return;
     setIsUpdatingKg(true);
     try {
@@ -59,8 +59,8 @@ export default function DeliveryDashboard() {
         kgWeight: Number(weight) || 0
       }));
 
-      await updateKgWeight(weighModalOrder._id, payload);
-      alert('Order weights updated and final price calculated successfully!');
+      await updateKgWeight(weighModalOrder._id, payload, andConfirmPickup || activeTab === 'PICKUP');
+      alert('Clothes weighed, final price calculated, and order marked as Picked Up!');
       setWeighModalOrder(null);
     } catch (err) {
       alert('Failed to update weights: ' + (err?.response?.data?.error || err.message));
@@ -74,17 +74,19 @@ export default function DeliveryDashboard() {
     if (!order) return;
     
     if (activeTab === 'PICKUP') {
+      const hasKgItems = order.items.some(it => it.unit === 'KG');
+      // At PICKUP time: If order has KG items that haven't been weighed yet, weigh them at pickup!
+      if (hasKgItems && !order.kgPriceUpdated) {
+        handleOpenWeighModal(order);
+        return;
+      }
       const initial = {};
       order.items.forEach(it => initial[it.itemId] = it.quantity);
       setCounts(initial);
       setVerifyModalOrder(order);
     } else {
-      // If order has KG items that haven't been weighed yet, prompt delivery agent to weigh them first
-      const hasUnweighedKg = order.items.some(it => it.unit === 'KG') && !order.kgPriceUpdated;
-      if (hasUnweighedKg) {
-        handleOpenWeighModal(order);
-        return;
-      }
+      // At DELIVERY time: Final price was already calculated and locked at pickup.
+      // Directly proceed to payment collection and mark delivered!
       setPaymentModalOrder(order);
     }
   };
@@ -191,15 +193,19 @@ export default function DeliveryDashboard() {
                           <span className={`text-xs font-black uppercase px-2.5 py-1 border-2 border-black rounded-lg ${
                             order.kgPriceUpdated ? 'bg-[#9AE600] text-black' : 'bg-yellow-300 text-black'
                           }`}>
-                            {order.kgPriceUpdated ? 'KG WEIGHED' : 'KG Weighing Pending'}
+                            {order.kgPriceUpdated 
+                              ? (activeTab === 'PICKUP' ? `✓ WEIGHED AT PICKUP: ₹${order.totalAmount}` : `✓ WEIGHED AT PICKUP • FINAL: ₹${order.totalAmount}`) 
+                              : 'Weighing Required at Pickup'}
                           </span>
                           
-                          <button
-                            onClick={() => handleOpenWeighModal(order)}
-                            className="bg-black text-white text-xs font-black uppercase px-3 py-1 rounded-lg border-2 border-black hover:bg-[#0D8DE3] transition-colors flex items-center gap-1"
-                          >
-                            <Scale size={13} /> {order.kgPriceUpdated ? 'Re-weigh' : 'Weigh Clothes'}
-                          </button>
+                          {activeTab === 'PICKUP' && (
+                            <button
+                              onClick={() => handleOpenWeighModal(order)}
+                              className="bg-black text-white text-xs font-black uppercase px-3 py-1 rounded-lg border-2 border-black hover:bg-[#0D8DE3] transition-colors flex items-center gap-1"
+                            >
+                              <Scale size={13} /> {order.kgPriceUpdated ? 'Edit Weight' : 'Weigh Clothes'}
+                            </button>
+                          )}
                         </div>
                       )}
                     </div>
@@ -209,17 +215,13 @@ export default function DeliveryDashboard() {
                         onClick={() => handleAction(order._id)}
                         className={`flex-1 py-4 font-black uppercase text-lg border-4 border-black transition-all hover:-translate-y-1 hover:shadow-[4px_4px_0px_rgba(0,0,0,1)] ${
                           activeTab === 'PICKUP' 
-                            ? 'bg-[#0D8DE3] text-white' 
-                            : (hasKgItems && !order.kgPriceUpdated) 
-                            ? 'bg-yellow-400 text-black' 
+                            ? (hasKgItems && !order.kgPriceUpdated ? 'bg-yellow-400 text-black hover:bg-yellow-300' : 'bg-[#0D8DE3] text-white') 
                             : 'bg-[#9AE600] text-black'
                         }`}
                       >
                         {activeTab === 'PICKUP' 
-                          ? 'Mark Picked Up' 
-                          : (hasKgItems && !order.kgPriceUpdated)
-                          ? 'Weigh & Deliver'
-                          : 'Mark Delivered'}
+                          ? (hasKgItems && !order.kgPriceUpdated ? 'Weigh & Confirm Pickup' : 'Mark Picked Up') 
+                          : 'Deliver & Collect Payment'}
                       </button>
                     </div>
                   </div>
@@ -395,10 +397,10 @@ export default function DeliveryDashboard() {
             <div className="p-5 border-b-4 border-black bg-[#0D8DE3] text-white flex justify-between items-center">
               <div>
                 <span className="text-[10px] font-black uppercase tracking-widest bg-black px-2 py-0.5 rounded text-[#9AE600]">
-                  Weight Calculation Portal
+                  Pickup Weighing & Price Finalization
                 </span>
                 <h2 className="text-2xl font-black uppercase mt-1 flex items-center gap-2">
-                  <Scale size={24} /> Weigh KG Clothes
+                  <Scale size={24} /> Weigh Clothes at Pickup
                 </h2>
               </div>
               <button 
@@ -411,7 +413,7 @@ export default function DeliveryDashboard() {
 
             <div className="p-6 overflow-y-auto bg-gray-50 flex-1 space-y-4 border-b-4 border-black">
               <p className="text-xs font-bold text-gray-600 uppercase">
-                Enter measured weight in KG for each item. The customer total will be calculated and updated immediately.
+                Enter measured weight in KG for each item. The customer's final price will be calculated and locked at pickup.
               </p>
 
               {weighModalOrder.items.filter(it => it.unit === 'KG').map(it => {
@@ -522,11 +524,11 @@ export default function DeliveryDashboard() {
                 Cancel
               </button>
               <button 
-                onClick={handleSaveKgWeights}
+                onClick={() => handleSaveKgWeights(true)}
                 disabled={isUpdatingKg}
                 className="flex-[2] bg-[#9AE600] text-black border-2 border-black shadow-[3px_3px_0px_rgba(0,0,0,1)] py-3 font-black uppercase hover:translate-y-[1px] hover:shadow-[1px_1px_0px_rgba(0,0,0,1)] transition-all text-sm disabled:opacity-50 flex items-center justify-center gap-1.5"
               >
-                {isUpdatingKg ? 'Calculating & Saving...' : 'Save & Finalize Price'}
+                {isUpdatingKg ? 'Calculating & Saving...' : 'Save & Confirm Pickup (Finalize Price)'}
               </button>
             </div>
           </div>
