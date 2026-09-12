@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import Navbar from '../Navbar';
-import bucketImage from '../../assets/final-bucket-cropped.webp';
 
 import { TbTruckDelivery, TbWash, TbShirt } from "react-icons/tb";
 import { MdOutlineLocalLaundryService } from "react-icons/md";
@@ -205,7 +204,9 @@ function Hero() {
                             <div className="hidden absolute right-[16%] md:right-[18%] top-[45%] w-16 md:w-24 h-10 md:h-12 bg-gradient-to-b from-[#9AE600] to-[#8cd927] border-[4px] border-black rounded-r-full shadow-[inset_2px_2px_0px_rgba(255,255,255,0.5)] z-[-1] transition-transform duration-300 group-hover:translate-x-3"></div>
 
                             <img
-                                src={bucketImage}
+                                src="/bucket.webp"
+                                srcSet="/bucket-sm.webp 400w, /bucket.webp 700w"
+                                sizes="(max-width: 640px) 384px, 700px"
                                 alt="Clean Laundry Basket - Doorstep Pickup WOW Laundry"
                                 width="700"
                                 height="655"
@@ -549,6 +550,8 @@ function Hero() {
 
                         <img
                             src="/heroimage.webp"
+                            srcSet="/heroimage-sm.webp 384w, /heroimage.webp 476w"
+                            sizes="(max-width: 640px) 384px, 476px"
                             alt="WOW Laundry Professional Garment Care and Dry Cleaning Specialist"
                             width="476"
                             height="600"

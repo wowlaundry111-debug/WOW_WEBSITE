@@ -200,8 +200,9 @@
   }
   </script>
 
-  <!-- Preload LCP Hero Specialist Image -->
-  <link rel="preload" as="image" href="/heroimage.webp" type="image/webp" fetchpriority="high" />
+  <!-- Preload Device-Specific LCP Hero Images -->
+  <link rel="preload" as="image" href="/bucket-sm.webp" type="image/webp" fetchpriority="high" media="(max-width: 640px)" />
+  <link rel="preload" as="image" href="/heroimage.webp" type="image/webp" fetchpriority="high" media="(min-width: 641px)" />
 
   <!-- Preconnect to Backend API & CDN -->
   <link rel="preconnect" href="https://wow-backend-isuq.onrender.com" />
