@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAppStore } from '../../store/useAppStore';
 import { ArrowRight, AlertTriangle, ShieldCheck, Mail } from 'lucide-react';
-import logo from '../../assets/logo.png';
+import logo from '../../assets/logo.webp';
 
 export default function Login() {
   const [step, setStep] = useState('EMAIL'); // 'EMAIL' | 'OTP'

@@ -8,7 +8,7 @@ import Footer from '../components/Footer';
 
 function Home() {
   return (
-    <div className='bg-[#FAF7F2] text-stone-900'>
+    <main id="main-content" className='bg-[#FAF7F2] text-stone-900'>
       <div id="hero">
         <Hero />
       </div>
@@ -24,7 +24,7 @@ function Home() {
       <div id="faq">
         <FAQ />
       </div>
-    </div>
+    </main>
   );
 }
 

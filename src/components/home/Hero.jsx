@@ -2,8 +2,6 @@ import React, { useState } from 'react';
 import Navbar from '../Navbar';
 import heroimage from '../../assets/heroimage.webp';
 import bucketImage from '../../assets/final-bucket-cropped.webp';
-import Skeleton from 'react-loading-skeleton';
-import 'react-loading-skeleton/dist/skeleton.css';
 
 import { TbTruckDelivery, TbWash, TbShirt } from "react-icons/tb";
 import { MdOutlineLocalLaundryService } from "react-icons/md";
@@ -12,8 +10,6 @@ import { Link } from 'react-router-dom';
 import { Sparkles } from 'lucide-react';
 
 function Hero() {
-    const [imageLoaded, setImageLoaded] = useState(false);
-    const [bucketLoaded, setBucketLoaded] = useState(false);
 
     return (
         <div className="bg-[#FAF7F2] font-outfit selection:bg-black selection:text-[#9AE600] min-h-screen relative overflow-hidden flex flex-col items-center w-full">
@@ -209,12 +205,14 @@ function Hero() {
                             <div className="hidden absolute left-[16%] md:left-[18%] top-[45%] w-16 md:w-24 h-10 md:h-12 bg-gradient-to-b from-[#9AE600] to-[#8cd927] border-[4px] border-black rounded-l-full shadow-[inset_2px_2px_0px_rgba(255,255,255,0.5)] z-[-1] transition-transform duration-300 group-hover:-translate-x-3"></div>
                             <div className="hidden absolute right-[16%] md:right-[18%] top-[45%] w-16 md:w-24 h-10 md:h-12 bg-gradient-to-b from-[#9AE600] to-[#8cd927] border-[4px] border-black rounded-r-full shadow-[inset_2px_2px_0px_rgba(255,255,255,0.5)] z-[-1] transition-transform duration-300 group-hover:translate-x-3"></div>
 
-                            {!bucketLoaded && <Skeleton className="w-full aspect-[4/3] rounded-3xl" />}
                             <img
                                 src={bucketImage}
                                 alt="Clean Laundry Basket - Doorstep Pickup WOW Laundry"
-                                className={`w-full h-auto object-contain relative z-0 ${bucketLoaded ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300 drop-shadow-[0_15px_15px_rgba(0,0,0,0.15)] group-hover:scale-[1.02] transition-transform origin-bottom`}
-                                onLoad={() => setBucketLoaded(true)}
+                                width="936"
+                                height="876"
+                                fetchPriority="high"
+                                decoding="async"
+                                className="w-full h-auto object-contain relative z-0 drop-shadow-[0_15px_15px_rgba(0,0,0,0.15)] group-hover:scale-[1.02] transition-transform origin-bottom"
                             />
 
                             {/* Rich Soap Foam with billowing mounds and cartoon suds textures */}
@@ -249,129 +247,107 @@ function Hero() {
                                         <g className="nat-burst" transform="translate(235, 26)">
                                             <circle cx="0" cy="0" r="9" stroke="#60A5FA" strokeWidth="1" fill="none" opacity="0.6" />
                                             <circle cx="-8" cy="-7" r="1.5" fill="#38BDF8" />
-                                            <circle cx="8" cy="-6" r="1.5" fill="#38BDF8" />
-                                            <circle cx="-6" cy="7" r="1.5" fill="#38BDF8" />
+                                            <circle cx="8" cy="-6" r="1.4" fill="#38BDF8" />
+                                            <circle cx="-7" cy="8" r="1.4" fill="#38BDF8" />
                                             <circle cx="7" cy="7" r="1.5" fill="#38BDF8" />
                                         </g>
                                     </g>
 
-                                    {/* Bubble 3 (Hero Majestic Sphere) */}
+                                    {/* Bubble 3 (Far Left Tiny Plume) */}
                                     <g className="nat-bubble-3">
                                         <g>
-                                            <circle cx="390" cy="12" r="15" stroke="#1D70F7" strokeWidth="3" fill="rgba(255, 255, 255, 0.85)" />
-                                            <path d="M 381 4 A 10 10 0 0 1 396 1" stroke="#93C5FD" strokeWidth="2.5" strokeLinecap="round" fill="none" />
-                                            <path d="M 394 19 A 10 10 0 0 1 401 12" stroke="#60A5FA" strokeWidth="1.5" strokeLinecap="round" fill="none" opacity="0.8" />
+                                            <circle cx="70" cy="38" r="6" stroke="#1D70F7" strokeWidth="2" fill="rgba(255, 255, 255, 0.8)" />
+                                            <path d="M 67 35 A 3.5 3.5 0 0 1 72 34" stroke="#93C5FD" strokeWidth="1.2" strokeLinecap="round" fill="none" />
                                         </g>
-                                        <g className="nat-burst" transform="translate(390, 12)">
-                                            <circle cx="0" cy="0" r="18" stroke="#38BDF8" strokeWidth="1.5" fill="none" opacity="0.7" />
-                                            <circle cx="-15" cy="-13" r="2.5" fill="#38BDF8" />
-                                            <circle cx="15" cy="-12" r="2.5" fill="#38BDF8" />
-                                            <circle cx="-13" cy="14" r="2" fill="#38BDF8" />
-                                            <circle cx="14" cy="13" r="2.5" fill="#38BDF8" />
-                                            <circle cx="0" cy="-17" r="2" fill="#38BDF8" />
-                                            <circle cx="0" cy="17" r="2" fill="#38BDF8" />
+                                        <g className="nat-burst" transform="translate(70, 38)">
+                                            <circle cx="0" cy="0" r="7" stroke="#60A5FA" strokeWidth="0.8" fill="none" opacity="0.6" />
+                                            <circle cx="-6" cy="-5" r="1.2" fill="#38BDF8" />
+                                            <circle cx="6" cy="-5" r="1" fill="#38BDF8" />
+                                            <circle cx="-5" cy="6" r="1" fill="#38BDF8" />
+                                            <circle cx="5" cy="5" r="1.2" fill="#38BDF8" />
                                         </g>
                                     </g>
 
-                                    {/* Bubble 4 (Center-Right Gentle Rise) */}
+                                    {/* Bubble 4 (Center-Right Rising Pearl) */}
                                     <g className="nat-bubble-4">
                                         <g>
-                                            <circle cx="325" cy="22" r="9" stroke="#1D70F7" strokeWidth="2.5" fill="rgba(255, 255, 255, 0.85)" />
-                                            <path d="M 320 17 A 5.5 5.5 0 0 1 327 15" stroke="#93C5FD" strokeWidth="1.8" strokeLinecap="round" fill="none" />
+                                            <circle cx="380" cy="22" r="8.5" stroke="#1D70F7" strokeWidth="2" fill="rgba(255, 255, 255, 0.85)" />
+                                            <path d="M 375 18 A 5 5 0 0 1 382 16" stroke="#93C5FD" strokeWidth="1.6" strokeLinecap="round" fill="none" />
                                         </g>
-                                        <g className="nat-burst" transform="translate(325, 22)">
+                                        <g className="nat-burst" transform="translate(380, 22)">
+                                            <circle cx="0" cy="0" r="10" stroke="#60A5FA" strokeWidth="1" fill="none" opacity="0.6" />
+                                            <circle cx="-9" cy="-7" r="1.6" fill="#38BDF8" />
+                                            <circle cx="9" cy="-6" r="1.5" fill="#38BDF8" />
+                                            <circle cx="-7" cy="8" r="1.5" fill="#38BDF8" />
+                                            <circle cx="8" cy="8" r="1.6" fill="#38BDF8" />
+                                        </g>
+                                    </g>
+
+                                    {/* Bubble 5 (Right Big Froth Balloon) */}
+                                    <g className="nat-bubble-5">
+                                        <g>
+                                            <circle cx="490" cy="26" r="9.5" stroke="#1D70F7" strokeWidth="2.5" fill="rgba(255, 255, 255, 0.85)" />
+                                            <path d="M 484 21 A 5.5 5.5 0 0 1 493 19" stroke="#93C5FD" strokeWidth="1.8" strokeLinecap="round" fill="none" />
+                                            <circle cx="495" cy="30" r="1.5" fill="#60A5FA" opacity="0.7" />
+                                        </g>
+                                        <g className="nat-burst" transform="translate(490, 26)">
                                             <circle cx="0" cy="0" r="11" stroke="#60A5FA" strokeWidth="1" fill="none" opacity="0.6" />
                                             <circle cx="-10" cy="-8" r="1.8" fill="#38BDF8" />
-                                            <circle cx="10" cy="-7" r="1.8" fill="#38BDF8" />
-                                            <circle cx="-8" cy="9" r="1.8" fill="#38BDF8" />
+                                            <circle cx="10" cy="-7" r="1.6" fill="#38BDF8" />
+                                            <circle cx="-8" cy="9" r="1.6" fill="#38BDF8" />
                                             <circle cx="9" cy="8" r="1.8" fill="#38BDF8" />
                                         </g>
                                     </g>
 
-                                    {/* Bubble 5 (Right Corner Drifter) */}
-                                    <g className="nat-bubble-5">
+                                    {/* Bubble 6 (Far Right Petite Spark) */}
+                                    <g className="nat-bubble-6">
                                         <g>
-                                            <circle cx="505" cy="25" r="11" stroke="#1D70F7" strokeWidth="2.5" fill="rgba(255, 255, 255, 0.85)" />
-                                            <path d="M 499 19 A 7 7 0 0 1 509 16" stroke="#93C5FD" strokeWidth="2" strokeLinecap="round" fill="none" />
+                                            <circle cx="535" cy="45" r="5" stroke="#1D70F7" strokeWidth="1.5" fill="rgba(255, 255, 255, 0.8)" />
                                         </g>
-                                        <g className="nat-burst" transform="translate(505, 25)">
-                                            <circle cx="0" cy="0" r="13" stroke="#60A5FA" strokeWidth="1" fill="none" opacity="0.6" />
-                                            <circle cx="-12" cy="-10" r="2" fill="#38BDF8" />
-                                            <circle cx="12" cy="-9" r="2" fill="#38BDF8" />
-                                            <circle cx="-10" cy="11" r="2" fill="#38BDF8" />
-                                            <circle cx="11" cy="10" r="2" fill="#38BDF8" />
+                                        <g className="nat-burst" transform="translate(535, 45)">
+                                            <circle cx="0" cy="0" r="6" stroke="#60A5FA" strokeWidth="0.8" fill="none" opacity="0.6" />
+                                            <circle cx="-5" cy="-4" r="1" fill="#38BDF8" />
+                                            <circle cx="5" cy="-4" r="1" fill="#38BDF8" />
                                         </g>
                                     </g>
 
-                                    {/* LAYER 1: BACK FOAM SHADOW MASS (Ice Blue with bold outline) */}
-                                    <path
-                                        d="M 50 78
-                                           C 40 45, 80 18, 130 14
-                                           C 170 10, 205 24, 235 30
-                                           C 270 36, 305 38, 335 22
-                                           C 365 5, 420 -2, 465 10
-                                           C 515 22, 560 40, 565 75
-                                           C 570 105, 470 115, 300 115
-                                           C 130 115, 45 105, 50 78 Z"
-                                        fill="#BAE6FD"
-                                        stroke="black"
-                                        strokeWidth="3.5"
-                                        strokeLinejoin="round"
-                                    />
+                                    {/* MOUND 1 (Far Left Billow) */}
+                                    <path d="M 45 75 C 40 45, 75 25, 110 35 C 130 18, 175 16, 195 38 C 190 60, 160 85, 115 85 Z" fill="#F0F9FF" />
+                                    <path d="M 52 70 C 50 48, 78 30, 105 40" stroke="#BAE6FD" strokeWidth="10" strokeLinecap="round" fill="none" />
+                                    <path d="M 125 24 C 145 20, 175 22, 188 36" stroke="#BAE6FD" strokeWidth="10" strokeLinecap="round" fill="none" />
 
-                                    {/* LAYER 2: MAIN FLUFFY WHITE FOAM MASS (Billowing mounds with ups & downs) */}
-                                    <path
-                                        d="M 46 76
-                                           C 38 48, 75 22, 125 18
-                                           C 165 14, 200 28, 230 34
-                                           C 265 40, 300 42, 330 25
-                                           C 360 8, 415 2, 460 14
-                                           C 510 26, 555 44, 560 74
-                                           C 565 102, 465 112, 300 112
-                                           C 135 112, 42 102, 46 76 Z"
-                                        fill="white"
-                                        stroke="black"
-                                        strokeWidth="3.5"
-                                        strokeLinejoin="round"
-                                    />
+                                    {/* MOUND 2 (Left-Center Massive Mountain) */}
+                                    <path d="M 160 65 C 170 25, 220 5, 265 18 C 305 2, 355 12, 370 42 C 375 70, 310 85, 240 85 Z" fill="#FFFFFF" />
+                                    <path d="M 180 28 C 215 12, 255 18, 270 26" stroke="#BAE6FD" strokeWidth="12" strokeLinecap="round" fill="none" />
+                                    <path d="M 295 10 C 335 12, 355 22, 365 38" stroke="#BAE6FD" strokeWidth="12" strokeLinecap="round" fill="none" />
 
-                                    {/* FOAM CREST DEFINING ARCS (Cartoon suds lobes & pillows) */}
-                                    {/* Left Mound Creases */}
-                                    <path d="M 85 55 C 105 32, 145 28, 175 42" stroke="black" strokeWidth="3" strokeLinecap="round" fill="none" />
-                                    <path d="M 140 48 C 165 35, 200 38, 225 58" stroke="black" strokeWidth="3" strokeLinecap="round" fill="none" />
-                                    <path d="M 60 78 C 80 62, 110 65, 125 80" stroke="black" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+                                    {/* MOUND 3 (Center-Right Towering Peak) */}
+                                    <path d="M 330 65 C 345 20, 395 2, 440 12 C 480 5, 520 22, 530 52 C 535 80, 480 88, 410 88 Z" fill="#F0F9FF" />
+                                    <path d="M 360 12 C 405 6, 440 14, 455 24" stroke="#BAE6FD" strokeWidth="12" strokeLinecap="round" fill="none" />
+                                    <path d="M 470 14 C 505 20, 520 32, 525 48" stroke="#BAE6FD" strokeWidth="10" strokeLinecap="round" fill="none" />
 
-                                    {/* Center Valley Creases */}
-                                    <path d="M 220 62 C 245 52, 275 54, 295 68" stroke="black" strokeWidth="2.5" strokeLinecap="round" fill="none" />
-                                    <path d="M 270 70 C 290 62, 320 64, 335 78" stroke="black" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+                                    {/* MOUND 4 (Far Right Overflow Droop) */}
+                                    <path d="M 475 75 C 495 45, 535 40, 555 60 C 565 75, 550 90, 520 90 Z" fill="#E0F2FE" />
+                                    <path d="M 505 48 C 528 44, 545 52, 550 62" stroke="#BAE6FD" strokeWidth="8" strokeLinecap="round" fill="none" />
 
-                                    {/* Right Tall Mound Creases */}
-                                    <path d="M 330 38 C 360 15, 415 10, 450 28" stroke="black" strokeWidth="3.5" strokeLinecap="round" fill="none" />
+                                    {/* FRONT OVERFLOW LIP MOUNDS (Dripping gently over dark blue edge) */}
+                                    <path d="M 70 80 C 100 70, 140 70, 160 88 C 170 98, 140 102, 100 98 Z" fill="#FFFFFF" />
+                                    <path d="M 150 85 C 190 72, 240 75, 260 92 C 270 102, 230 106, 180 102 Z" fill="#F0F9FF" />
+                                    <path d="M 245 88 C 290 75, 340 78, 365 92 C 375 102, 335 106, 280 104 Z" fill="#FFFFFF" />
+                                    <path d="M 350 88 C 395 75, 450 75, 475 92 C 485 102, 445 105, 390 104 Z" fill="#F0F9FF" />
+                                    <path d="M 455 85 C 495 72, 535 78, 550 92 C 555 100, 530 104, 490 100 Z" fill="#E0F2FE" />
+
+                                    {/* THICK CARTOON BOLD INK OUTLINES */}
+                                    <path d="M 45 75 C 40 45, 75 25, 110 35" stroke="black" strokeWidth="3.5" strokeLinecap="round" fill="none" />
+                                    <path d="M 110 35 C 130 18, 175 16, 195 38" stroke="black" strokeWidth="3" strokeLinecap="round" fill="none" />
+                                    <path d="M 185 30 C 205 15, 245 8, 275 20" stroke="black" strokeWidth="4" strokeLinecap="round" fill="none" />
+                                    <path d="M 285 12 C 325 5, 365 14, 380 36" stroke="black" strokeWidth="4" strokeLinecap="round" fill="none" />
+                                    <path d="M 355 22 C 385 6, 435 6, 460 22" stroke="black" strokeWidth="4" strokeLinecap="round" fill="none" />
                                     <path d="M 425 32 C 455 18, 495 24, 520 48" stroke="black" strokeWidth="3" strokeLinecap="round" fill="none" />
                                     <path d="M 490 52 C 515 42, 545 48, 555 68" stroke="black" strokeWidth="2.5" strokeLinecap="round" fill="none" />
 
                                     {/* Scalloped Front Lip Suds Pillows */}
                                     <path d="M 80 82 C 105 72, 135 74, 150 90" stroke="black" strokeWidth="2.5" strokeLinecap="round" fill="none" />
-                                    <path d="M 155 88 C 185 76, 225 78, 245 94" stroke="black" strokeWidth="2.5" strokeLinecap="round" fill="none" />
-                                    <path d="M 250 92 C 285 80, 325 82, 350 95" stroke="black" strokeWidth="2.5" strokeLinecap="round" fill="none" />
-                                    <path d="M 355 92 C 390 80, 430 80, 455 94" stroke="black" strokeWidth="2.5" strokeLinecap="round" fill="none" />
-                                    <path d="M 460 90 C 490 78, 525 80, 545 88" stroke="black" strokeWidth="2.5" strokeLinecap="round" fill="none" />
-
-                                    {/* GLOSSY SUDS HIGHLIGHTS (Curved Sky-Blue Reflections) */}
-                                    <path d="M 105 28 C 125 22, 155 24, 170 34" stroke="#38BDF8" strokeWidth="3.5" strokeLinecap="round" fill="none" />
-                                    <path d="M 365 18 C 395 10, 435 12, 455 22" stroke="#38BDF8" strokeWidth="4" strokeLinecap="round" fill="none" />
-                                    <path d="M 470 28 C 495 24, 520 30, 535 40" stroke="#38BDF8" strokeWidth="3" strokeLinecap="round" fill="none" />
-
-                                    {/* EMBEDDED MINI SUDS BUBBLES (Tiny realistic clusters on foam surface) */}
-                                    <circle cx="130" cy="55" r="5" stroke="#0284C7" strokeWidth="1.5" fill="white" />
-                                    <circle cx="138" cy="58" r="3" stroke="#0284C7" strokeWidth="1" fill="white" />
-                                    <circle cx="210" cy="52" r="6" stroke="#0284C7" strokeWidth="1.5" fill="white" />
-                                    <circle cx="280" cy="65" r="5" stroke="#0284C7" strokeWidth="1.5" fill="white" />
-                                    <circle cx="365" cy="50" r="6" stroke="#0284C7" strokeWidth="1.5" fill="white" />
-                                    <circle cx="375" cy="54" r="4" stroke="#0284C7" strokeWidth="1" fill="white" />
-                                    <circle cx="440" cy="52" r="7" stroke="#0284C7" strokeWidth="1.5" fill="white" />
-                                    <circle cx="452" cy="56" r="4" stroke="#0284C7" strokeWidth="1" fill="white" />
-                                    <circle cx="510" cy="62" r="5" stroke="#0284C7" strokeWidth="1.5" fill="white" />
                                 </svg>
                             </div>
 
@@ -444,7 +420,7 @@ function Hero() {
                                     </div>
 
                                     {/* Pricing Box (Below) */}
-                                    <div className='bg-[#1565C0] border-[2px] md:border-[3px] border-black px-4 py-1.5 md:px-5 md:py-2 rounded-2xl max-w-[85%] relative z-20 shadow-[3px_3px_0px_#000] transition-transform hover:-translate-y-0.5 mt-1'>
+                                    <div className='bg-black border-[2px] md:border-[3px] border-black px-4 py-1.5 md:px-5 md:py-2 rounded-2xl max-w-[85%] relative z-20 shadow-[3px_3px_0px_rgba(0,0,0,0.5)] transition-transform hover:-translate-y-0.5 mt-1'>
                                         <p className='font-black text-white uppercase text-[10px] md:text-xs tracking-widest leading-relaxed text-center'>
                                             Always <span className='text-[#9AE600] text-xs md:text-sm font-black ml-0.5'>Affordable</span>
                                         </p>
@@ -572,12 +548,14 @@ function Hero() {
                             </div>
                         </div>
 
-                        {!imageLoaded && <Skeleton className="w-full max-w-[500px] h-[500px]" />}
                         <img
                             src={heroimage}
                             alt="WOW Laundry Professional Garment Care and Dry Cleaning Specialist"
-                            className={`w-full max-w-[430px] lg:max-w-[530px] object-contain relative z-20 drop-shadow-[0_20px_20px_rgba(0,0,0,0.15)] scale-110 transform -translate-y-8 md:-translate-y-12 mb-4 ${imageLoaded ? '' : 'hidden'}`}
-                            onLoad={() => setImageLoaded(true)}
+                            width="896"
+                            height="1128"
+                            fetchPriority="high"
+                            decoding="async"
+                            className="w-full max-w-[430px] lg:max-w-[530px] object-contain relative z-20 drop-shadow-[0_20px_20px_rgba(0,0,0,0.15)] scale-110 transform -translate-y-8 md:-translate-y-12 mb-4"
                         />
 
 

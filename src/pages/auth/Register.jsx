@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { User, Mail, Phone, Lock, ArrowRight, ArrowLeft, AlertTriangle, CheckCircle } from 'lucide-react';
-import logo from '../../assets/logo.png';
+import logo from '../../assets/logo.webp';
 import { useAppStore } from '../../store/useAppStore';
 
 export default function Register() {

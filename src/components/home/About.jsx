@@ -2,6 +2,7 @@ import React from 'react';
 import { MdOutlineLocalLaundryService, MdStorefront } from "react-icons/md";
 import { TbWash, TbTruckDelivery, TbClockHour4, TbShieldCheck } from "react-icons/tb";
 import { FaStar } from "react-icons/fa";
+import facilityImg from '../../assets/laundry-facility.webp';
 
 function About() {
     return (
@@ -9,9 +10,9 @@ function About() {
 
             {/* ── Section Header ─────────────────────────────────────── */}
             <div className='text-center mb-8 sm:mb-12'>
-                <div className='inline-block bg-white border-2 border-black px-5 sm:px-8 py-2 rounded-2xl shadow-[4px_4px_0px_rgba(0,0,0,1)] transform -rotate-1 sm:-rotate-2'>
-                    <h2 className='text-2xl sm:text-4xl md:text-5xl lilita-one-regular text-black uppercase tracking-wider'>
-                        About <span className='text-[#0D8DE3]'>Us</span>
+                <div className='inline-block bg-black border-2 border-black px-5 sm:px-8 py-2 rounded-2xl shadow-[4px_4px_0px_#9AE600] transform -rotate-1 sm:-rotate-2'>
+                    <h2 className='text-2xl sm:text-4xl md:text-5xl lilita-one-regular text-white uppercase tracking-wider'>
+                        About <span className='text-[#9AE600]'>Us</span>
                     </h2>
                 </div>
                 <div className='mt-3'>
@@ -52,7 +53,7 @@ function About() {
 
                         {/* Quick Stats / Highlights Bar */}
                         <div className='mt-5 grid grid-cols-3 gap-2 sm:gap-3'>
-                            <div className='bg-[#0D8DE3] border-2 border-black rounded-xl p-2.5 sm:p-3 text-center shadow-[2px_2px_0px_rgba(0,0,0,1)]'>
+                            <div className='bg-black border-2 border-black rounded-xl p-2.5 sm:p-3 text-center shadow-[2px_2px_0px_rgba(0,0,0,1)]'>
                                 <div className='text-lg sm:text-2xl font-black text-white leading-none'>24h</div>
                                 <div className='text-[10px] sm:text-xs font-black text-[#9AE600] uppercase tracking-wider mt-1'>Express Delivery</div>
                             </div>
@@ -91,7 +92,7 @@ function About() {
 
                             {/* State-of-the-Art Facilities */}
                             <div className='flex gap-3 sm:gap-4 bg-[#FAF8F5] p-3.5 sm:p-4 border-2 border-black rounded-xl shadow-[3px_3px_0px_rgba(0,0,0,1)]'>
-                                <div className='p-2.5 bg-[#0D8DE3] border-2 border-black rounded-xl text-white shadow-[2px_2px_0px_rgba(0,0,0,1)] h-fit shrink-0'>
+                                <div className='p-2.5 bg-[#01579B] border-2 border-black rounded-xl text-white shadow-[2px_2px_0px_rgba(0,0,0,1)] h-fit shrink-0'>
                                     <MdOutlineLocalLaundryService size={24} />
                                 </div>
                                 <div className='flex-1 min-w-0'>
@@ -119,7 +120,7 @@ function About() {
                                         <span className='text-sm sm:text-base font-black uppercase text-black tracking-wide'>
                                             Live Processing Centre & Outlet
                                         </span>
-                                        <span className='bg-[#0D8DE3] text-white text-[10px] font-black uppercase px-2 py-0.5 rounded border border-black'>
+                                        <span className='bg-black text-[#9AE600] text-[10px] font-black uppercase px-2 py-0.5 rounded border border-black'>
                                             Complete Transparency
                                         </span>
                                     </div>
@@ -149,7 +150,7 @@ function About() {
                     <div className='rounded-2xl sm:rounded-3xl border-2 border-black shadow-[4px_4px_0px_rgba(0,0,0,1)] sm:shadow-[6px_6px_0px_rgba(0,0,0,1)] overflow-hidden relative flex-1 min-h-[280px] sm:min-h-[340px] bg-black'>
                         <div
                             className="absolute inset-0 bg-cover bg-center transition-transform duration-700 hover:scale-105"
-                            style={{ backgroundImage: 'url(https://images.unsplash.com/photo-1545173168-9f1947eebb7f?q=80&w=2071&auto=format&fit=crop)' }}
+                            style={{ backgroundImage: `url(${facilityImg})` }}
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
 
@@ -166,10 +167,10 @@ function About() {
                         {/* Bottom overlay badges */}
                         <div className='absolute bottom-4 left-4 right-4 flex flex-col sm:flex-row gap-2 sm:gap-3'>
                             <div className='bg-white border-2 border-black rounded-xl px-3 py-2 shadow-[3px_3px_0px_rgba(0,0,0,1)] flex items-center gap-2 flex-1'>
-                                <TbTruckDelivery className='text-[#0D8DE3] text-xl sm:text-2xl shrink-0' />
+                                <TbTruckDelivery className='text-black text-xl sm:text-2xl shrink-0' />
                                 <div>
                                     <div className='text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-stone-600 leading-none'>Doorstep Service</div>
-                                    <div className='text-xs sm:text-sm font-black text-[#0D8DE3] leading-tight'>Fast Pickup & Delivery</div>
+                                    <div className='text-xs sm:text-sm font-black text-black leading-tight'>Fast Pickup & Delivery</div>
                                 </div>
                             </div>
                             <div className='bg-[#9AE600] border-2 border-black rounded-xl px-3 py-2 shadow-[3px_3px_0px_rgba(0,0,0,1)] flex items-center gap-2'>

@@ -1,11 +1,11 @@
 import React from 'react';
-import logo from '../assets/logo.png';
+import logo from '../assets/logo.webp';
 
 function Footer() {
   return (
-    <div className='mt-20 md:mx-10 bg-black rounded-t-[40px] md:rounded-t-[80px] px-10 lg:px-20 py-16 font-outfit selection:bg-[#9AE600] selection:text-black shadow-[0_-8px_0_#0D8DE3]'>
+    <footer className='mt-20 md:mx-10 bg-black rounded-t-[40px] md:rounded-t-[80px] px-10 lg:px-20 py-16 font-outfit selection:bg-[#9AE600] selection:text-black shadow-[0_-8px_0_#0D8DE3]'>
       <div className='flex justify-center'>
-        <img src={logo} alt="WOW Laundry" className="h-44 md:h-56 w-auto object-contain drop-shadow-[0_15px_25px_rgba(0,0,0,0.6)] hover:scale-105 transition-transform duration-300" />
+        <img src={logo} alt="WOW Laundry - Wear Fresh and Feel Fresh" width="224" height="224" loading="lazy" className="h-44 md:h-56 w-auto object-contain drop-shadow-[0_15px_25px_rgba(0,0,0,0.6)] hover:scale-105 transition-transform duration-300" />
       </div>
       
       <div className='-mt-4 md:-mt-6 flex justify-center items-center'>
@@ -24,7 +24,7 @@ function Footer() {
           (C) {new Date().getFullYear()} WOW Laundry. All Rights Reserved.
         </div>
       </div>
-    </div>
+    </footer>
   );
 }
 

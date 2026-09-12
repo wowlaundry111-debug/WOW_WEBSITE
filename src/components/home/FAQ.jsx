@@ -38,8 +38,8 @@ function FAQ() {
     return (
         <div className='px-4 md:px-10 lg:px-20 py-16 mt-20 flex flex-col md:flex-row justify-between gap-10 bg-[#FAF7F2] font-outfit selection:bg-black selection:text-[#9AE600]'>
             <div className='w-full lg:w-[45%]'>
-                <div className="inline-block bg-[#9AE600] border-2 border-black px-6 py-2 rounded-2xl shadow-[4px_4px_0px_rgba(0,0,0,1)] mb-8 transform -rotate-1">
-                    <div className='text-4xl md:text-5xl lilita-one-regular text-black uppercase tracking-wider'>Contact <span className='text-[#0D8DE3]'>Us</span></div>
+                <div className="inline-block bg-black border-2 border-black px-6 py-2 rounded-2xl shadow-[4px_4px_0px_#9AE600] mb-8 transform -rotate-1">
+                    <div className='text-4xl md:text-5xl lilita-one-regular text-white uppercase tracking-wider'>Contact <span className='text-[#9AE600]'>Us</span></div>
                 </div>
                 
                 <div className='bg-[#0D8DE3] rounded-3xl md:rounded-[40px] border-2 border-black p-6 md:p-10 mt-6 flex flex-col shadow-[8px_8px_0px_rgba(0,0,0,1)] relative'>
@@ -69,7 +69,7 @@ function FAQ() {
             
             <div className='flex-1 flex justify-center items-end relative'>
                 <div className="absolute bottom-10 right-10 w-64 h-64 bg-[#9AE600] rounded-full border-2 border-black shadow-[4px_4px_0px_rgba(0,0,0,1)] -z-10 blur-sm opacity-50"></div>
-                <img src={contactImage} alt="Contact WOW Laundry Rama Mandi Jalandhar and Law Gate Maheru" className='w-[30rem] filter drop-shadow-2xl hover:scale-105 transition-transform duration-500' loading="lazy" />
+                <img src={contactImage} alt="Contact WOW Laundry Rama Mandi Jalandhar and Law Gate Maheru" width="960" height="960" decoding="async" className='w-[30rem] filter drop-shadow-2xl hover:scale-105 transition-transform duration-500' loading="lazy" />
             </div>
         </div>
     );

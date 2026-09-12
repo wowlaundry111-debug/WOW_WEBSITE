@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAppStore } from '../store/useAppStore';
 import { ShoppingCart, User, LogOut, LayoutDashboard, Package, Store } from 'lucide-react';
-import logo from '../assets/logo.png';
+import logo from '../assets/logo.webp';
 import { setAuthToken } from '../services/api';
 
 export default function Navbar() {
@@ -56,7 +56,7 @@ export default function Navbar() {
           <div className="flex items-center gap-3 sm:gap-4">
             <Link to="/" className="flex items-center gap-3 transition-colors">
               <div className="bg-black border-2 sm:border-3 border-black rounded-full shadow-[3px_3px_0px_rgba(0,0,0,1)] flex items-center justify-center w-14 h-14 sm:w-18 sm:h-18 overflow-hidden shrink-0">
-                <img src={logo} alt="WOW Laundry" className="w-16 h-16 sm:w-22 sm:h-22 object-contain scale-125" />
+                <img src={logo} alt="" width="72" height="72" className="w-16 h-16 sm:w-22 sm:h-22 object-contain scale-125" />
               </div>
               <span className="font-extrabold text-2xl sm:text-4xl text-black lilita-one-regular uppercase tracking-wider bg-white px-3 py-0.5 sm:px-4 sm:py-1 border-2 sm:border-4 border-black shadow-[3px_3px_0px_rgba(0,0,0,1)] sm:shadow-[6px_6px_0px_rgba(0,0,0,1)] rounded-xl sm:rounded-2xl transform -rotate-2">
                 WOW Laundry
@@ -93,7 +93,7 @@ export default function Navbar() {
             )}
 
             {(!currentUser || currentUser.role === 'Customer') && (
-              <Link to="/cart" className="relative p-1.5 bg-white border-2 border-black rounded-xl text-black hover:bg-black hover:text-[#9AE600] shadow-[2px_2px_0px_rgba(0,0,0,1)] transition-colors">
+              <Link to="/cart" aria-label={`Shopping Cart${cartItemsCount > 0 ? `, ${cartItemsCount} items` : ''}`} className="relative p-1.5 bg-white border-2 border-black rounded-xl text-black hover:bg-black hover:text-[#9AE600] shadow-[2px_2px_0px_rgba(0,0,0,1)] transition-colors">
                 <ShoppingCart size={20} strokeWidth={3} />
                 {cartItemsCount > 0 && (
                   <span className="absolute -top-3 -right-3 inline-flex items-center justify-center w-7 h-7 text-sm font-black text-white bg-[#0D8DE3] border-2 border-black rounded-full shadow-[2px_2px_0px_rgba(0,0,0,1)]">
@@ -145,7 +145,7 @@ export default function Navbar() {
                 <Link to="/login" className="text-black bg-white border-2 border-black font-black text-xs uppercase tracking-widest px-4 py-2 rounded-xl hover:bg-gray-100 shadow-[2px_2px_0px_rgba(0,0,0,1)] transition-colors">
                   Login
                 </Link>
-                <Link to="/register" className="bg-[#0D8DE3] text-white border-2 border-black font-black text-xs uppercase tracking-widest px-5 py-2 rounded-xl shadow-[2px_2px_0px_rgba(0,0,0,1)] hover:bg-blue-600 transition-colors hidden sm:block transform rotate-2">
+                <Link to="/register" className="bg-black text-[#9AE600] border-2 border-black font-black text-xs uppercase tracking-widest px-5 py-2 rounded-xl shadow-[2px_2px_0px_rgba(0,0,0,1)] hover:bg-neutral-900 transition-colors hidden sm:block transform rotate-2">
                   Register
                 </Link>
               </div>

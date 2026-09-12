@@ -72,7 +72,7 @@ function Service() {
     <div className='p-6 lg:px-20 lg:py-16 mt-10 bg-[#FAF7F2] font-outfit selection:bg-black selection:text-[#9AE600]'>
       <div className='lg:flex justify-between items-center'>
         <div className='lg:w-1/2'>
-          <div className="inline-block bg-[#0D8DE3] border-2 border-black px-4 py-2 rounded-2xl shadow-[4px_4px_0px_rgba(0,0,0,1)] mb-6 transform -rotate-2">
+          <div className="inline-block bg-black border-2 border-black px-4 py-2 rounded-2xl shadow-[4px_4px_0px_#0D8DE3] mb-6 transform -rotate-2">
             <h2 className='text-4xl md:text-5xl lilita-one-regular text-white uppercase tracking-wider'>Why <span className='text-[#9AE600]'>Us??</span></h2>
           </div>
           <ul className='text-sm md:text-lg mt-4 md:mt-8 font-black uppercase tracking-widest text-black space-y-4'>
@@ -83,7 +83,7 @@ function Service() {
               { text: "We deliver your clothes on the 3rd day after Pickup", icon: <TbTruckDelivery className='text-xl md:text-2xl' /> }
             ].map((item, index) => (
               <li key={index} className='flex items-center gap-4 bg-[#9AE600] border-2 border-black p-4 rounded-2xl shadow-[4px_4px_0px_rgba(0,0,0,1)] transform transition-transform hover:-translate-y-1 hover:shadow-[6px_6px_0px_rgba(0,0,0,1)]'>
-                <div className='p-2 bg-black border-2 border-black rounded-xl text-[#0D8DE3] shadow-[2px_2px_0px_rgba(255,255,255,1)]'>
+                <div className='p-2 bg-black border-2 border-black rounded-xl text-[#9AE600] shadow-[2px_2px_0px_rgba(255,255,255,1)]'>
                   {item.icon}
                 </div>
                 <span className='text-black leading-tight'>{item.text}</span>
@@ -94,15 +94,15 @@ function Service() {
         
         {/* Download App Section */}
         <div className='lg:w-5/12 mt-16 lg:mt-0 flex flex-col justify-center items-center lg:items-end relative'>
-          <div className='bg-[#0D8DE3] border-4 border-black p-8 rounded-[40px] shadow-[8px_8px_0px_rgba(0,0,0,1)] text-center w-full max-w-md relative'>
+          <div className='bg-black border-4 border-black p-8 rounded-[40px] shadow-[8px_8px_0px_#0D8DE3] text-center w-full max-w-md relative'>
             {/* Decorative circles */}
             <div className="absolute -top-5 -left-5 w-12 h-12 bg-[#9AE600] border-2 border-black rounded-full shadow-[2px_2px_0px_rgba(0,0,0,1)] animate-bounce-soft"></div>
-            <div className="absolute -bottom-5 -right-5 w-16 h-16 bg-white border-2 border-black rounded-full shadow-[2px_2px_0px_rgba(0,0,0,1)] animate-bounce-soft" style={{ animationDelay: '1s' }}></div>
+            <div className="absolute -bottom-5 -right-5 w-16 h-16 bg-[#0D8DE3] border-2 border-black rounded-full shadow-[2px_2px_0px_rgba(0,0,0,1)] animate-bounce-soft" style={{ animationDelay: '1s' }}></div>
 
             <h3 className='text-3xl md:text-4xl lilita-one-regular text-white uppercase tracking-wide mb-2'>
               Get The <span className='text-[#9AE600]'>App</span>
             </h3>
-            <p className='text-sm md:text-base font-bold text-white uppercase tracking-widest mb-8'>
+            <p className='text-sm md:text-base font-bold text-gray-300 uppercase tracking-widest mb-8'>
               Order laundry right from your phone.
             </p>
             
@@ -188,17 +188,17 @@ function Service() {
             <div className='mt-12 md:mt-20 grid grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10'>
                 <div className='rounded-3xl overflow-hidden border-2 border-black shadow-[8px_8px_0px_rgba(0,0,0,1)] transform hover:-translate-y-2 hover:rotate-1 transition-all group'>
                     <div className="bg-[#9AE600] border-b-2 border-black p-3 text-center font-black uppercase tracking-widest text-black">Modern Wash</div>
-                    <img src={first} alt="Commercial Washing Machines - WOW Laundry Jalandhar" loading="lazy" className='w-full h-48 md:h-64 object-cover group-hover:scale-110 transition-transform duration-500' />
+                    <img src={first} alt="Commercial Washing Machines - WOW Laundry Jalandhar" width="750" height="560" loading="lazy" decoding="async" className='w-full h-48 md:h-64 object-cover group-hover:scale-110 transition-transform duration-500' />
                 </div>
 
                 <div className='rounded-3xl overflow-hidden border-2 border-black shadow-[8px_8px_0px_rgba(0,0,0,1)] transform hover:-translate-y-2 hover:-rotate-1 transition-all group'>
-                    <div className="bg-[#0D8DE3] border-b-2 border-black p-3 text-center font-black uppercase tracking-widest text-white">Premium Press</div>
-                    <img src={second} alt="Garment Steam Ironing and Press Service" loading="lazy" className='w-full h-48 md:h-64 object-cover group-hover:scale-110 transition-transform duration-500' />
+                    <div className="bg-black border-b-2 border-black p-3 text-center font-black uppercase tracking-widest text-white">Premium Press</div>
+                    <img src={second} alt="Garment Steam Ironing and Press Service" width="750" height="560" loading="lazy" decoding="async" className='w-full h-48 md:h-64 object-cover group-hover:scale-110 transition-transform duration-500' />
                 </div>
 
                 <div className='rounded-3xl overflow-hidden border-2 border-black shadow-[8px_8px_0px_rgba(0,0,0,1)] transform hover:-translate-y-2 hover:rotate-2 transition-all group col-span-2 lg:col-span-1'>
                     <div className="bg-black border-b-2 border-black p-3 text-center font-black uppercase tracking-widest text-[#9AE600]">Care & Quality</div>
-                    <img src={third} alt="Hygienic Clothes Wash and Dry Cleaning Care" loading="lazy" className='w-full h-48 md:h-64 object-cover group-hover:scale-110 transition-transform duration-500' />
+                    <img src={third} alt="Hygienic Clothes Wash and Dry Cleaning Care" width="750" height="560" loading="lazy" decoding="async" className='w-full h-48 md:h-64 object-cover group-hover:scale-110 transition-transform duration-500' />
                 </div>
             </div>
         </div>
