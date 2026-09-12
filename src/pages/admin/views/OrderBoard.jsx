@@ -3,6 +3,17 @@ import { Clock, CreditCard, Phone, Truck, X, MapPin, Printer, MessageCircle, Che
 import { useAppStore } from '../../../store/useAppStore';
 import { downloadOrdersReport } from '../../../utils/exportCsv';
 
+const formatCatTitle = (it) => {
+  const cat = (it?.categoryName || '').trim();
+  const sub = (it?.subCategoryName || '').trim();
+  if (cat && sub && cat.toLowerCase() !== sub.toLowerCase()) {
+    return `${cat.toUpperCase()} › ${sub.toUpperCase()}`;
+  }
+  if (cat) return cat.toUpperCase();
+  if (sub) return sub.toUpperCase();
+  return 'GENERAL LAUNDRY';
+};
+
 export default function OrderBoard({ 
   tenantOrders = [], 
   displayFilters, 
@@ -381,15 +392,112 @@ export default function OrderBoard({
                     </span>
                   </div>
 
-                  <div className="bg-gray-50 border-2 border-black p-3 rounded-lg flex items-center gap-3 mb-4">
-                    <div className="w-10 h-10 border-2 border-black bg-white flex items-center justify-center rounded font-black text-xs text-black">
-                      {serviceInfo.icon}
-                    </div>
-                    <div>
-                      <p className="font-bold text-sm">{serviceInfo.label}</p>
-                      <p className="text-xs font-bold text-gray-500">{order.items.length} items</p>
-                    </div>
-                  </div>
+                  {/* Category & Items Section on Outer Card */}
+                  {(() => {
+                    const itemsByCat = (order.items || []).reduce((acc, it) => {
+                      const title = formatCatTitle(it);
+                      if (!acc[title]) acc[title] = [];
+                      acc[title].push(it);
+                      return acc;
+                    }, {});
+
+                    return (
+                      <div className="space-y-3 mb-4">
+                        {Object.entries(itemsByCat).map(([catTitle, catItems], groupIdx) => (
+                          <div key={groupIdx} className="border-2 border-black rounded-xl overflow-hidden bg-white shadow-[3px_3px_0px_rgba(0,0,0,1)]">
+                            {/* Big Words Category Header Banner */}
+                            <div className="bg-[#0D8DE3] text-white py-2 px-3.5 flex flex-wrap items-center justify-between gap-2 border-b-2 border-black">
+                              <div className="flex items-center gap-2">
+                                <span className="text-[10px] font-black uppercase text-black bg-[#9AE600] px-2 py-0.5 rounded border border-black tracking-wider shadow-[1px_1px_0px_rgba(0,0,0,1)]">
+                                  CATEGORY
+                                </span>
+                                <h4 className="text-base sm:text-lg font-black text-white uppercase tracking-wider lilita-one-regular drop-shadow-sm">
+                                  {catTitle}
+                                </h4>
+                              </div>
+                              <span className="text-[10px] font-black text-black bg-white border border-black px-2.5 py-0.5 rounded uppercase shadow-[1px_1px_0px_rgba(0,0,0,1)]">
+                                {catItems.length} {catItems.length === 1 ? 'Item' : 'Items'}
+                              </span>
+                            </div>
+
+                            {/* Items in this Category */}
+                            <div className="p-3 divide-y-2 divide-dashed divide-gray-200 bg-[#FAF9F6] space-y-2">
+                              {catItems.map((it, idx) => {
+                                const isKg = it.unit === 'KG' || (typeof it.name === 'string' && (it.name.toLowerCase().includes('per kg') || it.name.toLowerCase().includes('/ kg'))) || Boolean(it.kgWeight && it.kgWeight > 0);
+                                return (
+                                  <div key={idx} className={`flex justify-between items-center gap-2 ${idx > 0 ? 'pt-2' : ''}`}>
+                                    <div className="flex-1 min-w-0">
+                                      <div className="flex items-center gap-2 flex-wrap">
+                                        <span className="text-sm font-black text-black uppercase">
+                                          {it.quantity}x {it.name}
+                                        </span>
+                                        {it.isBucket && (
+                                          <span className="bg-[#0D8DE3] text-white text-[9px] font-black px-1.5 py-0.5 rounded border border-black uppercase tracking-wider">
+                                            Bucket (Per KG)
+                                          </span>
+                                        )}
+                                      </div>
+                                      {isKg ? (
+                                        <div className="mt-0.5 space-y-0.5">
+                                          <p className="text-[11px] font-bold text-gray-700 uppercase">
+                                            {it.kgWeight ? `Measured Weight: ${it.kgWeight} KG` : 'Awaiting delivery agent weight entry'}
+                                          </p>
+                                          {it.isBucket && (
+                                            <p className="text-[11px] font-black text-[#0D8DE3] uppercase">
+                                              Clothes Count: {it.quantity}
+                                            </p>
+                                          )}
+                                        </div>
+                                      ) : (
+                                        <p className="text-[11px] font-bold text-gray-500 uppercase mt-0.5">
+                                          ₹{it.price} / Item
+                                        </p>
+                                      )}
+                                    </div>
+
+                                    <div className="shrink-0 text-right">
+                                      {isKg ? (
+                                        order.kgPriceUpdated && it.price > 0 ? (
+                                          <span className="text-xs font-black text-black bg-[#9AE600] px-2.5 py-1 border-2 border-black rounded-lg inline-block shadow-[1px_1px_0px_rgba(0,0,0,1)]">
+                                            ₹{it.price}
+                                          </span>
+                                        ) : (
+                                          <span className="text-[10px] font-black text-yellow-900 bg-yellow-200 border border-black px-2 py-0.5 rounded-lg uppercase tracking-wider inline-block">
+                                            Pending Weighing
+                                          </span>
+                                        )
+                                      ) : (
+                                        <span className="text-xs font-black text-black bg-white px-2.5 py-1 border-2 border-black rounded-lg inline-block shadow-[1.5px_1.5px_0px_rgba(0,0,0,1)]">
+                                          ₹{it.price * it.quantity}
+                                        </span>
+                                      )}
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        ))}
+
+                        {/* Wash Add-ons & Preferences if present */}
+                        {order.washPreferences && order.washPreferences.length > 0 && (
+                          <div className="border-2 border-black p-2.5 bg-[#9AE600]/15 rounded-xl space-y-1.5">
+                            <p className="font-black text-[11px] uppercase tracking-widest text-black flex items-center gap-1.5">
+                              <Sparkles size={13} className="text-[#0D8DE3]" /> Selected Wash Add-ons & Preferences
+                            </p>
+                            <div className="flex flex-wrap gap-2">
+                              {order.washPreferences.map((pref, idx) => (
+                                <div key={idx} className="bg-white border-2 border-black px-2.5 py-0.5 rounded-lg flex items-center gap-1.5 text-xs font-black shadow-[1.5px_1.5px_0px_rgba(0,0,0,1)]">
+                                  <span>{pref.name}</span>
+                                  <span className="bg-[#9AE600] px-1.5 py-0.2 border border-black rounded text-[10px]">+₹{pref.price}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
 
                   <div className="flex gap-4 mb-4 text-sm font-bold text-gray-600 flex-wrap items-center">
                     <span className="flex items-center gap-1"><Clock size={16}/> {new Date(order.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
@@ -635,17 +743,6 @@ export default function OrderBoard({
             <div className="p-6 space-y-6">
               {/* ─── 1. ORDER ITEMS SECTION (UP) ─────────────────────── */}
               {(() => {
-                const formatCatTitle = (it) => {
-                  const cat = (it.categoryName || '').trim();
-                  const sub = (it.subCategoryName || '').trim();
-                  if (cat && sub && cat.toLowerCase() !== sub.toLowerCase()) {
-                    return `${cat.toUpperCase()} › ${sub.toUpperCase()}`;
-                  }
-                  if (cat) return cat.toUpperCase();
-                  if (sub) return sub.toUpperCase();
-                  return 'GENERAL LAUNDRY';
-                };
-
                 const itemsByCat = (selectedOrder.items || []).reduce((acc, it) => {
                   const title = formatCatTitle(it);
                   if (!acc[title]) acc[title] = [];
