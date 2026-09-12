@@ -233,15 +233,15 @@ export default function OrderHistory() {
                         </div>
 
                         {/* Assigned Rider Contact Icons */}
-                        {order.deliveryBoyName && (
+                        {(order.deliveryBoyName || order.deliveryBoyId) && (
                           <div className="flex items-center gap-1 bg-white p-1 rounded-xl border border-black shadow-[1px_1px_0px_rgba(0,0,0,1)]">
-                            <span className="text-[10px] font-black uppercase text-black px-1 truncate max-w-[80px]">
-                              {order.deliveryBoyName.split(' ')[0]}:
+                            <span className="text-[10px] font-black uppercase text-black px-1">
+                              Delivery:
                             </span>
                             {deliveryPhone && (
                               <a 
                                 href={`tel:${deliveryPhone}`}
-                                title={`Call Delivery Agent (${order.deliveryBoyName})`}
+                                title="Call Delivery Agent"
                                 className="w-7 h-7 bg-[#9AE600] hover:bg-[#86d000] text-black rounded-lg flex items-center justify-center border border-black transition-colors"
                               >
                                 <Phone size={13} strokeWidth={2.5} />
@@ -252,7 +252,7 @@ export default function OrderHistory() {
                                 href={getWaLink(deliveryPhone, order._id, 'rider')}
                                 target="_blank" 
                                 rel="noopener noreferrer"
-                                title={`WhatsApp Delivery Agent (${order.deliveryBoyName})`}
+                                title="WhatsApp Delivery Agent"
                                 className="w-7 h-7 bg-[#25D366] hover:bg-green-600 text-white rounded-lg flex items-center justify-center border border-black transition-colors"
                               >
                                 <MessageCircle size={13} strokeWidth={2.5} />
