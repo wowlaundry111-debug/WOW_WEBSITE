@@ -1,5 +1,5 @@
-import React from 'react';
-import { Plus, Truck, Trash2, Sparkles, Smartphone } from 'lucide-react';
+import React, { useState } from 'react';
+import { Plus, Truck, Trash2, Sparkles, Smartphone, Clock, Tag, X } from 'lucide-react';
 
 export default function ShopSettings({ 
   currentShop, 
@@ -19,6 +19,22 @@ export default function ShopSettings({
   deliveryBoys,
   deleteUser
 }) {
+  const [newSlotInput, setNewSlotInput] = useState('');
+
+  const handleAddSlot = (slot) => {
+    const trimmed = (slot || '').trim();
+    if (!trimmed) return;
+    const current = settingsForm.pickupTimings || [];
+    if (!current.includes(trimmed)) {
+      setSettingsForm({ ...settingsForm, pickupTimings: [...current, trimmed] });
+    }
+    setNewSlotInput('');
+  };
+
+  const handleRemoveSlot = (index) => {
+    const updated = (settingsForm.pickupTimings || []).filter((_, i) => i !== index);
+    setSettingsForm({ ...settingsForm, pickupTimings: updated });
+  };
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
       {/* Configuration Form */}
@@ -317,6 +333,231 @@ export default function ShopSettings({
                     </div>
                   </div>
                 ))}
+              </div>
+            </div>
+
+            {/* Shop Promo Code & Discount */}
+            <div className="border-t-2 border-black pt-4 space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-black uppercase text-black flex items-center gap-2">
+                  <Tag size={18} className="text-[#0D8DE3]" /> Shop Promo Code (Home Card & Checkout)
+                </h3>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const current = settingsForm.promoCode || { code: 'WOW50', discountPercent: 50, maxDiscount: 150, minOrderValue: 199, description: 'Flat 50% Off on Laundry', isActive: true };
+                      setSettingsForm({
+                        ...settingsForm,
+                        promoCode: { ...current, isActive: current.isActive === false }
+                      });
+                    }}
+                    className={`w-10 h-5 rounded-full border-2 border-black flex items-center p-0.5 transition-colors ${
+                      settingsForm.promoCode?.isActive !== false ? 'bg-[#9AE600]' : 'bg-gray-300'
+                    }`}
+                  >
+                    <div className={`w-3.5 h-3.5 bg-white border-2 border-black rounded-full transition-transform ${
+                      settingsForm.promoCode?.isActive !== false ? 'translate-x-4' : 'translate-x-0'
+                    }`} />
+                  </button>
+                  <span className="text-xs font-black uppercase">
+                    {settingsForm.promoCode?.isActive !== false ? 'Active' : 'Paused'}
+                  </span>
+                </div>
+              </div>
+
+              <div className="bg-[#9AE600]/15 border-2 border-black p-4 rounded-xl space-y-3">
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-black uppercase mb-1">Coupon Code (e.g. WOW50)</label>
+                    <input
+                      type="text"
+                      value={settingsForm.promoCode?.code || ''}
+                      onChange={(e) => {
+                        const current = settingsForm.promoCode || { discountPercent: 50, maxDiscount: 150, minOrderValue: 199, isActive: true };
+                        setSettingsForm({
+                          ...settingsForm,
+                          promoCode: { ...current, code: e.target.value.toUpperCase() }
+                        });
+                      }}
+                      placeholder="e.g. WOW50"
+                      className="w-full bg-white border-2 border-black p-2 font-black text-sm uppercase outline-none focus:bg-[#9AE600]/20"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-black uppercase mb-1">Discount (%)</label>
+                    <input
+                      type="number"
+                      value={settingsForm.promoCode?.discountPercent ?? 50}
+                      onChange={(e) => {
+                        const current = settingsForm.promoCode || { code: 'WOW50', maxDiscount: 150, minOrderValue: 199, isActive: true };
+                        setSettingsForm({
+                          ...settingsForm,
+                          promoCode: { ...current, discountPercent: Number(e.target.value) }
+                        });
+                      }}
+                      className="w-full bg-white border-2 border-black p-2 font-black text-sm outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-black uppercase mb-1">Max Discount (₹)</label>
+                    <input
+                      type="number"
+                      value={settingsForm.promoCode?.maxDiscount ?? 150}
+                      onChange={(e) => {
+                        const current = settingsForm.promoCode || { code: 'WOW50', discountPercent: 50, minOrderValue: 199, isActive: true };
+                        setSettingsForm({
+                          ...settingsForm,
+                          promoCode: { ...current, maxDiscount: Number(e.target.value) }
+                        });
+                      }}
+                      className="w-full bg-white border-2 border-black p-2 font-black text-sm outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-black uppercase mb-1">Min Order Value (₹)</label>
+                    <input
+                      type="number"
+                      value={settingsForm.promoCode?.minOrderValue ?? 199}
+                      onChange={(e) => {
+                        const current = settingsForm.promoCode || { code: 'WOW50', discountPercent: 50, maxDiscount: 150, isActive: true };
+                        setSettingsForm({
+                          ...settingsForm,
+                          promoCode: { ...current, minOrderValue: Number(e.target.value) }
+                        });
+                      }}
+                      className="w-full bg-white border-2 border-black p-2 font-black text-sm outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-black uppercase mb-1">Promo Title / Description</label>
+                  <input
+                    type="text"
+                    value={settingsForm.promoCode?.description || ''}
+                    onChange={(e) => {
+                      const current = settingsForm.promoCode || { code: 'WOW50', discountPercent: 50, maxDiscount: 150, minOrderValue: 199, isActive: true };
+                      setSettingsForm({
+                        ...settingsForm,
+                        promoCode: { ...current, description: e.target.value }
+                      });
+                    }}
+                    placeholder="e.g. Flat 50% Off on Laundry"
+                    className="w-full bg-white border-2 border-black p-2 font-bold text-xs outline-none"
+                  />
+                </div>
+
+                {/* Live Preview Badge */}
+                <div className="p-2.5 bg-white border-2 border-black rounded-lg flex items-center justify-between gap-2 shadow-[2px_2px_0px_rgba(0,0,0,1)]">
+                  <div>
+                    <p className="text-[10px] font-black uppercase text-gray-500">Preview On Customer Main Screen:</p>
+                    <p className="text-xs font-black text-black">
+                      {settingsForm.promoCode?.discountPercent || 50}% OFF • USE CODE: <span className="text-[#0D8DE3] underline">{settingsForm.promoCode?.code || 'WOW50'}</span>
+                    </p>
+                  </div>
+                  <span className="text-[10px] font-black uppercase bg-[#9AE600] border border-black px-2 py-0.5 rounded">
+                    {settingsForm.promoCode?.isActive !== false ? 'LIVE' : 'PAUSED'}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Customer Pickup Time Slots Configuration */}
+            <div className="border-t-2 border-black pt-4 space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-black uppercase text-black flex items-center gap-2">
+                  <Clock size={18} className="text-[#0D8DE3]" /> Customer Pickup Time Slots
+                </h3>
+                <span className="text-xs font-bold text-gray-500">
+                  {(settingsForm.pickupTimings || []).length} Slots Active
+                </span>
+              </div>
+
+              <div className="bg-blue-50/60 border-2 border-black p-4 rounded-xl space-y-3">
+                <p className="text-xs font-bold text-gray-600">
+                  Customers select one of these scheduled slots when checking out orders for this branch.
+                </p>
+
+                {/* Active Slots Pills */}
+                <div className="flex flex-wrap gap-2 pt-1">
+                  {(settingsForm.pickupTimings || []).map((slot, index) => (
+                    <div
+                      key={index}
+                      className="bg-white border-2 border-black px-3 py-1.5 rounded-lg flex items-center gap-2 shadow-[2px_2px_0px_rgba(0,0,0,1)] text-xs font-black"
+                    >
+                      <span>{slot}</span>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveSlot(index)}
+                        className="p-0.5 hover:bg-red-500 hover:text-white rounded transition-colors text-gray-600"
+                        title="Remove Slot"
+                      >
+                        <X size={13} strokeWidth={3} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Add Custom Slot */}
+                <div className="flex gap-2 pt-2">
+                  <input
+                    type="text"
+                    placeholder="e.g. 09:00 AM - 11:00 AM"
+                    value={newSlotInput}
+                    onChange={(e) => setNewSlotInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        handleAddSlot(newSlotInput);
+                      }
+                    }}
+                    className="flex-1 bg-white border-2 border-black p-2 font-bold text-xs outline-none"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => handleAddSlot(newSlotInput)}
+                    className="bg-[#0D8DE3] text-white border-2 border-black px-3 py-2 font-black uppercase text-xs shadow-[2px_2px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 transition-all flex items-center gap-1 shrink-0"
+                  >
+                    <Plus size={14} /> Add Slot
+                  </button>
+                </div>
+
+                {/* Quick Preset Buttons */}
+                <div className="pt-2 border-t border-dashed border-gray-300">
+                  <p className="text-[10px] font-black uppercase text-gray-500 mb-1.5">Quick Add Presets:</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {[
+                      '08:00 AM - 10:00 AM',
+                      '10:00 AM - 12:00 PM',
+                      '12:00 PM - 02:00 PM',
+                      '02:00 PM - 04:00 PM',
+                      '04:00 PM - 06:00 PM',
+                      '06:00 PM - 08:00 PM',
+                      '08:00 PM - 10:00 PM'
+                    ].map((preset) => {
+                      const exists = (settingsForm.pickupTimings || []).includes(preset);
+                      return (
+                        <button
+                          key={preset}
+                          type="button"
+                          disabled={exists}
+                          onClick={() => handleAddSlot(preset)}
+                          className={`text-[10px] font-extrabold px-2 py-1 rounded border border-black uppercase transition-all ${
+                            exists
+                              ? 'bg-gray-200 text-gray-400 cursor-not-allowed border-gray-300'
+                              : 'bg-white hover:bg-[#9AE600] text-black shadow-[1px_1px_0px_rgba(0,0,0,1)]'
+                          }`}
+                        >
+                          + {preset}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
               </div>
             </div>
           </div>

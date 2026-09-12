@@ -643,16 +643,41 @@ export const useAppStore = create<AppState>()(
       clearCart: () => set({ cart: [], activeCoupon: null, deliveryInstructions: '' }),
 
       applyCoupon: (code) => {
-        const { offers, cart, currentTenantId } = get();
-        const coupon = offers.find(o => o.code.toUpperCase() === code.toUpperCase() && o.shopId === currentTenantId);
+        const { offers, cart, currentTenantId, shops } = get();
+        const cleanCode = (code || '').trim().toUpperCase();
+        const shop = shops.find(s => s._id === currentTenantId);
+
+        // First check shop's custom promoCode if configured and active
+        let coupon: Offer | null = null;
+        if (shop?.promoCode && shop.promoCode.isActive !== false && shop.promoCode.code.toUpperCase() === cleanCode) {
+          coupon = {
+            _id: `promo_${shop._id}`,
+            shopId: shop._id,
+            code: shop.promoCode.code.toUpperCase(),
+            discountPercent: shop.promoCode.discountPercent,
+            maxDiscount: shop.promoCode.maxDiscount,
+            minOrderValue: shop.promoCode.minOrderValue,
+            description: shop.promoCode.description || '',
+            isActive: true,
+          };
+        } else {
+          coupon = offers.find(o => o.code.toUpperCase() === cleanCode && o.shopId === currentTenantId && o.isActive !== false) || null;
+        }
+
         if (!coupon) return { success: false, message: 'Invalid coupon code for this shop' };
 
-        const subtotal = cart.reduce((sum, c) => sum + c.price * c.quantity, 0);
+        const isKgItemCheck = (c: any) => 
+          c.unit === 'KG' || 
+          (typeof c.name === 'string' && (c.name.toLowerCase().includes('per kg') || c.name.toLowerCase().includes('/ kg'))) || 
+          Boolean(c.pricePerKg && c.pricePerKg > 0);
+
+        const subtotal = cart.filter(c => !isKgItemCheck(c)).reduce((sum, c) => sum + (c.price || 0) * c.quantity, 0);
         if (subtotal < coupon.minOrderValue) {
           return { success: false, message: `Minimum order value for this coupon is ₹${coupon.minOrderValue}` };
         }
         set({ activeCoupon: coupon });
-        return { success: true, message: `Coupon applied: ₹${Math.min((subtotal * coupon.discountPercent) / 100, coupon.maxDiscount)} off!` };
+        const discountVal = Math.min((subtotal * coupon.discountPercent) / 100, coupon.maxDiscount);
+        return { success: true, message: `Coupon applied: ₹${discountVal} off!` };
       },
 
       removeCoupon: () => set({ activeCoupon: null }),
@@ -709,6 +734,7 @@ export const useAppStore = create<AppState>()(
             washPreferences,
             totalAmount: finalTotal,
             discountAmount: discount,
+            couponCode: activeCoupon?.code || undefined,
             taxAmount: tax,
             deliveryFee: deliveryFeeAmt,
             pickupAddress: deliveryAddress,

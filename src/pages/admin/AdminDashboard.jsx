@@ -109,6 +109,17 @@ export default function AdminDashboard() {
         instructions: currentShop.instructions || '',
         androidAppUrl: currentShop.androidAppUrl || '',
         iosAppUrl: currentShop.iosAppUrl || '',
+        pickupTimings: (currentShop.pickupTimings && currentShop.pickupTimings.length > 0)
+          ? currentShop.pickupTimings
+          : ['08:00 AM - 10:00 AM', '10:00 AM - 12:00 PM', '02:00 PM - 04:00 PM', '06:00 PM - 08:00 PM'],
+        promoCode: currentShop.promoCode || {
+          code: 'WOW50',
+          discountPercent: 50,
+          maxDiscount: 150,
+          minOrderValue: 199,
+          description: 'Flat 50% Off on Laundry',
+          isActive: true,
+        },
         promoBanners: (currentShop.promoBanners && currentShop.promoBanners.length >= 2) 
           ? currentShop.promoBanners 
           : defaultPromos,
@@ -151,6 +162,15 @@ export default function AdminDashboard() {
         instructions: settingsForm.instructions,
         androidAppUrl: settingsForm.androidAppUrl ? settingsForm.androidAppUrl.trim() : '',
         iosAppUrl: settingsForm.iosAppUrl ? settingsForm.iosAppUrl.trim() : '',
+        pickupTimings: settingsForm.pickupTimings || [],
+        promoCode: settingsForm.promoCode ? {
+          ...settingsForm.promoCode,
+          code: (settingsForm.promoCode.code || '').trim().toUpperCase(),
+          discountPercent: Number(settingsForm.promoCode.discountPercent || 0),
+          maxDiscount: Number(settingsForm.promoCode.maxDiscount || 0),
+          minOrderValue: Number(settingsForm.promoCode.minOrderValue || 0),
+          isActive: settingsForm.promoCode.isActive !== false,
+        } : undefined,
         promoBanners: settingsForm.promoBanners,
         washPreferences: settingsForm.washPreferences,
         isOpen: isShopOpen

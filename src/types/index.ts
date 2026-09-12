@@ -23,6 +23,15 @@ interface WashPreference {
   price: number;
 }
 
+export interface ShopPromoCode {
+  code: string;
+  discountPercent: number;
+  maxDiscount: number;
+  minOrderValue: number;
+  description?: string;
+  isActive: boolean;
+}
+
 export interface Shop {
   _id: string;
   name: string;
@@ -39,9 +48,13 @@ export interface Shop {
   pickupTimings?: string[];
   contactNumber?: string;
   washPreferences?: WashPreference[];
+  promoBanners?: { id?: string; badge: string; title: string; subtitle: string; type?: string }[];
+  promoCode?: ShopPromoCode;
   minOrderValue?: number;
   taxPercent?: number;
   deliveryFee?: number;
+  androidAppUrl?: string;
+  iosAppUrl?: string;
   createdAt: string;
 }
 
@@ -132,6 +145,7 @@ export interface Order {
   taxAmount?: number;
   deliveryFee?: number;
   discountAmount?: number;
+  couponCode?: string;
   paymentStatus?: PaymentStatus;
   paymentMode?: PaymentMode;
   pickupAddress?: string;

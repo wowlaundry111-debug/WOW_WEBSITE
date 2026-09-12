@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, ChevronDown, FileText, CheckCircle2, Droplets, Sparkles, Truck, Gift, User, Store } from 'lucide-react';
+import { Search, ChevronDown, FileText, CheckCircle2, Droplets, Sparkles, Truck, Gift, User, Store, Copy, Check } from 'lucide-react';
 import { useAppStore } from '../../store/useAppStore';
 import Navbar from '../../components/Navbar';
 import { resolveVectorImage } from '../../utils/vectorGallery';
@@ -53,6 +53,11 @@ export default function CustomerHome() {
   const currentShop = shops.find((s) => s._id === currentTenantId) || shops[0];
   const promo1 = currentShop?.promoBanners?.[0] || { badge: 'PROMO', title: '50% OFF', subtitle: 'Winter Wear Deep Dryclean' };
   const promo2 = currentShop?.promoBanners?.[1] || { badge: 'EXPRESS', title: 'EXPRESS DOORSTEP', subtitle: 'Fast doorstep pickup & delivery' };
+  
+  const [copiedCode, setCopiedCode] = useState(false);
+  const activePromoCode = (currentShop?.promoCode && currentShop.promoCode.isActive !== false && currentShop.promoCode.code)
+    ? currentShop.promoCode
+    : null;
 
   const activeOrder = orders.find((o) => o.customerId === currentUser?._id && o.status !== 'DELIVERED');
   const activeStepIndex = activeOrder ? ORDER_STEPS.findIndex((s) => s.key === activeOrder.status) : -1;
@@ -185,16 +190,56 @@ export default function CustomerHome() {
 
         {/* Promo Banners */}
         <div className="flex gap-6 overflow-x-auto pb-6 mb-6 snap-x no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0 animate-fade-in-up" style={{ animationDelay: '300ms' }}>
-          <div className="snap-start shrink-0 w-[280px] sm:w-[320px] bg-[#9AE600] border-2 border-black rounded-2xl p-6 shadow-[6px_6px_0px_rgba(0,0,0,1)] text-black relative overflow-hidden flex items-center justify-between transform transition-transform hover:-translate-y-1">
-            <div className="relative z-10 pr-2">
-              <span className="bg-black text-[#9AE600] px-2 py-0.5 rounded text-[10px] font-black tracking-widest uppercase mb-2 inline-block">{promo1.badge || 'PROMO'}</span>
-              <h2 className="text-3xl font-black italic lilita-one-regular">{promo1.title}</h2>
-              <p className="font-extrabold mt-1 text-xs uppercase">{promo1.subtitle}</p>
+          {activePromoCode ? (
+            <div className="snap-start shrink-0 w-[290px] sm:w-[330px] bg-[#9AE600] border-2 border-black rounded-2xl p-5 shadow-[6px_6px_0px_rgba(0,0,0,1)] text-black relative overflow-hidden flex flex-col justify-between transform transition-transform hover:-translate-y-1">
+              <div className="relative z-10">
+                <div className="flex items-center justify-between gap-2 mb-2">
+                  <span className="bg-black text-[#9AE600] px-2 py-0.5 rounded text-[10px] font-black tracking-widest uppercase inline-block">
+                    PROMO CODE
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (navigator.clipboard) {
+                        navigator.clipboard.writeText(activePromoCode.code);
+                        setCopiedCode(true);
+                        setTimeout(() => setCopiedCode(false), 2000);
+                      }
+                    }}
+                    className="flex items-center gap-1 bg-white border border-black px-2 py-0.5 rounded text-[10px] font-black uppercase hover:bg-black hover:text-white transition-colors shadow-[1px_1px_0px_rgba(0,0,0,1)] cursor-pointer"
+                  >
+                    {copiedCode ? <Check size={12} className="text-green-600" /> : <Copy size={12} />}
+                    {copiedCode ? 'COPIED!' : 'COPY'}
+                  </button>
+                </div>
+                <h2 className="text-3xl font-black italic lilita-one-regular leading-none">
+                  {activePromoCode.discountPercent}% OFF
+                </h2>
+                <div className="mt-1.5 flex items-center gap-2">
+                  <span className="bg-white border-2 border-black px-2 py-0.5 rounded-lg font-black text-xs uppercase tracking-wider text-black shadow-[1.5px_1.5px_0px_rgba(0,0,0,1)]">
+                    USE CODE: {activePromoCode.code}
+                  </span>
+                </div>
+                <p className="font-extrabold mt-2 text-[11px] uppercase text-black/80">
+                  {activePromoCode.description || `Min Order ₹${activePromoCode.minOrderValue} • Max Discount ₹${activePromoCode.maxDiscount}`}
+                </p>
+              </div>
+              <div className="absolute right-3 bottom-3 w-14 h-14 rounded-full bg-white border-2 border-black flex items-center justify-center shrink-0 shadow-[2px_2px_0px_rgba(0,0,0,1)] opacity-90 pointer-events-none">
+                <Sparkles size={28} strokeWidth={2.5} className="text-black" />
+              </div>
             </div>
-            <div className="w-16 h-16 rounded-full bg-white border-2 border-black flex items-center justify-center shrink-0 shadow-[2px_2px_0px_rgba(0,0,0,1)]">
-              <Sparkles size={32} strokeWidth={2.5} className="text-black" />
+          ) : (
+            <div className="snap-start shrink-0 w-[280px] sm:w-[320px] bg-[#9AE600] border-2 border-black rounded-2xl p-6 shadow-[6px_6px_0px_rgba(0,0,0,1)] text-black relative overflow-hidden flex items-center justify-between transform transition-transform hover:-translate-y-1">
+              <div className="relative z-10 pr-2">
+                <span className="bg-black text-[#9AE600] px-2 py-0.5 rounded text-[10px] font-black tracking-widest uppercase mb-2 inline-block">{promo1.badge || 'PROMO'}</span>
+                <h2 className="text-3xl font-black italic lilita-one-regular">{promo1.title}</h2>
+                <p className="font-extrabold mt-1 text-xs uppercase">{promo1.subtitle}</p>
+              </div>
+              <div className="w-16 h-16 rounded-full bg-white border-2 border-black flex items-center justify-center shrink-0 shadow-[2px_2px_0px_rgba(0,0,0,1)]">
+                <Sparkles size={32} strokeWidth={2.5} className="text-black" />
+              </div>
             </div>
-          </div>
+          )}
           
           <div className="snap-start shrink-0 w-[280px] sm:w-[320px] bg-[#0D8DE3] border-2 border-black rounded-2xl p-6 shadow-[6px_6px_0px_rgba(0,0,0,1)] text-white relative overflow-hidden flex items-center justify-between transform transition-transform hover:-translate-y-1">
             <div className="relative z-10 pr-2">

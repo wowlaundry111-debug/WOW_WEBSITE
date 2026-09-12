@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '../../store/useAppStore';
-import { ArrowLeft, Trash2, Plus, Minus, MapPin, CheckCircle2, Receipt, AlertTriangle, Sparkles, Check, Home, Briefcase, Scale } from 'lucide-react';
+import { ArrowLeft, Trash2, Plus, Minus, MapPin, CheckCircle2, Receipt, AlertTriangle, Sparkles, Check, Home, Briefcase, Scale, Clock, Tag } from 'lucide-react';
 
 export default function Cart() {
   const navigate = useNavigate();
@@ -46,7 +46,32 @@ export default function Cart() {
     return `${parts.join(', ')} (${addrTag})`;
   };
 
-  const [pickupTime, setPickupTime] = useState('');
+  const defaultPickupSlots = [
+    '08:00 AM - 10:00 AM',
+    '10:00 AM - 12:00 PM',
+    '12:00 PM - 02:00 PM',
+    '02:00 PM - 04:00 PM',
+    '04:00 PM - 06:00 PM',
+    '06:00 PM - 08:00 PM',
+    '08:00 PM - 10:00 PM'
+  ];
+
+  const availablePickupSlots = (shop?.pickupTimings && shop.pickupTimings.length > 0) ? shop.pickupTimings : defaultPickupSlots;
+
+  // Day & Slot selection
+  const [pickupDay, setPickupDay] = useState('Today');
+  const [pickupSlot, setPickupSlot] = useState(availablePickupSlots[0] || '10:00 AM - 12:00 PM');
+  const [pickupTime, setPickupTime] = useState('Today, ' + (availablePickupSlots[0] || '10:00 AM - 12:00 PM'));
+
+  const handleSelectDay = (day) => {
+    setPickupDay(day);
+    setPickupTime(`${day}, ${pickupSlot}`);
+  };
+
+  const handleSelectSlot = (slot) => {
+    setPickupSlot(slot);
+    setPickupTime(`${pickupDay}, ${slot}`);
+  };
   const [couponCode, setCouponCode] = useState('');
   const [couponMsg, setCouponMsg] = useState({ type: '', text: '' });
   const [selectedWashPrefs, setSelectedWashPrefs] = useState([]);
@@ -257,15 +282,63 @@ export default function Cart() {
 
               {/* Pickup Slot */}
               <div>
-                <label className="block text-[11px] font-black text-black mb-1 uppercase tracking-wider">
-                  Pickup Time Slot
-                </label>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="text-[11px] font-black text-black uppercase tracking-wider flex items-center gap-1.5">
+                    <Clock size={13} strokeWidth={3} />
+                    Pickup Schedule
+                  </label>
+                  <span className="text-[10px] font-black bg-black text-[#9AE600] px-2 py-0.5 rounded-md uppercase">
+                    {pickupTime}
+                  </span>
+                </div>
+
+                {/* Day Selector */}
+                <div className="grid grid-cols-3 gap-1.5 mb-2.5">
+                  {['Today', 'Tomorrow', 'Day After'].map((d) => (
+                    <button
+                      key={d}
+                      type="button"
+                      onClick={() => handleSelectDay(d)}
+                      className={`py-1.5 px-2 rounded-xl border-2 border-black font-black text-xs transition-all uppercase ${
+                        pickupDay === d
+                          ? 'bg-black text-[#9AE600] shadow-[2px_2px_0px_rgba(0,0,0,1)]'
+                          : 'bg-white text-black hover:bg-gray-100'
+                      }`}
+                    >
+                      {d}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Available Shop Time Slots */}
+                <div className="grid grid-cols-2 gap-1.5 mb-2">
+                  {availablePickupSlots.map((slot) => {
+                    const isSlotSelected = pickupSlot === slot;
+                    return (
+                      <button
+                        key={slot}
+                        type="button"
+                        onClick={() => handleSelectSlot(slot)}
+                        className={`p-2 rounded-xl border-2 border-black font-extrabold text-[11px] sm:text-xs transition-all flex items-center justify-between ${
+                          isSlotSelected
+                            ? 'bg-black text-[#9AE600] shadow-[2px_2px_0px_rgba(0,0,0,1)]'
+                            : 'bg-white text-black hover:bg-gray-50'
+                        }`}
+                      >
+                        <span className="truncate">{slot}</span>
+                        {isSlotSelected && <Check size={13} strokeWidth={3.5} className="shrink-0 ml-1" />}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Editable/Custom Pickup instructions or slot */}
                 <input 
                   type="text"
                   value={pickupTime}
                   onChange={(e) => setPickupTime(e.target.value)}
-                  placeholder="e.g. Today 4:00 PM - 6:00 PM, Tomorrow Morning"
-                  className="w-full bg-white border-2 border-black rounded-xl p-2.5 text-black font-extrabold focus:outline-none text-xs sm:text-sm shadow-[2px_2px_0px_rgba(0,0,0,1)]"
+                  placeholder="Custom pickup timing or note..."
+                  className="w-full bg-white/90 border-2 border-black rounded-xl p-2 text-black font-extrabold focus:outline-none text-[11px] sm:text-xs shadow-[2px_2px_0px_rgba(0,0,0,1)]"
                 />
               </div>
             </div>
@@ -383,6 +456,40 @@ export default function Cart() {
             <h3 className="font-black text-black mb-3 text-sm sm:text-base uppercase lilita-one-regular tracking-wide bg-white inline-block px-2.5 py-0.5 border-2 border-black rounded-lg shadow-[-2px_2px_0px_rgba(0,0,0,1)]">
               Apply Promo Code
             </h3>
+
+            {/* Quick 1-tap Promo Code from Shop if available */}
+            {shop?.promoCode?.isActive && shop?.promoCode?.code && (
+              <div className="mb-3 bg-white border-2 border-black rounded-xl p-2.5 shadow-[2px_2px_0px_rgba(0,0,0,1)]">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-1.5">
+                      <Tag size={13} className="text-[#0D8DE3] shrink-0" strokeWidth={3} />
+                      <span className="font-black text-xs uppercase text-black tracking-wide truncate">
+                        {shop.promoCode.code}
+                      </span>
+                      <span className="text-[10px] font-black bg-[#9AE600] text-black px-1.5 py-0.2 rounded border border-black uppercase">
+                        {shop.promoCode.discountPercent}% OFF
+                      </span>
+                    </div>
+                    <p className="text-[10px] font-extrabold text-gray-600 mt-0.5 truncate">
+                      {shop.promoCode.description || `Min order ₹${shop.promoCode.minOrderValue || 0}, max ₹${shop.promoCode.maxDiscount || 'unlimited'}`}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCouponCode(shop.promoCode.code);
+                      const res = applyCoupon(shop.promoCode.code);
+                      setCouponMsg({ type: res.success ? 'success' : 'error', text: res.message });
+                    }}
+                    className="bg-black text-[#9AE600] hover:bg-gray-800 text-[10px] font-black py-1.5 px-3 rounded-lg border-2 border-black uppercase tracking-wider shrink-0 shadow-[1px_1px_0px_rgba(0,0,0,1)] active:translate-y-0.5 active:shadow-none transition-all"
+                  >
+                    APPLY NOW
+                  </button>
+                </div>
+              </div>
+            )}
+
             <form onSubmit={handleApplyCoupon} className="flex gap-2 relative mt-1">
               <input 
                 type="text"
