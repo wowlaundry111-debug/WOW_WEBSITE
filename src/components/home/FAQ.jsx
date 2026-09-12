@@ -2,7 +2,7 @@ import React from 'react';
 import { FaPhoneAlt, FaMapMarker } from "react-icons/fa";
 import { IoMailUnread } from "react-icons/io5";
 import { BsClockFill } from "react-icons/bs";
-import contactImage from "../../assets/contactimge.png";
+import contactImage from "../../assets/contactimge.webp";
 
 const contactDetails = [
     {
@@ -59,7 +59,7 @@ function FAQ() {
                             <div>
                                 <div className='text-xl font-black text-white uppercase tracking-widest bg-black inline-block px-2 py-0.5 rounded-lg border-2 border-black mb-2'>{item.title}</div>
                                 {item.details.map((detail, i) => (
-                                    <div key={i} className={`font-bold text-white text-sm sm:text-base md:text-lg uppercase tracking-wider ${i > 0 ? 'mt-2 pt-2 border-t border-white/20' : ''}`}>{detail}</div>
+                                    <div key={i} className='text-sm md:text-base font-bold text-black bg-white/90 px-3 py-1 rounded-xl border border-black mb-1.5 shadow-[2px_2px_0px_rgba(0,0,0,1)]'>{detail}</div>
                                 ))}
                             </div>
                         </div>
@@ -69,7 +69,7 @@ function FAQ() {
             
             <div className='flex-1 flex justify-center items-end relative'>
                 <div className="absolute bottom-10 right-10 w-64 h-64 bg-[#9AE600] rounded-full border-2 border-black shadow-[4px_4px_0px_rgba(0,0,0,1)] -z-10 blur-sm opacity-50"></div>
-                <img src={contactImage} alt="contact image" className='w-[30rem] filter drop-shadow-2xl hover:scale-105 transition-transform duration-500' />
+                <img src={contactImage} alt="Contact WOW Laundry Rama Mandi Jalandhar and Law Gate Maheru" className='w-[30rem] filter drop-shadow-2xl hover:scale-105 transition-transform duration-500' loading="lazy" />
             </div>
         </div>
     );

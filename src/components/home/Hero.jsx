@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Navbar from '../Navbar';
-import heroimage from '../../assets/heroimage.png';
-import bucketImage from '../../assets/final-bucket-cropped.png';
+import heroimage from '../../assets/heroimage.webp';
+import bucketImage from '../../assets/final-bucket-cropped.webp';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 
@@ -212,7 +212,7 @@ function Hero() {
                             {!bucketLoaded && <Skeleton className="w-full aspect-[4/3] rounded-3xl" />}
                             <img
                                 src={bucketImage}
-                                alt="Laundry Bucket"
+                                alt="Clean Laundry Basket - Doorstep Pickup WOW Laundry"
                                 className={`w-full h-auto object-contain relative z-0 ${bucketLoaded ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300 drop-shadow-[0_15px_15px_rgba(0,0,0,0.15)] group-hover:scale-[1.02] transition-transform origin-bottom`}
                                 onLoad={() => setBucketLoaded(true)}
                             />
@@ -575,7 +575,7 @@ function Hero() {
                         {!imageLoaded && <Skeleton className="w-full max-w-[500px] h-[500px]" />}
                         <img
                             src={heroimage}
-                            alt="WOW Laundry Professional"
+                            alt="WOW Laundry Professional Garment Care and Dry Cleaning Specialist"
                             className={`w-full max-w-[430px] lg:max-w-[530px] object-contain relative z-20 drop-shadow-[0_20px_20px_rgba(0,0,0,0.15)] scale-110 transform -translate-y-8 md:-translate-y-12 mb-4 ${imageLoaded ? '' : 'hidden'}`}
                             onLoad={() => setImageLoaded(true)}
                         />

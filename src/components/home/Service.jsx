@@ -4,9 +4,9 @@ import { TbWash, TbHanger, TbIroning3, TbTruckDelivery } from "react-icons/tb";
 import { FaApple, FaAndroid } from "react-icons/fa";
 import { X, Sparkles, Download, CheckCircle2 } from "lucide-react";
 import { useAppStore } from '../../store/useAppStore';
-import first from '../../assets/firstimage.jpeg';
-import second from '../../assets/secondimage.jpeg';
-import third from '../../assets/thirdimage.jpeg';
+import first from '../../assets/firstimage.webp';
+import second from '../../assets/secondimage.webp';
+import third from '../../assets/thirdimage.webp';
 
 function getDirectDownloadUrl(url) {
   if (!url) return '';
@@ -188,17 +188,17 @@ function Service() {
             <div className='mt-12 md:mt-20 grid grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10'>
                 <div className='rounded-3xl overflow-hidden border-2 border-black shadow-[8px_8px_0px_rgba(0,0,0,1)] transform hover:-translate-y-2 hover:rotate-1 transition-all group'>
                     <div className="bg-[#9AE600] border-b-2 border-black p-3 text-center font-black uppercase tracking-widest text-black">Modern Wash</div>
-                    <img src={first} alt="Service 1" className='w-full h-48 md:h-64 object-cover group-hover:scale-110 transition-transform duration-500' />
+                    <img src={first} alt="Commercial Washing Machines - WOW Laundry Jalandhar" loading="lazy" className='w-full h-48 md:h-64 object-cover group-hover:scale-110 transition-transform duration-500' />
                 </div>
 
                 <div className='rounded-3xl overflow-hidden border-2 border-black shadow-[8px_8px_0px_rgba(0,0,0,1)] transform hover:-translate-y-2 hover:-rotate-1 transition-all group'>
                     <div className="bg-[#0D8DE3] border-b-2 border-black p-3 text-center font-black uppercase tracking-widest text-white">Premium Press</div>
-                    <img src={second} alt="Service 2" className='w-full h-48 md:h-64 object-cover group-hover:scale-110 transition-transform duration-500' />
+                    <img src={second} alt="Garment Steam Ironing and Press Service" loading="lazy" className='w-full h-48 md:h-64 object-cover group-hover:scale-110 transition-transform duration-500' />
                 </div>
 
                 <div className='rounded-3xl overflow-hidden border-2 border-black shadow-[8px_8px_0px_rgba(0,0,0,1)] transform hover:-translate-y-2 hover:rotate-2 transition-all group col-span-2 lg:col-span-1'>
                     <div className="bg-black border-b-2 border-black p-3 text-center font-black uppercase tracking-widest text-[#9AE600]">Care & Quality</div>
-                    <img src={third} alt="Service 3" className='w-full h-48 md:h-64 object-cover group-hover:scale-110 transition-transform duration-500' />
+                    <img src={third} alt="Hygienic Clothes Wash and Dry Cleaning Care" loading="lazy" className='w-full h-48 md:h-64 object-cover group-hover:scale-110 transition-transform duration-500' />
                 </div>
             </div>
         </div>

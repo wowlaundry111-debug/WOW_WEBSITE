@@ -38,7 +38,7 @@ const getCategoryStyle = (name) => {
 };
 
 
-import bucketImg from '../../assets/final-bucket-cropped.png';
+import bucketImg from '../../assets/final-bucket-cropped.webp';
 
 export default function CategoryItems() {
   const { categoryId } = useParams();

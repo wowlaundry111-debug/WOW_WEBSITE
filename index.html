@@ -30,7 +30,7 @@
   <meta name="twitter:description" content="WOW Laundry — A laundry for everyone. Fast, hygienic laundry &amp; dry cleaning with convenient doorstep pickup &amp; delivery." />
   <meta name="twitter:image" content="https://wowlaundry.in/logo.png" />
 
-  <!-- Structured Data / JSON-LD for Google Sitelinks & Brand SERP -->
+  <!-- Structured Data / JSON-LD for Google Sitelinks, Local SEO & FAQ Rich Snippets -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -59,8 +59,93 @@
         "priceRange": "₹₹",
         "currenciesAccepted": "INR",
         "paymentAccepted": "Cash, Credit Card, Debit Card, UPI, Net Banking",
-        "openingHours": "Mo,Tu,We,Th,Fr,Sa,Su 08:00-21:00",
-        "description": "Doorstep laundry and dry cleaning services delivering washed, sanitized, and neatly pressed garments."
+        "openingHours": "Mo,Tu,We,Th,Fr,Sa,Su 10:00-23:00",
+        "areaServed": [
+          "Jalandhar",
+          "Rama Mandi",
+          "Jalandhar Cantt",
+          "Law Gate",
+          "Maheru",
+          "Phagwara",
+          "Lovely Professional University (LPU)"
+        ],
+        "description": "Doorstep laundry and dry cleaning services delivering washed, sanitized, and neatly pressed garments in Jalandhar and Phagwara.",
+        "department": [
+          {
+            "@type": "DryCleaningOrLaundry",
+            "name": "WOW Laundry - Rama Mandi Branch",
+            "telephone": "+91 7814508706",
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "11/1 Warehouse, Rama Mandi",
+              "addressLocality": "Jalandhar Cantt",
+              "addressRegion": "Punjab",
+              "postalCode": "144005",
+              "addressCountry": "IN"
+            },
+            "openingHours": "Mo-Su 10:00-23:00"
+          },
+          {
+            "@type": "DryCleaningOrLaundry",
+            "name": "WOW Laundry - Law Gate Branch",
+            "telephone": "+91 6280832724",
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Shop No. 1 GABA PG, Mughlai Point, Law Gate",
+              "addressLocality": "Maheru, Phagwara",
+              "addressRegion": "Punjab",
+              "postalCode": "144411",
+              "addressCountry": "IN"
+            },
+            "openingHours": "Mo-Su 10:00-23:00"
+          }
+        ]
+      },
+      {
+        "@type": "FAQPage",
+        "@id": "https://wowlaundry.in/#faqpage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "How do I book a laundry pickup with WOW Laundry?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "You can book a pickup directly on our website at wowlaundry.in or via our mobile app. Select your garments, choose a convenient pickup time slot, and our delivery rider will collect your clothes right from your doorstep."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Which areas in Jalandhar and Phagwara do you serve?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "We provide doorstep pickup and delivery across Rama Mandi, Jalandhar Cantt, Law Gate Maheru, and the LPU campus region."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What services does WOW Laundry offer?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "WOW Laundry offers premium Wash & Fold, Steam Press / Ironing, Dry Cleaning for suits, wedding dresses, and delicate wear, as well as specialized Shoe Cleaning and Blanket / Curtain care."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What are WOW Laundry's operating hours?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Our service centers and doorstep pickup operate Monday through Sunday from 10:00 AM to 11:00 PM."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How fast is your delivery turnaround?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Our standard service delivers freshly washed and pressed clothes within 48-72 hours. We also offer 24-hour express service upon request."
+            }
+          }
+        ]
       },
       {
         "@type": "ItemList",
