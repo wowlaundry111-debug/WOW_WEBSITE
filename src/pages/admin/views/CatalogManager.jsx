@@ -521,6 +521,13 @@ export default function CatalogManager({ categories = [], items = [], shops = []
                                   </div>
                                 </div>
                                 <div className="flex items-center gap-1 shrink-0" onClick={e => e.stopPropagation()}>
+                                  <button
+                                    onClick={(e) => { e.stopPropagation(); updateCategory(sub._id, { singleItemSelection: !sub.singleItemSelection }); }}
+                                    className={`px-1.5 py-1 border border-black rounded transition-colors flex items-center gap-0.5 text-[10px] font-black uppercase ${sub.singleItemSelection ? 'bg-yellow-300 hover:bg-yellow-400 text-black' : 'bg-white hover:bg-yellow-100 text-gray-500'}`}
+                                    title={sub.singleItemSelection ? 'Single Item Mode ON — click to disable' : 'Click to restrict to one item type only'}
+                                  >
+                                    {sub.singleItemSelection ? '1 ITEM ✓' : '1 ITEM'}
+                                  </button>
                                   <button 
                                     onClick={(e) => { e.stopPropagation(); openAddItem(sub._id); }} 
                                     className="px-1.5 py-1 bg-[#9AE600] hover:bg-black hover:text-[#9AE600] text-black border border-black rounded transition-colors flex items-center gap-0.5 text-[10px] font-black uppercase" 
