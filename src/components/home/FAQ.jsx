@@ -8,7 +8,7 @@ const contactDetails = [
     {
         icon: <FaPhoneAlt size={28} />, 
         title: "Contact", 
-        details: ["+91 6280832724"]
+        details: ["+91 62808-32724"]
     },
 
     {
