@@ -260,13 +260,19 @@ export default function CategoryItems() {
                   const isBucket = Boolean(item.isBucket || (item.pricePerKg && item.pricePerKg > 0) || (typeof item.name === 'string' && (item.name.toLowerCase().includes('per kg') || item.name.toLowerCase().includes('/ kg') || item.name.toLowerCase().includes('per-kg'))));
                   const ratePerKg = item.pricePerKg || (item.unit === 'KG' ? (item.pricePerItem ?? item.price) : (item.price ?? item.pricePerItem)) || 0;
 
+                  const itemCat = categories.find(c => c._id === item.categoryId);
+                  const isDisabled = itemCat?.singleItemSelection && cart.some(c => {
+                    const otherItem = items.find(i => i._id === c.itemId);
+                    return otherItem && String(otherItem.categoryId) === String(item.categoryId) && c.itemId !== item._id;
+                  });
+
               // ── BUCKET ITEM CARD ───────────────────────────────────────────
               if (isBucket) {
                 return (
                   <div 
                     key={item._id}
-                    onClick={() => handleAddToCart(item, 1)}
-                    className="bg-white rounded-2xl p-4 sm:p-6 border-3 border-black shadow-[6px_6px_0px_rgba(0,0,0,1)] hover:shadow-[8px_8px_0px_rgba(0,0,0,1)] transition-all cursor-pointer group relative overflow-hidden bg-gradient-to-br from-white via-green-50/50 to-lime-50"
+                    onClick={() => { if (!isDisabled) handleAddToCart(item, 1) }}
+                    className={`bg-white rounded-2xl p-4 sm:p-6 border-3 border-black shadow-[6px_6px_0px_rgba(0,0,0,1)] transition-all group relative overflow-hidden bg-gradient-to-br from-white via-green-50/50 to-lime-50 ${isDisabled ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-[8px_8px_0px_rgba(0,0,0,1)] cursor-pointer'}`}
                   >
                     <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
                       <div className="relative w-28 h-28 sm:w-32 sm:h-32 flex-shrink-0 flex items-center justify-center bg-white rounded-xl border-2 border-black p-2 shadow-[3px_3px_0px_rgba(0,0,0,1)] group-hover:scale-105 transition-transform">
@@ -316,13 +322,14 @@ export default function CategoryItems() {
                           )}
 
                           <button
+                            disabled={isDisabled}
                             onClick={(e) => {
                               e.stopPropagation();
-                              handleAddToCart(item, 1);
+                              if (!isDisabled) handleAddToCart(item, 1);
                             }}
-                            className="px-4 py-2 bg-black text-[#9AE600] border-2 border-black rounded-xl font-black text-xs uppercase tracking-wider shadow-[3px_3px_0px_rgba(0,0,0,1)] hover:bg-[#9AE600] hover:text-black transition-colors"
+                            className={`px-4 py-2 ${isDisabled ? 'bg-gray-400 text-gray-700' : 'bg-black text-[#9AE600] hover:bg-[#9AE600] hover:text-black'} border-2 border-black rounded-xl font-black text-xs uppercase tracking-wider shadow-[3px_3px_0px_rgba(0,0,0,1)] transition-colors`}
                           >
-                            + Tap To Add ({qty})
+                            {isDisabled ? 'Disabled' : `+ Tap To Add (${qty})`}
                           </button>
                         </div>
                       </div>
@@ -336,7 +343,7 @@ export default function CategoryItems() {
               return (
                 <div 
                   key={item._id} 
-                  className="bg-white rounded-2xl p-3.5 sm:p-5 border-2 border-black flex items-center gap-3 sm:gap-6 shadow-[4px_4px_0px_rgba(0,0,0,1)] sm:shadow-[6px_6px_0px_rgba(0,0,0,1)] transition-transform animate-fade-in-up opacity-0 group"
+                  className={`bg-white rounded-2xl p-3.5 sm:p-5 border-2 border-black flex items-center gap-3 sm:gap-6 shadow-[4px_4px_0px_rgba(0,0,0,1)] sm:shadow-[6px_6px_0px_rgba(0,0,0,1)] transition-transform animate-fade-in-up group ${isDisabled ? 'opacity-50' : 'opacity-0'}`}
                   style={{ animationDelay: `${idx * 100}ms` }}
                 >
                   <div className={`w-20 h-20 sm:w-28 sm:h-28 ${catStyle.bg} rounded-xl overflow-hidden flex-shrink-0 flex items-center justify-center border-2 border-black shadow-[3px_3px_0px_rgba(0,0,0,1)] sm:shadow-[4px_4px_0px_rgba(0,0,0,1)] group-hover:-translate-y-1 group-hover:-translate-x-1 group-hover:shadow-[6px_6px_0px_rgba(0,0,0,1)] transition-all duration-300 p-2`}>
@@ -385,10 +392,11 @@ export default function CategoryItems() {
                           </div>
                         ) : (
                           <button 
-                            onClick={() => handleAddToCart(item, 1)}
-                            className="px-6 py-2.5 bg-black text-[#0D8DE3] font-black rounded-xl hover:bg-[#0D8DE3] hover:text-black border-2 border-black shadow-[4px_4px_0px_rgba(0,0,0,1)] active:translate-x-1 active:translate-y-1 active:shadow-none transition-all text-sm uppercase tracking-widest"
+                            disabled={isDisabled}
+                            onClick={() => { if (!isDisabled) handleAddToCart(item, 1) }}
+                            className={`px-6 py-2.5 ${isDisabled ? 'bg-gray-400 text-gray-700' : 'bg-black text-[#0D8DE3] hover:bg-[#0D8DE3] hover:text-black active:translate-x-1 active:translate-y-1 active:shadow-none'} font-black rounded-xl border-2 border-black shadow-[4px_4px_0px_rgba(0,0,0,1)] transition-all text-sm uppercase tracking-widest`}
                           >
-                            Add
+                            {isDisabled ? 'Disabled' : 'Add'}
                           </button>
                         )}
                       </div>

@@ -80,6 +80,7 @@ export interface Category {
   isActive?: boolean;
   parentCategoryId?: string | null;
   subCategories?: Category[];
+  singleItemSelection?: boolean;
 }
 
 export interface Item {

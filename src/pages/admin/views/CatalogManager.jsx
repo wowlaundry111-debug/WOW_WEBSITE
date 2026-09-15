@@ -60,6 +60,7 @@ export default function CatalogManager({ categories = [], items = [], shops = []
   const [catImage, setCatImage] = useState('');
   const [catType, setCatType] = useState('main'); // 'main' = Top-Level, 'sub' = Sub-Category
   const [catParentId, setCatParentId] = useState(null); // ID of parent category when catType === 'sub'
+  const [catSingleItemSelection, setCatSingleItemSelection] = useState(false);
 
   // Item Modal State
   const [itemModalOpen, setItemModalOpen] = useState(false);
@@ -85,6 +86,7 @@ export default function CatalogManager({ categories = [], items = [], shops = []
     setEditingCategory(null);
     setCatName('');
     setCatImage(PRESET_VECTOR_IMAGES[0].src);
+    setCatSingleItemSelection(false);
     if (safeParentId) {
       setCatType('sub');
       setCatParentId(safeParentId);
@@ -102,6 +104,7 @@ export default function CatalogManager({ categories = [], items = [], shops = []
     setEditingCategory(cat);
     setCatName(cat.name);
     setCatImage(cat.image || PRESET_VECTOR_IMAGES[0].src);
+    setCatSingleItemSelection(!!cat.singleItemSelection);
     if (cat.parentCategoryId) {
       setCatType('sub');
       setCatParentId(String(cat.parentCategoryId));
@@ -133,10 +136,11 @@ export default function CatalogManager({ categories = [], items = [], shops = []
         await updateCategory(editingCategory._id, { 
           name: catName.trim(), 
           image: catImage,
-          parentCategoryId: finalParentId
+          parentCategoryId: finalParentId,
+          singleItemSelection: catType === 'sub' ? catSingleItemSelection : undefined
         });
       } else {
-        await addCategory(catName.trim(), catImage, activeShopId, finalParentId);
+        await addCategory(catName.trim(), catImage, activeShopId, finalParentId, catType === 'sub' ? catSingleItemSelection : undefined);
         if (finalParentId) {
           setExpandedCategoryId(finalParentId);
         }
@@ -506,7 +510,14 @@ export default function CatalogManager({ categories = [], items = [], shops = []
                                   <ChevronRight size={12} className={isSubSelected ? 'text-white' : 'text-gray-400'} />
                                   <div className="truncate">
                                     <p className="font-black text-xs uppercase truncate">{sub.name}</p>
-                                    <p className={`text-[10px] font-bold ${isSubSelected ? 'text-blue-100' : 'text-gray-500'}`}>{subItemCount} items</p>
+                                    <div className="flex items-center gap-1.5 mt-0.5">
+                                      <p className={`text-[10px] font-bold ${isSubSelected ? 'text-blue-100' : 'text-gray-500'}`}>{subItemCount} items</p>
+                                      {sub.singleItemSelection && (
+                                        <span className={`text-[8px] font-black uppercase px-1 py-0.5 border ${isSubSelected ? 'border-white text-white' : 'border-black text-black bg-yellow-300'}`} title="Only 1 item type can be selected from this category at a time">
+                                          Single Item Only
+                                        </span>
+                                      )}
+                                    </div>
                                   </div>
                                 </div>
                                 <div className="flex items-center gap-1 shrink-0" onClick={e => e.stopPropagation()}>
@@ -818,6 +829,26 @@ export default function CatalogManager({ categories = [], items = [], shops = []
                   className="w-full p-3 border-2 border-black font-bold text-sm outline-none focus:bg-yellow-50 shadow-[2px_2px_0px_rgba(0,0,0,1)]"
                 />
               </div>
+
+              {catType === 'sub' && (
+                <div className="flex items-center gap-3 p-3 bg-white border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)]">
+                  <input
+                    type="checkbox"
+                    id="singleItemToggle"
+                    checked={catSingleItemSelection}
+                    onChange={(e) => setCatSingleItemSelection(e.target.checked)}
+                    className="w-5 h-5 accent-black cursor-pointer"
+                  />
+                  <div>
+                    <label htmlFor="singleItemToggle" className="font-black text-xs uppercase cursor-pointer text-[#0D8DE3]">
+                      Single Item Selection Only
+                    </label>
+                    <p className="text-[10px] font-bold text-gray-500 mt-0.5">
+                      When enabled, customers can only select one item type from this sub-category (with any quantity). Other items become disabled.
+                    </p>
+                  </div>
+                </div>
+              )}
 
               {/* Vector Image Selector */}
               <div>

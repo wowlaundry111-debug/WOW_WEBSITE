@@ -70,7 +70,7 @@ interface AppState {
   updateOrderStatus: (orderId: string, status: OrderStatus, paymentMode?: PaymentMode, paymentStatus?: PaymentStatus) => Promise<void>;
   updateOrderAdminDetails: (orderId: string, updates: { totalAmount?: number, adminNotes?: string }) => Promise<void>;
   assignDeliveryBoy: (orderId: string, deliveryBoyId: string) => Promise<void>;
-  addCategory: (name: string, image?: string, overrideShopId?: string, parentCategoryId?: string) => Promise<void>;
+  addCategory: (name: string, image?: string, overrideShopId?: string, parentCategoryId?: string, singleItemSelection?: boolean) => Promise<void>;
   updateCategory: (categoryId: string, updates: Partial<Category>) => Promise<void>;
   deleteCategory: (categoryId: string) => Promise<void>;
   addCatalogItem: (categoryId: string, name: string, description: string, price: number, unit: 'KG' | 'ITEM', image?: string, isBucket?: boolean) => Promise<void>;
@@ -600,6 +600,17 @@ export const useAppStore = create<AppState>()(
         } else if (quantity > 0) {
           const { categories } = get();
           const cat = categories.find(c => c._id === item.categoryId);
+
+          if (cat?.singleItemSelection) {
+            const hasOtherFromSubcat = cart.some(c => {
+              const otherItem = get().items.find(i => i._id === c.itemId);
+              return otherItem && String(otherItem.categoryId) === String(item.categoryId) && c.itemId !== item._id;
+            });
+            if (hasOtherFromSubcat) {
+              return; // Prevent adding if single item selection rule is violated
+            }
+          }
+
           let categoryName = item.categoryName || '';
           let subCategoryName = item.subCategoryName || '';
           if (cat && !categoryName) {
@@ -850,7 +861,7 @@ export const useAppStore = create<AppState>()(
         }
       },
 
-      addCategory: async (name, image, overrideShopId, parentCategoryId) => {
+      addCategory: async (name, image, overrideShopId, parentCategoryId, singleItemSelection) => {
         const shopId = overrideShopId || get().currentTenantId || get().currentUser?.shopId || get().shops[0]?._id;
         if (!shopId) throw new Error('No shop context — select a shop branch before adding categories.');
         try {
@@ -862,7 +873,8 @@ export const useAppStore = create<AppState>()(
             shopId, 
             name, 
             image: finalImage, 
-            parentCategoryId: parentCategoryId || null 
+            parentCategoryId: parentCategoryId || null,
+            singleItemSelection
           });
           if (res.data) {
             set(state => ({
