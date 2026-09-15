@@ -12,12 +12,16 @@ import imgBedding from '../../assets/bedding.png';
 
 import imgLeather from '../../assets/leather.png';
 import imgSuits from '../../assets/suits.png';
+import imgBlanket from '../../assets/blanket.png';
 
 const getCategoryStyle = (name) => {
   if (!name) return { img: imgNormal, bg: 'bg-white', color: 'text-black', badge: 'Care+' };
   
   const lowerName = name.toLowerCase();
   
+  if (lowerName.includes('blanket') || lowerName.includes('rajai') || lowerName.includes('rajaai') || lowerName.includes('quilt')) {
+    return { img: imgBlanket, bg: 'bg-white', color: 'text-black', badge: 'Warm Care' };
+  }
   if (lowerName.includes('formal') || lowerName.includes('interview') || lowerName.includes('suit')) {
     return { img: imgSuits, bg: 'bg-white', color: 'text-black', badge: 'Eco Safe' };
   }

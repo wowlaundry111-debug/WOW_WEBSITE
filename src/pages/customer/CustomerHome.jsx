@@ -12,12 +12,16 @@ import imgBedding from '../../assets/bedding.png';
 
 import imgLeather from '../../assets/leather.png';
 import imgSuits from '../../assets/suits.png';
+import imgBlanket from '../../assets/blanket.png';
 
 const getCategoryStyle = (name) => {
   if (!name) return { img: imgNormal, bg: 'bg-white', color: 'text-black', badge: 'Care+' };
   
   const lowerName = name.toLowerCase();
   
+  if (lowerName.includes('blanket') || lowerName.includes('rajai') || lowerName.includes('rajaai') || lowerName.includes('quilt')) {
+    return { img: imgBlanket, bg: 'bg-white', color: 'text-black', badge: 'Warm Care' };
+  }
   if (lowerName.includes('formal') || lowerName.includes('interview') || lowerName.includes('suit')) {
     return { img: imgSuits, bg: 'bg-white', color: 'text-black', badge: 'Eco Safe' };
   }
@@ -47,10 +51,23 @@ const ORDER_STEPS = [
 ];
 
 export default function CustomerHome() {
-  const { categories, items, currentTenantId, setCurrentTenantId, cart, currentUser, orders, shops, isCatalogLoading } = useAppStore();
+  const { categories, items, currentTenantId, setCurrentTenantId, cart, currentUser, orders, shops, isCatalogLoading, fetchCatalog, fetchOrders } = useAppStore();
   const [searchQuery, setSearchQuery] = useState('');
 
-  const currentShop = shops.find((s) => s._id === currentTenantId) || shops[0];
+  const currentShop = shops.find((s) => String(s._id) === String(currentTenantId)) || shops[0];
+  const effectiveShopId = currentTenantId || currentShop?._id;
+
+  React.useEffect(() => {
+    if (effectiveShopId) {
+      fetchCatalog(String(effectiveShopId));
+    } else {
+      fetchCatalog();
+    }
+    if (fetchOrders) {
+      fetchOrders();
+    }
+  }, [effectiveShopId, fetchCatalog, fetchOrders]);
+
   const promo1 = currentShop?.promoBanners?.[0] || { badge: 'PROMO', title: '50% OFF', subtitle: 'Winter Wear Deep Dryclean' };
   const promo2 = currentShop?.promoBanners?.[1] || { badge: 'EXPRESS', title: 'EXPRESS DOORSTEP', subtitle: 'Fast doorstep pickup & delivery' };
   
@@ -63,11 +80,11 @@ export default function CustomerHome() {
   const activeStepIndex = activeOrder ? ORDER_STEPS.findIndex((s) => s.key === activeOrder.status) : -1;
   const cartTotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
-  const hasLoadedShopCats = categories.some((c) => String(c.shopId) === String(currentTenantId));
-  const isCatLoading = isCatalogLoading || (!hasLoadedShopCats && categories.length === 0) || (Boolean(currentTenantId) && !hasLoadedShopCats);
+  const hasLoadedShopCats = categories.some((c) => !effectiveShopId || String(c.shopId) === String(effectiveShopId));
+  const isCatLoading = isCatalogLoading || (!hasLoadedShopCats && categories.length === 0);
 
   const tenantCats = categories.filter((c) => {
-    if (c.shopId !== currentTenantId) return false;
+    if (effectiveShopId && String(c.shopId) !== String(effectiveShopId)) return false;
     if (c.parentCategoryId) return false; // Show only top-level categories on root home grid
     if (!searchQuery) return true;
     
