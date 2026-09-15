@@ -420,7 +420,7 @@ export default function Cart() {
                       )}
                       {isKg ? (
                         <div className="flex items-center gap-1 text-[10px] font-black text-[#0D8DE3] uppercase mt-0.5">
-                          <Scale size={11} strokeWidth={2.5} /> Weighed at pickup
+                          <Scale size={11} strokeWidth={2.5} /> {item.pricePerKg ? `₹${item.pricePerKg}/kg · Weighed at pickup` : 'Weighed at pickup'}
                         </div>
                       ) : (
                         <p className="text-xs text-gray-700 font-extrabold mt-0.5">₹{item.price} / {item.unit || 'Item'}</p>

@@ -254,6 +254,7 @@ export default function CategoryItems() {
                     item.unit === 'KG' || 
                     (typeof item.name === 'string' && (item.name.toLowerCase().includes('per kg') || item.name.toLowerCase().includes('/ kg') || item.name.toLowerCase().includes('per-kg')));
                   const isBucket = Boolean(item.isBucket || (item.pricePerKg && item.pricePerKg > 0) || (typeof item.name === 'string' && (item.name.toLowerCase().includes('per kg') || item.name.toLowerCase().includes('/ kg') || item.name.toLowerCase().includes('per-kg'))));
+                  const ratePerKg = item.pricePerKg || (item.unit === 'KG' ? (item.pricePerItem ?? item.price) : (item.price ?? item.pricePerItem)) || 0;
 
               // ── BUCKET ITEM CARD ───────────────────────────────────────────
               if (isBucket) {
@@ -274,10 +275,18 @@ export default function CategoryItems() {
                       <div className="flex-1 text-center sm:text-left">
                         <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 mb-1">
                           <h3 className="font-black text-black text-lg sm:text-xl uppercase tracking-wide">{item.name}</h3>
-                          <span className="bg-[#0D8DE3] text-white text-[10px] font-black px-2.5 py-0.5 rounded-lg border-2 border-black uppercase tracking-wider">
-                            Bucket (Per KG)
+                          <span className="bg-[#0D8DE3] text-white text-[11px] font-black px-2.5 py-0.5 rounded-lg border-2 border-black uppercase tracking-wider shadow-[2px_2px_0px_rgba(0,0,0,1)]">
+                            {ratePerKg > 0 ? `₹${ratePerKg} / KG` : 'Bucket (Per KG)'}
                           </span>
                         </div>
+
+                        {ratePerKg > 0 && (
+                          <div className="flex items-baseline justify-center sm:justify-start gap-1.5 my-1">
+                            <span className="font-black text-black text-2xl lilita-one-regular">₹{ratePerKg}</span>
+                            <span className="text-xs font-black text-gray-600 uppercase tracking-wide">/ KG</span>
+                            <span className="text-[10px] font-black text-[#0D8DE3] uppercase tracking-wider bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200 ml-1">Weighed at delivery</span>
+                          </div>
+                        )}
 
                         <p className="text-xs font-bold text-gray-600 mt-1 uppercase">
                           {item.description || 'Add clothes to your laundry bucket. Final weight calculated at delivery.'}
@@ -346,7 +355,9 @@ export default function CategoryItems() {
                         // Per-KG items: price is determined at delivery by weighing
                         <div className="flex flex-col gap-1">
                           <div className="bg-[#0D8DE3] px-3 py-1 border-2 border-black rounded-xl shadow-[4px_4px_0px_rgba(0,0,0,1)] transform -rotate-2">
-                            <span className="font-black text-white text-sm uppercase tracking-wider">Per KG</span>
+                            <span className="font-black text-white text-sm uppercase tracking-wider">
+                              {ratePerKg > 0 ? `₹${ratePerKg} / KG` : 'Per KG'}
+                            </span>
                           </div>
                           <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-1">Priced at delivery</span>
                         </div>
