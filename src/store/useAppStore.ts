@@ -101,8 +101,8 @@ interface AppState {
   archiveDeliveredOrders: () => Promise<{ success: boolean; archivedCount?: number; message?: string }>;
 }
 
-// In-flight deduplication guards
-let catalogFetchInFlight: Promise<void> | null = null;
+// // In-flight deduplication guards
+let catalogFetchInFlight: { promise: Promise<void>; shopId: string } | null = null;
 let initAppDataInFlight: Promise<void> | null = null;
 
 export const useAppStore = create<AppState>()(
@@ -146,7 +146,8 @@ export const useAppStore = create<AppState>()(
         set({ 
           currentTenantId: shopId,
           cart: [], 
-          activeCoupon: null 
+          activeCoupon: null,
+          isCatalogLoading: true,
         });
         if (shopId) {
           get().fetchCatalog(shopId);
@@ -469,17 +470,26 @@ export const useAppStore = create<AppState>()(
         }
         if (!shopId) return;
 
-        // TTL: skip if same-shop data is fresh within 60 seconds (explicit override always refetches)
+        const shopIdStr = String(shopId);
         const CATALOG_TTL = 60_000;
-        if (!overrideShopId && (Date.now() - get().catalogLastFetched) < CATALOG_TTL && get().categories.length > 0) return;
+        const hasFreshData = !overrideShopId &&
+          (Date.now() - get().catalogLastFetched) < CATALOG_TTL &&
+          get().categories.some(c => String(c.shopId) === shopIdStr);
 
-        if (catalogFetchInFlight) return catalogFetchInFlight;
+        if (hasFreshData) {
+          set({ isCatalogLoading: false });
+          return;
+        }
 
-        catalogFetchInFlight = (async () => {
+        if (catalogFetchInFlight && catalogFetchInFlight.shopId === shopIdStr) {
+          return catalogFetchInFlight.promise;
+        }
+
+        const fetchPromise = (async () => {
           set({ isCatalogLoading: true, error: null });
           try {
             // Use combined endpoint — 1 round-trip instead of 2
-            const res = await api.get(`/catalog/shops/${shopId}/catalog`);
+            const res = await api.get(`/catalog/shops/${shopIdStr}/catalog`);
             set({
               categories: res.data.categories || [],
               items: res.data.items || [],
@@ -490,10 +500,13 @@ export const useAppStore = create<AppState>()(
             set({ error: err.message || 'Failed to load catalog', isCatalogLoading: false });
           }
         })().finally(() => {
-          catalogFetchInFlight = null;
+          if (catalogFetchInFlight && catalogFetchInFlight.shopId === shopIdStr) {
+            catalogFetchInFlight = null;
+          }
         });
 
-        return catalogFetchInFlight;
+        catalogFetchInFlight = { promise: fetchPromise, shopId: shopIdStr };
+        return fetchPromise;
       },
 
       // Paginated orders fetch with strict shop partitioning

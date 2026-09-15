@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, ChevronDown, FileText, CheckCircle2, Droplets, Sparkles, Truck, Gift, User, Store, Copy, Check } from 'lucide-react';
+import { Search, ChevronDown, FileText, CheckCircle2, Droplets, Sparkles, Truck, Gift, User, Store, Copy, Check, Loader2 } from 'lucide-react';
 import { useAppStore } from '../../store/useAppStore';
 import Navbar from '../../components/Navbar';
 import { resolveVectorImage } from '../../utils/vectorGallery';
@@ -47,7 +47,7 @@ const ORDER_STEPS = [
 ];
 
 export default function CustomerHome() {
-  const { categories, items, currentTenantId, setCurrentTenantId, cart, currentUser, orders, shops } = useAppStore();
+  const { categories, items, currentTenantId, setCurrentTenantId, cart, currentUser, orders, shops, isCatalogLoading } = useAppStore();
   const [searchQuery, setSearchQuery] = useState('');
 
   const currentShop = shops.find((s) => s._id === currentTenantId) || shops[0];
@@ -62,6 +62,9 @@ export default function CustomerHome() {
   const activeOrder = orders.find((o) => o.customerId === currentUser?._id && o.status !== 'DELIVERED');
   const activeStepIndex = activeOrder ? ORDER_STEPS.findIndex((s) => s.key === activeOrder.status) : -1;
   const cartTotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
+  const hasLoadedShopCats = categories.some((c) => String(c.shopId) === String(currentTenantId));
+  const isCatLoading = isCatalogLoading || (!hasLoadedShopCats && categories.length === 0) || (Boolean(currentTenantId) && !hasLoadedShopCats);
 
   const tenantCats = categories.filter((c) => {
     if (c.shopId !== currentTenantId) return false;
@@ -254,52 +257,83 @@ export default function CustomerHome() {
         </div>
 
         {/* Categories Section */}
-        <div className="mb-6 flex items-center animate-fade-in-up" style={{ animationDelay: '400ms' }}>
+        <div className="mb-6 flex items-center justify-between animate-fade-in-up" style={{ animationDelay: '400ms' }}>
           <div>
             <h2 className="text-3xl font-black text-black lilita-one-regular tracking-wide uppercase">Start Washing</h2>
-            <p className="text-sm font-extrabold text-gray-600 mt-1 uppercase tracking-widest">Pick a category</p>
+            <p className="text-sm font-extrabold text-gray-600 mt-1 uppercase tracking-widest">
+              {isCatLoading ? `Loading ${currentShop?.name || 'Shop'} Services...` : 'Pick a category'}
+            </p>
           </div>
+          {isCatLoading && (
+            <div className="flex items-center gap-2 bg-[#9AE600] border-2 border-black px-3 py-1.5 rounded-xl shadow-[2px_2px_0px_rgba(0,0,0,1)]">
+              <Loader2 size={16} strokeWidth={3} className="text-black animate-spin" />
+              <span className="text-xs font-black uppercase tracking-wider text-black">Updating</span>
+            </div>
+          )}
         </div>
 
-        {/* Neo-Brutalist Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-2 gap-4 sm:gap-6">
-          {tenantCats.map((cat, idx) => {
-            const style = getCategoryStyle(cat.name);
-            const catImg = resolveVectorImage(cat.image, cat.name) || style.img;
-            
-            return (
-              <Link 
-                key={cat._id}
-                to={`/order/${cat._id}`}
-                className={`${style.bg} border-2 border-black rounded-2xl p-5 flex flex-col justify-between shadow-[4px_4px_0px_rgba(0,0,0,1)] transition-all cursor-pointer group animate-fade-in-up opacity-0 active:translate-y-1 active:translate-x-1 active:shadow-none`}
-                style={{ animationDelay: `${500 + idx * 100}ms` }}
+        {/* Animated Loading Skeleton Grid */}
+        {isCatLoading ? (
+          <div className="grid grid-cols-2 sm:grid-cols-2 gap-4 sm:gap-6">
+            {[1, 2, 3, 4].map((n) => (
+              <div 
+                key={n} 
+                className="bg-white border-2 border-black rounded-2xl p-5 flex flex-col justify-between shadow-[4px_4px_0px_rgba(0,0,0,1)] relative overflow-hidden animate-pulse"
               >
                 <div className="flex justify-between items-start mb-6">
-                  <div className={`px-3 py-1.5 rounded-lg bg-black text-white border-2 border-black transform -rotate-3 group-hover:rotate-0 transition-transform`}>
-                    <span className={`text-[10px] font-black uppercase tracking-widest`}>
-                      {style.badge}
-                    </span>
+                  <div className="h-6 w-20 bg-gray-200 rounded-lg border-2 border-black animate-pulse" />
+                </div>
+                <div className="w-full flex flex-col items-center justify-center my-4">
+                  <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-gray-100 border-2 border-dashed border-gray-300 flex items-center justify-center">
+                    <Droplets className="w-8 h-8 sm:w-10 sm:h-10 text-[#0D8DE3] opacity-60 animate-bounce" />
                   </div>
                 </div>
-
-                <div className="w-full flex justify-center mb-6">
-                  <img 
-                    src={catImg} 
-                    alt={cat.name} 
-                    onError={(e) => { e.currentTarget.src = style.img; }}
-                    className="w-24 h-24 object-contain filter drop-shadow-md group-hover:scale-110 transition-transform duration-300" 
-                  />
-                </div>
-                
                 <div className="mt-auto border-t-4 border-black pt-3">
-                  <h3 className={`font-extrabold ${style.color} leading-tight text-lg sm:text-xl uppercase tracking-wide`}>{cat.name}</h3>
+                  <div className="h-6 bg-gray-200 rounded-md w-3/4 animate-pulse" />
                 </div>
-              </Link>
-            );
-          })}
-        </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-2 gap-4 sm:gap-6">
+            {tenantCats.map((cat, idx) => {
+              const style = getCategoryStyle(cat.name);
+              const catImg = resolveVectorImage(cat.image, cat.name) || style.img;
+              
+              return (
+                <Link 
+                  key={cat._id}
+                  to={`/order/${cat._id}`}
+                  className={`${style.bg} border-2 border-black rounded-2xl p-5 flex flex-col justify-between shadow-[4px_4px_0px_rgba(0,0,0,1)] transition-all cursor-pointer group animate-fade-in-up opacity-0 active:translate-y-1 active:translate-x-1 active:shadow-none`}
+                  style={{ animationDelay: `${500 + idx * 100}ms` }}
+                >
+                  <div className="flex justify-between items-start mb-6">
+                    <div className={`px-3 py-1.5 rounded-lg bg-black text-white border-2 border-black transform -rotate-3 group-hover:rotate-0 transition-transform`}>
+                      <span className={`text-[10px] font-black uppercase tracking-widest`}>
+                        {style.badge}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="w-full flex justify-center mb-6">
+                    <img 
+                      src={catImg} 
+                      alt={cat.name} 
+                      onError={(e) => { e.currentTarget.src = style.img; }}
+                      className="w-24 h-24 object-contain filter drop-shadow-md group-hover:scale-110 transition-transform duration-300" 
+                    />
+                  </div>
+                  
+                  <div className="mt-auto border-t-4 border-black pt-3">
+                    <h3 className={`font-extrabold ${style.color} leading-tight text-lg sm:text-xl uppercase tracking-wide`}>{cat.name}</h3>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        )}
         
-        {tenantCats.length === 0 && (
+        {!isCatLoading && tenantCats.length === 0 && (
           <div className="text-center py-16 bg-gray-100 rounded-3xl border-4 border-dashed border-black">
             <p className="text-black font-black text-xl uppercase tracking-wider">No categories found.</p>
           </div>
