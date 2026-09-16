@@ -76,8 +76,18 @@ export default function CustomerHome() {
     ? currentShop.promoCode
     : null;
 
-  const activeOrder = orders.find((o) => o.customerId === currentUser?._id && o.status !== 'DELIVERED');
-  const activeStepIndex = activeOrder ? ORDER_STEPS.findIndex((s) => s.key === activeOrder.status) : -1;
+  const activeOrder = orders.find((o) => o.customerId === currentUser?._id && o.status !== 'DELIVERED' && o.status !== 'CANCELLED');
+  const activeStepIndex = React.useMemo(() => {
+    if (!activeOrder) return -1;
+    const st = activeOrder.status;
+    if (st === 'PLACED') return 0;
+    if (['ACCEPTED', 'PICKUP_ASSIGNED', 'PICKED_UP'].includes(st)) return 1;
+    if (st === 'WASHING') return 2;
+    if (st === 'IRONING') return 3;
+    if (st === 'OUT_FOR_DELIVERY') return 4;
+    if (st === 'DELIVERED') return 5;
+    return -1;
+  }, [activeOrder]);
   const cartTotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
   const hasLoadedShopCats = categories.some((c) => !effectiveShopId || String(c.shopId) === String(effectiveShopId));

@@ -78,7 +78,7 @@ export default function ShopDashboard({ tenantOrders = [], deliveryBoys = [], us
   }, [filteredOrders]);
 
   const pendingOrdersCount = useMemo(() => {
-    return filteredOrders.filter(o => ['PLACED', 'ACCEPTED', 'PICKUP_ASSIGNED', 'WASHING', 'IRONING', 'OUT_FOR_DELIVERY'].includes(o.status)).length;
+    return filteredOrders.filter(o => ['PLACED', 'ACCEPTED', 'PICKUP_ASSIGNED', 'PICKED_UP', 'WASHING', 'IRONING', 'OUT_FOR_DELIVERY'].includes(o.status)).length;
   }, [filteredOrders]);
 
   const cancelledOrdersCount = useMemo(() => {

@@ -16,9 +16,9 @@ import GlobalUsers from './views/GlobalUsers';
 import ShopSettings from './views/ShopSettings';
 
 const FILTERS = [
-  { key: 'new',      label: 'New Orders',      statuses: ['PLACED', 'ACCEPTED'] },
+  { key: 'new',      label: 'New Orders',      statuses: ['PLACED', 'ACCEPTED', 'PICKUP_ASSIGNED'] },
   { key: 'washing',  label: 'In Wash Cycle',   statuses: ['PICKED_UP', 'WASHING', 'IRONING'] },
-  { key: 'delivery', label: 'Out for Delivery', statuses: ['PICKUP_ASSIGNED', 'OUT_FOR_DELIVERY'] },
+  { key: 'delivery', label: 'Out for Delivery', statuses: ['OUT_FOR_DELIVERY'] },
   { key: 'history',  label: 'History',         statuses: ['DELIVERED'] },
 ];
 
@@ -30,8 +30,9 @@ const SERVICE_LABEL_FOR_CATEGORY = (catName) => {
 
 const stripeColor = (s) => {
   if (['PLACED', 'ACCEPTED'].includes(s)) return 'bg-red-500';
-  if (['PICKUP_ASSIGNED', 'OUT_FOR_DELIVERY'].includes(s)) return 'bg-[#0D8DE3]';
+  if (s === 'PICKUP_ASSIGNED') return 'bg-purple-500';
   if (['PICKED_UP', 'WASHING', 'IRONING'].includes(s)) return 'bg-[#9AE600]';
+  if (s === 'OUT_FOR_DELIVERY') return 'bg-[#0D8DE3]';
   if (s === 'DELIVERED') return 'bg-green-500';
   return 'bg-gray-400';
 };
@@ -325,9 +326,9 @@ export default function AdminDashboard() {
               tenantOrders={tenantOrders} 
               displayFilters={displayFilters} 
               counts={{
-                new: tenantOrders.filter(o => ['PLACED', 'ACCEPTED'].includes(o.status)).length,
+                new: tenantOrders.filter(o => ['PLACED', 'ACCEPTED', 'PICKUP_ASSIGNED'].includes(o.status)).length,
                 washing: tenantOrders.filter(o => ['PICKED_UP', 'WASHING', 'IRONING'].includes(o.status)).length,
-                delivery: tenantOrders.filter(o => ['PICKUP_ASSIGNED', 'OUT_FOR_DELIVERY'].includes(o.status)).length,
+                delivery: tenantOrders.filter(o => ['OUT_FOR_DELIVERY'].includes(o.status)).length,
                 history: tenantOrders.filter(o => ['DELIVERED'].includes(o.status)).length
               }} 
               activeFilter={activeFilter} 
