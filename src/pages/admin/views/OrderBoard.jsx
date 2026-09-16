@@ -45,8 +45,17 @@ export default function OrderBoard({
   const [selectedStatusFilter, setSelectedStatusFilter] = useState('ALL');
   const [isExporting, setIsExporting] = useState(false);
 
+  const uniqueTenantOrders = useMemo(() => {
+    const seen = new Set();
+    return (tenantOrders || []).filter(o => {
+      if (!o || !o._id || seen.has(o._id)) return false;
+      seen.add(o._id);
+      return true;
+    });
+  }, [tenantOrders]);
+
   const currentFilter = displayFilters.find(f => f.key === activeFilter) || displayFilters[0];
-  const filteredOrders = tenantOrders.filter(o => currentFilter.statuses.includes(o.status));
+  const filteredOrders = uniqueTenantOrders.filter(o => currentFilter.statuses.includes(o.status));
 
   // Compute sorted orders based on active sortBy selection
   const sortedOrders = useMemo(() => {

@@ -131,9 +131,18 @@ export default function AdminDashboard() {
     }
   }, [currentShop]);
 
-  const tenantOrders = activeShopId 
+  const rawTenantOrders = activeShopId 
     ? orders.filter(o => o.shopId === activeShopId) 
     : orders;
+
+  const tenantOrders = React.useMemo(() => {
+    const seen = new Set();
+    return (rawTenantOrders || []).filter(o => {
+      if (!o || !o._id || seen.has(o._id)) return false;
+      seen.add(o._id);
+      return true;
+    });
+  }, [rawTenantOrders]);
 
   const deliveryBoys = users.filter(u => 
     u.role === 'Delivery' && (

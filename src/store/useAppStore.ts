@@ -519,13 +519,22 @@ export const useAppStore = create<AppState>()(
           const res = await api.get(url);
           const { orders, total } = res.data;
 
+          const mergeUniqueOrders = (base: Order[], fresh: Order[]) => {
+            const map = new Map<string, Order>();
+            (fresh || []).forEach(o => { if (o && o._id) map.set(o._id, o); });
+            (base || []).forEach(o => { if (o && o._id && !map.has(o._id)) map.set(o._id, o); });
+            return Array.from(map.values()).sort((a, b) => 
+              new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
+            );
+          };
+
           if (page === 1) {
-            // First page — replace
-            set({ orders, orderTotal: total, orderPage: 1, isOrdersLoading: false });
+            // First page — replace and deduplicate
+            set({ orders: mergeUniqueOrders([], orders), orderTotal: total, orderPage: 1, isOrdersLoading: false });
           } else {
-            // Subsequent pages — append
+            // Subsequent pages — deduplicate and append
             set(state => ({
-              orders: [...state.orders, ...orders],
+              orders: mergeUniqueOrders(state.orders, orders),
               orderTotal: total,
               orderPage: page,
               isOrdersLoading: false,
@@ -781,13 +790,16 @@ export const useAppStore = create<AppState>()(
           });
           const newOrder = res.data;
 
-          set(state => ({
-            orders: [newOrder, ...state.orders],
-            cart: [],
-            activeCoupon: null,
-            deliveryInstructions: '',
-            isLoading: false,
-          }));
+          set(state => {
+            const exists = state.orders.some(o => o._id === newOrder._id);
+            return {
+              orders: exists ? state.orders : [newOrder, ...state.orders],
+              cart: [],
+              activeCoupon: null,
+              deliveryInstructions: '',
+              isLoading: false,
+            };
+          });
 
           return { success: true, orderId: newOrder._id, message: 'Order placed successfully!' };
         } catch (err: any) {
