@@ -9,8 +9,6 @@ const api = axios.create({
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
-    // Tell the server we accept gzip — triggers compression middleware
-    'Accept-Encoding': 'gzip, deflate, br',
   },
 });
 
