@@ -4,7 +4,7 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 
 import { Shop, User, Category, Item, Order, Offer, OrderStatus, PaymentStatus, PaymentMode, Role, OrderItem, CartItem } from '../types';
-import api, { setAuthToken, uploadImageToCloudinary } from '../services/api';
+import api, { setAuthToken, uploadImageToCloudinary, swrGet, invalidateCache } from '../services/api';
 
 interface AppState {
   // Auth Contexts
@@ -252,17 +252,22 @@ export const useAppStore = create<AppState>()(
 
           set({ isLoading: true, error: null });
           try {
+            // Use swrGet for shops + offers — serves stale data INSTANTLY on repeat visits
+            // while refreshing in background. Eliminates loading spinner on every app open.
+            const SHOPS_SWR_TTL = 60_000;  // serve cache for 60s, refresh in background
+            const OFFERS_SWR_TTL = 60_000;
+
             const shopId = get().currentTenantId;
             const offersUrl = shopId ? `/catalog/offers?shopId=${shopId}` : '/catalog/offers';
 
-            const [shopsRes, offersRes] = await Promise.all([
-              api.get('/catalog/shops'),
-              api.get(offersUrl),
+            const [shopsData, offersData] = await Promise.all([
+              swrGet('/catalog/shops', SHOPS_SWR_TTL),
+              swrGet(offersUrl, OFFERS_SWR_TTL),
             ]);
 
             set({
-              shops: shopsRes.data,
-              offers: offersRes.data,
+              shops: shopsData,
+              offers: offersData,
               shopsLastFetched: Date.now(),
               offersLastFetched: Date.now(),
               isLoading: false,
@@ -487,13 +492,16 @@ export const useAppStore = create<AppState>()(
         }
 
         const fetchPromise = (async () => {
-          set({ isCatalogLoading: true, error: null });
+          const hasData = get().categories.some(c => String(c.shopId) === shopIdStr);
+          if (!hasData) {
+            set({ isCatalogLoading: true, error: null });
+          }
           try {
-            // Use combined endpoint — 1 round-trip instead of 2
-            const res = await api.get(`/catalog/shops/${shopIdStr}/catalog`);
+            // Use swrGet combined endpoint — 1 round-trip, serves cached response instantly while revalidating
+            const data = await swrGet<{ categories?: any[]; items?: any[] }>(`/catalog/shops/${shopIdStr}/catalog`, CATALOG_TTL);
             set({
-              categories: res.data.categories || [],
-              items: res.data.items || [],
+              categories: data?.categories || [],
+              items: data?.items || [],
               catalogLastFetched: Date.now(),
               isCatalogLoading: false,
             });
@@ -824,6 +832,7 @@ export const useAppStore = create<AppState>()(
             customerName: currentUser?.name || undefined,
           });
           const newOrder = res.data;
+          invalidateCache('/orders');
 
           set(state => {
             const exists = state.orders.some(o => o._id === newOrder._id);
@@ -847,6 +856,7 @@ export const useAppStore = create<AppState>()(
         try {
           const res = await api.patch(`/orders/${orderId}/cancel`, { reason });
           if (res.data) {
+            invalidateCache('/orders');
             set(state => ({
               orders: state.orders.map(o => o._id === orderId ? res.data : o)
             }));
@@ -928,6 +938,7 @@ export const useAppStore = create<AppState>()(
             set(state => ({
               categories: state.categories.some(c => c._id === res.data._id) ? state.categories : [...state.categories, res.data]
             }));
+            invalidateCache('/catalog');
             // Invalidate cache and refetch catalog to keep hierarchy in sync
             await get().fetchCatalog(shopId);
           }
@@ -955,6 +966,7 @@ export const useAppStore = create<AppState>()(
             set(state => ({
               categories: state.categories.map(c => c._id === categoryId ? res.data : c),
             }));
+            invalidateCache('/catalog');
             if (shopId) {
               await get().fetchCatalog(shopId);
             }
@@ -980,6 +992,7 @@ export const useAppStore = create<AppState>()(
           items: state.items.filter(i => String(i.categoryId) !== String(categoryId) && !subCatIds.includes(String(i.categoryId))),
           catalogLastFetched: 0,
         }));
+        invalidateCache('/catalog');
         try {
           await api.delete(`/catalog/categories/${categoryId}`);
           if (shopId) {
@@ -1016,6 +1029,7 @@ export const useAppStore = create<AppState>()(
               items: state.items.some(i => String(i._id) === String(res.data._id)) ? state.items : [...state.items, res.data],
               catalogLastFetched: 0,
             }));
+            invalidateCache('/catalog');
             if (shopId) {
               await get().fetchCatalog(shopId);
             }
@@ -1045,6 +1059,7 @@ export const useAppStore = create<AppState>()(
             set(state => ({
               items: state.items.map(item => String(item._id) === String(itemId) ? res.data : item),
             }));
+            invalidateCache('/catalog');
             if (shopId) {
               await get().fetchCatalog(shopId);
             }
@@ -1088,6 +1103,7 @@ export const useAppStore = create<AppState>()(
           items: state.items.filter(item => String(item._id) !== String(itemId)),
           catalogLastFetched: 0,
         }));
+        invalidateCache('/catalog');
         try {
           await api.delete(`/catalog/items/${itemId}`);
           if (shopId) {
@@ -1104,7 +1120,7 @@ export const useAppStore = create<AppState>()(
       addOffer: async (offerData) => {
         const { currentTenantId } = get();
         try {
-          // Do NOT push to state here — SocketManager's offer_created event is source of truth
+          invalidateCache('/catalog/offers');
           await api.post('/catalog/offers', {
             shopId: currentTenantId,
             ...offerData,

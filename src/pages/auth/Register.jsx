@@ -15,7 +15,7 @@ export default function Register() {
     phone: '',
     password: '',
   });
-  const [redirectNotice, setRedirectNotice] = useState(
+  const [redirectNotice] = useState(
     location.state?.redirectedFromLogin ? 'No account found with this email. Please register below to continue!' : ''
   );
   const [otp, setOtp] = useState(['', '', '', '', '', '']);

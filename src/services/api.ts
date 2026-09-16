@@ -9,10 +9,13 @@ const api = axios.create({
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
+    // Tell the server we accept gzip — triggers compression middleware
+    'Accept-Encoding': 'gzip, deflate, br',
   },
 });
 
-let memoryToken: string | null = null;
+// ── In-memory auth token (avoids localStorage hit on every request) ────────────
+let memoryToken: string | null = localStorage.getItem('auth_token');
 
 export const setAuthToken = (token: string | null) => {
   memoryToken = token;
@@ -23,15 +26,8 @@ export const setAuthToken = (token: string | null) => {
   }
 };
 
-const token = localStorage.getItem('auth_token');
-if (token) memoryToken = token;
-
 api.interceptors.request.use(
   (config: any) => {
-    if (!memoryToken) {
-      const stored = localStorage.getItem('auth_token');
-      if (stored) memoryToken = stored;
-    }
     if (memoryToken && config.headers) {
       config.headers.Authorization = `Bearer ${memoryToken}`;
     }
@@ -63,6 +59,64 @@ api.interceptors.response.use(
   }
 );
 
+// ── Request Deduplication ─────────────────────────────────────────────────────
+// If two components mount simultaneously and call the same GET endpoint,
+// this merges them into ONE network request — both get the same response.
+// Eliminates redundant API calls on every route transition.
+const inFlightRequests = new Map<string, Promise<any>>();
+
+export function dedupedGet<T = any>(url: string, params?: Record<string, any>): Promise<T> {
+  const key = url + (params ? JSON.stringify(params) : '');
+  if (inFlightRequests.has(key)) {
+    return inFlightRequests.get(key)!;
+  }
+  const promise = api.get<T>(url, { params })
+    .then(r => r.data)
+    .finally(() => inFlightRequests.delete(key));
+  inFlightRequests.set(key, promise);
+  return promise;
+}
+
+// ── Stale-While-Revalidate Client Cache ───────────────────────────────────────
+// Serves a cached response INSTANTLY (0ms) while revalidating in the background.
+// After TTL expires the next caller gets fresh data; everyone else gets instant cache.
+// This is why navigating between pages feels instant after first load.
+interface CacheEntry { data: any; cachedAt: number; }
+const memoryCache = new Map<string, CacheEntry>();
+
+export function swrGet<T = any>(url: string, ttlMs: number, params?: Record<string, any>): Promise<T> {
+  const key = url + (params ? JSON.stringify(params) : '');
+  const entry = memoryCache.get(key);
+  const now = Date.now();
+
+  if (entry) {
+    const age = now - entry.cachedAt;
+    if (age < ttlMs) {
+      // Fresh: serve from cache instantly
+      return Promise.resolve(entry.data as T);
+    }
+    // Stale: serve old data immediately AND kick off background refresh
+    dedupedGet<T>(url, params).then(fresh => {
+      memoryCache.set(key, { data: fresh, cachedAt: Date.now() });
+    }).catch(() => {}); // Silent — old data stays if refresh fails
+    return Promise.resolve(entry.data as T);
+  }
+
+  // No cache yet: fetch and cache
+  return dedupedGet<T>(url, params).then(data => {
+    memoryCache.set(key, { data, cachedAt: Date.now() });
+    return data;
+  });
+}
+
+/** Invalidate a cached entry (call after mutations like order creation) */
+export function invalidateCache(urlPrefix: string) {
+  for (const key of memoryCache.keys()) {
+    if (key.startsWith(urlPrefix)) memoryCache.delete(key);
+  }
+}
+
+// ── Cloudinary Upload ─────────────────────────────────────────────────────────
 // Upload a local image file through the backend to Cloudinary
 export const uploadImageToCloudinary = async (file: File | string | null | undefined): Promise<string> => {
   if (!file) return '';
@@ -76,6 +130,7 @@ export const uploadImageToCloudinary = async (file: File | string | null | undef
   const response = await fetch(`${BASE_URL}/upload`, {
     method: 'POST',
     body: formData,
+    headers: memoryToken ? { Authorization: `Bearer ${memoryToken}` } : {},
   });
 
   if (!response.ok) {

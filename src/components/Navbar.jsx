@@ -35,7 +35,9 @@ export default function Navbar() {
       localStorage.removeItem('auth-token');
       localStorage.removeItem('token');
       localStorage.removeItem('user');
-    } catch {}
+    } catch {
+      // ignore storage errors
+    }
     setShowMenu(false);
     navigate('/login');
   };

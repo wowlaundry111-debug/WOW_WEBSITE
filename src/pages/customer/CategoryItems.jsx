@@ -263,7 +263,6 @@ export default function CategoryItems() {
                   const itemCat = categories.find(c => c._id === item.categoryId);
                   const isSingleMode = Boolean(itemCat?.singleItemSelection);
                   const isSelected = cart.some(c => String(c.itemId) === String(item._id));
-                  const isDisabled = false; // Never disable in 1-click direct selection mode
 
               // ── BUCKET ITEM CARD ───────────────────────────────────────────
               if (isBucket) {

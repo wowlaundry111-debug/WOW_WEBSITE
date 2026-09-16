@@ -60,6 +60,33 @@ function App() {
 
   React.useEffect(() => {
     initializeAppData();
+
+    // Idle route prefetching — loads chunks into browser cache during idle time
+    // Eliminates route transition delay when user clicks navigation buttons
+    const prefetchKeyRoutes = () => {
+      const routes = [
+        () => import('./pages/customer/CustomerHome'),
+        () => import('./pages/customer/CategoryItems'),
+        () => import('./pages/customer/Cart'),
+        () => import('./pages/customer/OrderHistory'),
+        () => import('./pages/customer/ShopSelect'),
+        () => import('./pages/auth/Login'),
+        () => import('./pages/auth/Register'),
+      ];
+      routes.forEach((load) => {
+        if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+          window.requestIdleCallback(() => { load().catch(() => {}); });
+        } else {
+          setTimeout(() => { load().catch(() => {}); }, 1200);
+        }
+      });
+    };
+
+    if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+      window.requestIdleCallback(prefetchKeyRoutes);
+    } else {
+      setTimeout(prefetchKeyRoutes, 1000);
+    }
   }, [initializeAppData]);
 
   return (

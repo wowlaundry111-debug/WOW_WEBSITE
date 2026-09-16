@@ -22,7 +22,6 @@ export default function OrderBoard({
   setActiveFilter, 
   users = [], 
   shops = [],
-  SERVICE_LABEL_FOR_CATEGORY,
   stripeColor,
   deliveryBoys = []
 }) {
@@ -378,7 +377,6 @@ export default function OrderBoard({
             const customer = users.find(u => u._id === order.customerId);
             const customerName = customer?.name || order.customerName || 'Unknown Customer';
             const customerPhone = customer?.phone || order.customerPhone || 'N/A';
-            const serviceInfo = SERVICE_LABEL_FOR_CATEGORY(order.items[0]?.name);
             
             return (
               <div key={order._id} className="bg-white border-2 border-black rounded-xl shadow-[4px_4px_0px_rgba(0,0,0,1)] flex overflow-hidden group cursor-pointer hover:translate-y-[-2px] transition-transform" onClick={() => handleOpenModal(order)}>

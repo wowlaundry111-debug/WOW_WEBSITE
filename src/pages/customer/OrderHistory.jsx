@@ -77,7 +77,7 @@ export default function OrderHistory() {
     return shop?.contactNumber || '9999999999';
   };
 
-  const getWaLink = (phone, orderId, label = 'support') => {
+  const getWaLink = (phone, orderId) => {
     const clean = getCleanPhone(phone);
     if (!clean) return '#';
     const intlPhone = clean.length === 10 ? '91' + clean : clean;
@@ -149,7 +149,7 @@ export default function OrderHistory() {
           </div>
         ) : (
           <div className="space-y-4 sm:space-y-6">
-            {orders.map((order, idx) => {
+            {orders.map((order) => {
               const isExpanded = !!expandedOrders[order._id];
               const isKgCheck = (it) => it.unit === 'KG' || (typeof it.name === 'string' && (it.name.toLowerCase().includes('per kg') || it.name.toLowerCase().includes('/ kg'))) || Boolean(it.kgWeight && it.kgWeight > 0);
               const hasKgItems = (order.items || []).some(isKgCheck);
