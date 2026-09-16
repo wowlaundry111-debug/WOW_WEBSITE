@@ -48,7 +48,7 @@ interface AppState {
   // Async Data Fetching
   initializeAppData: () => Promise<void>;
   login: (identifier: string, password?: string) => Promise<{ success: boolean; message: string }>;
-  sendLoginOtp: (identifier: string, password?: string) => Promise<{ success: boolean; requiresOtp?: boolean; message: string }>;
+  sendLoginOtp: (identifier: string, password?: string) => Promise<{ success: boolean; requiresOtp?: boolean; notRegistered?: boolean; message: string }>;
   verifyLoginOtp: (email: string, otp: string) => Promise<{ success: boolean; message: string }>;
   register: (name: string, phone: string, email: string, password?: string) => Promise<{ success: boolean; requiresOtp?: boolean; message: string }>;
   fetchCatalog: (overrideShopId?: string) => Promise<void>;
@@ -320,9 +320,10 @@ export const useAppStore = create<AppState>()(
             message: response.data.message || 'Verification code sent to your email',
           };
         } catch (err: any) {
-          const msg = err.response?.data?.error || 'Failed to send verification code';
+          const msg = err.response?.data?.error || err.response?.data?.message || 'Failed to send verification code';
+          const notRegistered = err.response?.status === 404 || err.response?.data?.notRegistered === true;
           set({ isLoading: false, error: msg });
-          return { success: false, message: msg };
+          return { success: false, notRegistered, message: msg };
         }
       },
 

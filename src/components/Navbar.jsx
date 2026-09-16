@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAppStore } from '../store/useAppStore';
-import { ShoppingCart, User, LogOut, LayoutDashboard, Package, Store } from 'lucide-react';
+import { ShoppingCart, User, LogOut, LayoutDashboard, Package, Store, X, Phone, Mail, Shield } from 'lucide-react';
 import logo from '../assets/logo.webp';
 import { setAuthToken } from '../services/api';
 
@@ -9,6 +9,7 @@ export default function Navbar() {
   const { currentUser, setCurrentUser, cart, shops, currentTenantId, setCurrentTenantId } = useAppStore();
   const navigate = useNavigate();
   const [showMenu, setShowMenu] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
   const menuRef = useRef(null);
 
   const cartItemsCount = cart.reduce((total, item) => total + item.quantity, 0);
@@ -122,6 +123,13 @@ export default function Navbar() {
                       <p className="text-xs font-bold truncate opacity-90">{currentUser.email}</p>
                     </div>
                     
+                    <button 
+                      onClick={() => { setShowProfileModal(true); setShowMenu(false); }}
+                      className="w-full text-left flex items-center gap-3 px-5 py-3 text-sm font-black text-black hover:bg-[#9AE600] hover:border-y-4 hover:border-black uppercase tracking-widest transition-colors"
+                    >
+                      <User size={20} strokeWidth={3} /> My Profile
+                    </button>
+
                     <Link 
                       to={getDashboardLink()} 
                       onClick={() => setShowMenu(false)}
@@ -153,6 +161,85 @@ export default function Navbar() {
           </div>
         </div>
       </div>
+
+      {/* ─── Profile Modal ─── */}
+      {showProfileModal && currentUser && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white rounded-3xl p-6 sm:p-8 w-full max-w-md border-4 border-black shadow-[10px_10px_0px_rgba(0,0,0,1)] relative animate-scale-up">
+            {/* Close Button */}
+            <button
+              onClick={() => setShowProfileModal(false)}
+              className="absolute top-4 right-4 bg-gray-100 hover:bg-[#9AE600] border-2 border-black p-2 rounded-full shadow-[2px_2px_0px_rgba(0,0,0,1)] transition-colors"
+            >
+              <X size={20} strokeWidth={3} className="text-black" />
+            </button>
+
+            {/* Header / Avatar */}
+            <div className="flex flex-col items-center mb-6">
+              <div className="w-20 h-20 rounded-full bg-[#9AE600] border-3 border-black flex items-center justify-center shadow-[4px_4px_0px_rgba(0,0,0,1)] text-black font-extrabold text-3xl lilita-one-regular mb-3">
+                {currentUser.name?.charAt(0).toUpperCase() || 'U'}
+              </div>
+              <h2 className="text-2xl font-black text-black lilita-one-regular tracking-wide uppercase">
+                {currentUser.name}
+              </h2>
+              <span className="bg-[#0D8DE3] text-white text-xs font-black uppercase px-3 py-1 rounded-full border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] mt-1">
+                {currentUser.role}
+              </span>
+            </div>
+
+            {/* Profile Info Fields */}
+            <div className="space-y-4">
+              {/* Full Name */}
+              <div className="bg-gray-50 border-2 border-black rounded-xl p-3.5 shadow-[3px_3px_0px_rgba(0,0,0,1)]">
+                <span className="text-[10px] font-black uppercase text-gray-500 tracking-wider block">Full Name</span>
+                <div className="flex items-center gap-2 mt-0.5">
+                  <User size={16} strokeWidth={2.5} className="text-black shrink-0" />
+                  <span className="text-sm font-black text-black uppercase">{currentUser.name}</span>
+                </div>
+              </div>
+
+              {/* Mobile Number */}
+              <div className="bg-gray-50 border-2 border-black rounded-xl p-3.5 shadow-[3px_3px_0px_rgba(0,0,0,1)]">
+                <span className="text-[10px] font-black uppercase text-gray-500 tracking-wider block">Mobile Number</span>
+                <div className="flex items-center gap-2 mt-0.5">
+                  <Phone size={16} strokeWidth={2.5} className="text-black shrink-0" />
+                  <span className="text-sm font-black text-black">
+                    {currentUser.phone ? `+91 ${currentUser.phone}` : 'Not provided'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Email Address */}
+              <div className="bg-gray-50 border-2 border-black rounded-xl p-3.5 shadow-[3px_3px_0px_rgba(0,0,0,1)]">
+                <span className="text-[10px] font-black uppercase text-gray-500 tracking-wider block">Email Address</span>
+                <div className="flex items-center gap-2 mt-0.5">
+                  <Mail size={16} strokeWidth={2.5} className="text-black shrink-0" />
+                  <span className="text-sm font-black text-black truncate">{currentUser.email}</span>
+                </div>
+              </div>
+
+              {/* Account Role */}
+              <div className="bg-gray-50 border-2 border-black rounded-xl p-3.5 shadow-[3px_3px_0px_rgba(0,0,0,1)]">
+                <span className="text-[10px] font-black uppercase text-gray-500 tracking-wider block">Account Type</span>
+                <div className="flex items-center gap-2 mt-0.5">
+                  <Shield size={16} strokeWidth={2.5} className="text-black shrink-0" />
+                  <span className="text-sm font-black text-black">{currentUser.role} Account</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="mt-6 flex gap-3">
+              <button
+                onClick={() => setShowProfileModal(false)}
+                className="w-full bg-[#0D8DE3] hover:bg-blue-600 text-white font-black py-3 rounded-xl border-2 border-black shadow-[4px_4px_0px_rgba(0,0,0,1)] active:translate-y-1 active:shadow-none transition-all uppercase tracking-widest text-sm"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </nav>
   );
 }

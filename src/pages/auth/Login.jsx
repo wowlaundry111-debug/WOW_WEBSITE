@@ -40,6 +40,10 @@ export default function Login() {
           }
         }
       } else {
+        if (res.notRegistered || res.message?.toLowerCase().includes('register') || res.message?.toLowerCase().includes('not found')) {
+          navigate('/register', { state: { email: email.trim(), redirectedFromLogin: true } });
+          return;
+        }
         setError(res.message || 'Failed to send OTP');
       }
     } catch (err) {

@@ -1,19 +1,29 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { User, Mail, Phone, Lock, ArrowRight, ArrowLeft, AlertTriangle, CheckCircle } from 'lucide-react';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
+import { User, Mail, Phone, Lock, ArrowRight, ArrowLeft, AlertTriangle, CheckCircle, Info } from 'lucide-react';
 import logo from '../../assets/logo.webp';
 import { useAppStore } from '../../store/useAppStore';
 
 export default function Register() {
+  const navigate = useNavigate();
+  const location = useLocation();
+
   const [step, setStep] = useState('form'); // 'form' | 'otp'
-  const [formData, setFormData] = useState({ name: '', email: '', phone: '', password: '' });
+  const [formData, setFormData] = useState({
+    name: '',
+    email: location.state?.email || '',
+    phone: '',
+    password: '',
+  });
+  const [redirectNotice, setRedirectNotice] = useState(
+    location.state?.redirectedFromLogin ? 'No account found with this email. Please register below to continue!' : ''
+  );
   const [otp, setOtp] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [otpMessage, setOtpMessage] = useState('');
 
   const { register, verifyOtp } = useAppStore();
-  const navigate = useNavigate();
 
   // Step 1 — Submit form, backend sends OTP
   const handleRegister = async (e) => {
@@ -98,6 +108,13 @@ export default function Register() {
 
         {/* Card */}
         <div className="bg-white rounded-3xl p-8 w-full border-2 border-black shadow-[8px_8px_0px_rgba(0,0,0,1)] animate-fade-in-up">
+
+          {redirectNotice && !error && (
+            <div className="mb-5 p-4 bg-[#9AE600] text-black border-2 border-black shadow-[4px_4px_0px_rgba(0,0,0,1)] rounded-xl text-sm font-bold flex items-start gap-3">
+              <Info size={20} strokeWidth={2.5} className="shrink-0 mt-0.5" />
+              <span>{redirectNotice}</span>
+            </div>
+          )}
 
           {error && (
             <div className="mb-5 p-4 bg-red-500 text-white border-2 border-black shadow-[4px_4px_0px_rgba(0,0,0,1)] rounded-xl text-sm font-black tracking-widest flex items-start gap-3">
