@@ -3,7 +3,7 @@ import { ArrowLeft, Save, Trash2, User, Truck, Store, Phone, Mail, Building2, Sh
 import { useAppStore } from '../../../store/useAppStore';
 
 export default function SuperAdminShopDetail({ shopId, onBack, onOpenCatalog, onOpenOrders }) {
-  const { shops, users, orders, updateShop, deleteUser, addDeliveryBoy, setCurrentTenantId } = useAppStore();
+  const { shops, users, orders, updateShop, deleteUser, addDeliveryBoy, setCurrentTenantId, fetchAdminShop } = useAppStore();
   const shop = shops.find(s => s._id === shopId);
 
   const [activeTab, setActiveTab] = useState('details');
@@ -16,6 +16,23 @@ export default function SuperAdminShopDetail({ shopId, onBack, onOpenCatalog, on
   const [accountNo, setAccountNo] = useState(shop?.paymentInfo?.accountNo || '');
   const [isOpen, setIsOpen] = useState(shop?.isOpen ?? true);
   const [isSaving, setIsSaving] = useState(false);
+
+  React.useEffect(() => {
+    if (shopId) {
+      fetchAdminShop(shopId);
+    }
+  }, [shopId, fetchAdminShop]);
+
+  React.useEffect(() => {
+    if (shop) {
+      setShopName(shop.name || '');
+      setBranchStr(shop.branches?.join(', ') || '');
+      setUpiId(shop.paymentInfo?.upiId || '');
+      setBankName(shop.paymentInfo?.bankName || '');
+      setAccountNo(shop.paymentInfo?.accountNo || '');
+      setIsOpen(shop.isOpen ?? true);
+    }
+  }, [shop]);
 
   // Add Delivery Staff Form State
   const [showAddStaffModal, setShowAddStaffModal] = useState(false);

@@ -41,7 +41,7 @@ export default function AdminDashboard() {
   const { 
     currentUser, shops, currentTenantId, setCurrentTenantId, fetchOrders, fetchUsers, fetchCatalog,
     orders, categories, items, users,
-    createShop, updateShop, deleteShop, deleteUser, addDeliveryBoy
+    createShop, updateShop, deleteShop, deleteUser, addDeliveryBoy, fetchAdminShop
   } = useAppStore();
   
   const navigate = useNavigate();
@@ -84,6 +84,12 @@ export default function AdminDashboard() {
 
   const activeShopId = currentTenantId || currentUser?.shopId || (!isSuperAdmin && shops.length > 0 ? shops[0]._id : '');
   const currentShop = shops.find(s => s._id === activeShopId) || null;
+
+  useEffect(() => {
+    if (activeShopId) {
+      fetchAdminShop(activeShopId);
+    }
+  }, [activeShopId, fetchAdminShop]);
 
   // Sync shop state when currentShop changes
   useEffect(() => {
