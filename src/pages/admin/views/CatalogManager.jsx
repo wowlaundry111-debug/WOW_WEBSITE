@@ -327,6 +327,8 @@ export default function CatalogManager({ categories = [], items = [], shops = []
     return matchesCat && matchesSearch;
   });
 
+  const isSubCategorySelected = Boolean(selectedCategoryId && allSubCats.some(s => String(s._id) === String(selectedCategoryId)));
+
   return (
     <div className="space-y-6">
       {/* Header Banner */}
@@ -513,33 +515,19 @@ export default function CatalogManager({ categories = [], items = [], shops = []
                                     <div className="flex items-center gap-1.5 mt-0.5">
                                       <p className={`text-[10px] font-bold ${isSubSelected ? 'text-blue-100' : 'text-gray-500'}`}>{subItemCount} items</p>
                                       {sub.singleItemSelection && (
-                                        <span className={`text-[8px] font-black uppercase px-1 py-0.5 border ${isSubSelected ? 'border-white text-white' : 'border-black text-black bg-yellow-300'}`} title="Only 1 item type can be selected from this category at a time">
-                                          Single Item Only
+                                        <span className={`text-[8px] font-black uppercase px-1 py-0.5 border ${isSubSelected ? 'border-white text-white' : 'border-black text-black bg-yellow-300'}`} title="1-Click Direct Selection Mode is active">
+                                          1-Click Mode
                                         </span>
                                       )}
                                     </div>
                                   </div>
                                 </div>
                                 <div className="flex items-center gap-1 shrink-0" onClick={e => e.stopPropagation()}>
-                                  <button
-                                    onClick={(e) => { e.stopPropagation(); updateCategory(sub._id, { singleItemSelection: !sub.singleItemSelection }); }}
-                                    className={`px-1.5 py-1 border border-black rounded transition-colors flex items-center gap-0.5 text-[10px] font-black uppercase ${sub.singleItemSelection ? 'bg-yellow-300 hover:bg-yellow-400 text-black' : 'bg-white hover:bg-yellow-100 text-gray-500'}`}
-                                    title={sub.singleItemSelection ? 'Single Item Mode ON — click to disable' : 'Click to restrict to one item type only'}
-                                  >
-                                    {sub.singleItemSelection ? '1 ITEM ✓' : '1 ITEM'}
+                                  <button onClick={(e) => openEditCategory(sub, e)} className="p-1.5 bg-white border border-black rounded hover:bg-[#9AE600] transition-colors" title="Edit Sub-Category">
+                                    <Edit2 size={12} />
                                   </button>
-                                  <button 
-                                    onClick={(e) => { e.stopPropagation(); openAddItem(sub._id); }} 
-                                    className="px-1.5 py-1 bg-[#9AE600] hover:bg-black hover:text-[#9AE600] text-black border border-black rounded transition-colors flex items-center gap-0.5 text-[10px] font-black uppercase" 
-                                    title="Add Item to this Sub-Category"
-                                  >
-                                    <Plus size={10} /> Item
-                                  </button>
-                                  <button onClick={(e) => openEditCategory(sub, e)} className="p-1 bg-white border border-black rounded hover:bg-[#9AE600] transition-colors" title="Edit">
-                                    <Edit2 size={11} />
-                                  </button>
-                                  <button onClick={(e) => handleDeleteCategory(sub, e)} className="p-1 bg-red-100 hover:bg-red-500 hover:text-white text-red-700 border border-black rounded transition-colors" title="Delete">
-                                    <Trash2 size={11} />
+                                  <button onClick={(e) => handleDeleteCategory(sub, e)} className="p-1.5 bg-red-100 hover:bg-red-500 hover:text-white text-red-700 border border-black rounded transition-colors" title="Delete">
+                                    <Trash2 size={12} />
                                   </button>
                                 </div>
                               </div>
@@ -626,12 +614,14 @@ export default function CatalogManager({ categories = [], items = [], shops = []
             </div>
             <div className="flex items-center justify-between sm:justify-end gap-2 text-xs font-black uppercase">
               <span>Showing: {filteredItems.length} items</span>
-              <button
-                onClick={() => openAddItem()}
-                className="bg-[#0D8DE3] text-white border-2 border-black px-3 py-2 shadow-[2px_2px_0px_rgba(0,0,0,1)] hover:translate-y-[1px] transition-all flex items-center gap-1"
-              >
-                <Plus size={14} /> Add Item
-              </button>
+              {!isSubCategorySelected && (
+                <button
+                  onClick={() => openAddItem()}
+                  className="bg-[#0D8DE3] text-white border-2 border-black px-3 py-2 shadow-[2px_2px_0px_rgba(0,0,0,1)] hover:translate-y-[1px] transition-all flex items-center gap-1"
+                >
+                  <Plus size={14} /> Add Item
+                </button>
+              )}
             </div>
           </div>
 
@@ -719,12 +709,18 @@ export default function CatalogManager({ categories = [], items = [], shops = []
               <p className="font-bold text-gray-500 text-sm mt-1">
                 {searchQuery ? 'Try changing your search keyword.' : 'Add your first laundry item or service.'}
               </p>
-              <button
-                onClick={() => openAddItem()}
-                className="mt-4 bg-[#0D8DE3] text-white border-2 border-black shadow-[3px_3px_0px_rgba(0,0,0,1)] px-6 py-2.5 font-black uppercase text-sm hover:translate-y-[1px] transition-all inline-flex items-center gap-2"
-              >
-                <Plus size={16} /> Create Service Item
-              </button>
+              {!isSubCategorySelected ? (
+                <button
+                  onClick={() => openAddItem()}
+                  className="mt-4 bg-[#0D8DE3] text-white border-2 border-black shadow-[3px_3px_0px_rgba(0,0,0,1)] px-6 py-2.5 font-black uppercase text-sm hover:translate-y-[1px] transition-all inline-flex items-center gap-2"
+                >
+                  <Plus size={16} /> Create Service Item
+                </button>
+              ) : (
+                <p className="mt-3 text-xs font-bold text-gray-500">
+                  Service items for this sub-category are managed inside the Sub-Category Edit window.
+                </p>
+              )}
             </div>
           )}
         </div>
@@ -838,22 +834,56 @@ export default function CatalogManager({ categories = [], items = [], shops = []
               </div>
 
               {catType === 'sub' && (
-                <div className="flex items-center gap-3 p-3 bg-white border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)]">
-                  <input
-                    type="checkbox"
-                    id="singleItemToggle"
-                    checked={catSingleItemSelection}
-                    onChange={(e) => setCatSingleItemSelection(e.target.checked)}
-                    className="w-5 h-5 accent-black cursor-pointer"
-                  />
-                  <div>
-                    <label htmlFor="singleItemToggle" className="font-black text-xs uppercase cursor-pointer text-[#0D8DE3]">
-                      Single Item Selection Only
-                    </label>
-                    <p className="text-[10px] font-bold text-gray-500 mt-0.5">
-                      When enabled, customers can only select one item type from this sub-category (with any quantity). Other items become disabled.
-                    </p>
+                <div className="space-y-3">
+                  {/* Single Item 1-Click Toggle Button Card */}
+                  <div
+                    onClick={() => setCatSingleItemSelection(!catSingleItemSelection)}
+                    className={`p-3.5 border-2 border-black rounded-lg cursor-pointer transition-all shadow-[2px_2px_0px_rgba(0,0,0,1)] flex items-center justify-between gap-3 ${
+                      catSingleItemSelection ? 'bg-yellow-100 border-black' : 'bg-gray-50 border-gray-400'
+                    }`}
+                  >
+                    <div>
+                      <p className="font-black text-xs uppercase text-black flex items-center gap-1.5">
+                        <span className={`w-2.5 h-2.5 rounded-full border border-black ${catSingleItemSelection ? 'bg-[#9AE600]' : 'bg-gray-300'}`} />
+                        1-Click Direct Selection (Single Item Mode)
+                      </p>
+                      <p className="text-[10px] font-bold text-gray-600 mt-1">
+                        When enabled, customers can pick an item with just 1-click directly into their cart without needing multiple selections or quantity counters.
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={(e) => { e.stopPropagation(); setCatSingleItemSelection(!catSingleItemSelection); }}
+                      className={`px-3 py-1.5 border-2 border-black rounded-lg font-black text-xs uppercase shadow-[2px_2px_0px_rgba(0,0,0,1)] transition-all ${
+                        catSingleItemSelection ? 'bg-[#9AE600] text-black' : 'bg-white text-gray-700'
+                      }`}
+                    >
+                      {catSingleItemSelection ? 'ON ✓' : 'OFF'}
+                    </button>
                   </div>
+
+                  {/* Add Item Button Inside Subcategory Edit Modal */}
+                  {editingCategory && (
+                    <div className="p-3 bg-green-50 border-2 border-black rounded-lg flex items-center justify-between">
+                      <div>
+                        <p className="font-black text-xs uppercase text-black">Sub-Category Items</p>
+                        <p className="text-[10px] font-bold text-gray-600">
+                          {items.filter(i => i.categoryId === editingCategory._id).length} services configured in this sub-category
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const subId = editingCategory._id;
+                          setCatModalOpen(false);
+                          openAddItem(subId);
+                        }}
+                        className="px-3.5 py-2 bg-[#9AE600] hover:bg-black hover:text-[#9AE600] text-black border-2 border-black rounded-lg font-black text-xs uppercase flex items-center gap-1.5 shadow-[2px_2px_0px_rgba(0,0,0,1)] transition-all active:translate-x-0.5 active:translate-y-0.5"
+                      >
+                        <Plus size={14} strokeWidth={3} /> Add Item
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
 

@@ -261,24 +261,31 @@ export default function CategoryItems() {
                   const ratePerKg = item.pricePerKg || (item.unit === 'KG' ? (item.pricePerItem ?? item.price) : (item.price ?? item.pricePerItem)) || 0;
 
                   const itemCat = categories.find(c => c._id === item.categoryId);
-                  const isDisabled = itemCat?.singleItemSelection && cart.some(c => {
-                    const otherItem = items.find(i => i._id === c.itemId);
-                    return otherItem && String(otherItem.categoryId) === String(item.categoryId) && c.itemId !== item._id;
-                  });
+                  const isSingleMode = Boolean(itemCat?.singleItemSelection);
+                  const isSelected = cart.some(c => String(c.itemId) === String(item._id));
+                  const isDisabled = false; // Never disable in 1-click direct selection mode
 
               // ── BUCKET ITEM CARD ───────────────────────────────────────────
               if (isBucket) {
                 return (
                   <div 
                     key={item._id}
-                    onClick={() => { if (!isDisabled) handleAddToCart(item, 1) }}
-                    className={`bg-white rounded-2xl p-4 sm:p-6 border-3 border-black shadow-[6px_6px_0px_rgba(0,0,0,1)] transition-all group relative overflow-hidden bg-gradient-to-br from-white via-green-50/50 to-lime-50 ${isDisabled ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-[8px_8px_0px_rgba(0,0,0,1)] cursor-pointer'}`}
+                    onClick={() => {
+                      if (isSingleMode) {
+                        if (!isSelected) handleAddToCart(item, 1);
+                      } else {
+                        handleAddToCart(item, 1);
+                      }
+                    }}
+                    className={`bg-white rounded-2xl p-4 sm:p-6 border-3 border-black shadow-[6px_6px_0px_rgba(0,0,0,1)] transition-all group relative overflow-hidden bg-gradient-to-br from-white via-green-50/50 to-lime-50 hover:shadow-[8px_8px_0px_rgba(0,0,0,1)] cursor-pointer ${
+                      isSelected ? 'ring-4 ring-[#9AE600] bg-lime-50' : ''
+                    }`}
                   >
                     <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
                       <div className="relative w-28 h-28 sm:w-32 sm:h-32 flex-shrink-0 flex items-center justify-center bg-white rounded-xl border-2 border-black p-2 shadow-[3px_3px_0px_rgba(0,0,0,1)] group-hover:scale-105 transition-transform">
                         <img src={bucketImg} alt="Laundry Bucket" className="w-full h-full object-contain filter drop-shadow-md" />
                         <span className="absolute -top-2 -right-2 bg-[#9AE600] text-black font-black text-[9px] px-2 py-0.5 border-2 border-black rounded-md uppercase tracking-wider shadow-[2px_2px_0px_rgba(0,0,0,1)]">
-                          Tap to Add
+                          {isSingleMode ? (isSelected ? 'Selected ✓' : '1-Click Add') : 'Tap to Add'}
                         </span>
                       </div>
 
@@ -288,6 +295,11 @@ export default function CategoryItems() {
                           <span className="bg-[#0D8DE3] text-white text-[11px] font-black px-2.5 py-0.5 rounded-lg border-2 border-black uppercase tracking-wider shadow-[2px_2px_0px_rgba(0,0,0,1)]">
                             {ratePerKg > 0 ? `₹${ratePerKg} / KG` : 'Bucket (Per KG)'}
                           </span>
+                          {isSingleMode && (
+                            <span className="bg-yellow-300 text-black text-[10px] font-black px-2 py-0.5 rounded border border-black uppercase tracking-wider">
+                              1-Click Direct
+                            </span>
+                          )}
                         </div>
 
                         {ratePerKg > 0 && (
@@ -303,34 +315,60 @@ export default function CategoryItems() {
                         </p>
 
                         <div className="mt-4 flex flex-wrap items-center justify-center sm:justify-start gap-3">
-                          <div className="bg-[#9AE600] px-3.5 py-1.5 rounded-xl border-2 border-black shadow-[3px_3px_0px_rgba(0,0,0,1)] flex items-center gap-2">
-                            <span className="text-xs font-black uppercase text-black">Count:</span>
-                            <span className="text-lg font-black text-black lilita-one-regular">{qty} Clothes</span>
-                          </div>
+                          {isSingleMode ? (
+                            isSelected ? (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleAddToCart(item, -1);
+                                }}
+                                className="px-5 py-2.5 bg-[#9AE600] text-black border-2 border-black rounded-xl font-black text-xs uppercase tracking-wider shadow-[3px_3px_0px_rgba(0,0,0,1)] hover:bg-red-500 hover:text-white transition-all flex items-center gap-2"
+                              >
+                                ✓ In Cart (Click to Remove)
+                              </button>
+                            ) : (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleAddToCart(item, 1);
+                                }}
+                                className="px-5 py-2.5 bg-black text-[#9AE600] hover:bg-[#9AE600] hover:text-black border-2 border-black rounded-xl font-black text-xs uppercase tracking-wider shadow-[3px_3px_0px_rgba(0,0,0,1)] transition-all flex items-center gap-1.5"
+                              >
+                                <span>Select Item</span>
+                                <span className="bg-[#9AE600] text-black text-[9px] px-1.5 py-0.5 rounded font-black border border-black">1-CLICK</span>
+                              </button>
+                            )
+                          ) : (
+                            <>
+                              <div className="bg-[#9AE600] px-3.5 py-1.5 rounded-xl border-2 border-black shadow-[3px_3px_0px_rgba(0,0,0,1)] flex items-center gap-2">
+                                <span className="text-xs font-black uppercase text-black">Count:</span>
+                                <span className="text-lg font-black text-black lilita-one-regular">{qty} Clothes</span>
+                              </div>
 
-                          {qty > 0 && (
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleAddToCart(item, -1);
-                              }}
-                              className="w-9 h-9 bg-white hover:bg-gray-100 text-black border-2 border-black rounded-xl flex items-center justify-center font-black shadow-[2px_2px_0px_rgba(0,0,0,1)] active:translate-y-0.5"
-                              title="Decrease"
-                            >
-                              <Minus size={16} strokeWidth={4} />
-                            </button>
+                              {qty > 0 && (
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleAddToCart(item, -1);
+                                  }}
+                                  className="w-9 h-9 bg-white hover:bg-gray-100 text-black border-2 border-black rounded-xl flex items-center justify-center font-black shadow-[2px_2px_0px_rgba(0,0,0,1)] active:translate-y-0.5"
+                                  title="Decrease"
+                                >
+                                  <Minus size={16} strokeWidth={4} />
+                                </button>
+                              )}
+
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleAddToCart(item, 1);
+                                }}
+                                className="px-4 py-2 bg-black text-[#9AE600] hover:bg-[#9AE600] hover:text-black border-2 border-black rounded-xl font-black text-xs uppercase tracking-wider shadow-[3px_3px_0px_rgba(0,0,0,1)] transition-colors"
+                              >
+                                + Tap To Add ({qty})
+                              </button>
+                            </>
                           )}
-
-                          <button
-                            disabled={isDisabled}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              if (!isDisabled) handleAddToCart(item, 1);
-                            }}
-                            className={`px-4 py-2 ${isDisabled ? 'bg-gray-400 text-gray-700' : 'bg-black text-[#9AE600] hover:bg-[#9AE600] hover:text-black'} border-2 border-black rounded-xl font-black text-xs uppercase tracking-wider shadow-[3px_3px_0px_rgba(0,0,0,1)] transition-colors`}
-                          >
-                            {isDisabled ? 'Disabled' : `+ Tap To Add (${qty})`}
-                          </button>
                         </div>
                       </div>
                     </div>
@@ -343,7 +381,14 @@ export default function CategoryItems() {
               return (
                 <div 
                   key={item._id} 
-                  className={`bg-white rounded-2xl p-3.5 sm:p-5 border-2 border-black flex items-center gap-3 sm:gap-6 shadow-[4px_4px_0px_rgba(0,0,0,1)] sm:shadow-[6px_6px_0px_rgba(0,0,0,1)] transition-transform animate-fade-in-up group ${isDisabled ? 'opacity-50' : 'opacity-0'}`}
+                  onClick={() => {
+                    if (isSingleMode && !isSelected) {
+                      handleAddToCart(item, 1);
+                    }
+                  }}
+                  className={`bg-white rounded-2xl p-3.5 sm:p-5 border-2 border-black flex items-center gap-3 sm:gap-6 shadow-[4px_4px_0px_rgba(0,0,0,1)] sm:shadow-[6px_6px_0px_rgba(0,0,0,1)] transition-all animate-fade-in-up group ${
+                    isSingleMode && isSelected ? 'ring-4 ring-[#9AE600] bg-lime-50/50' : ''
+                  } ${isSingleMode ? 'cursor-pointer hover:border-black hover:shadow-[6px_6px_0px_rgba(0,0,0,1)]' : ''}`}
                   style={{ animationDelay: `${idx * 100}ms` }}
                 >
                   <div className={`w-20 h-20 sm:w-28 sm:h-28 ${catStyle.bg} rounded-xl overflow-hidden flex-shrink-0 flex items-center justify-center border-2 border-black shadow-[3px_3px_0px_rgba(0,0,0,1)] sm:shadow-[4px_4px_0px_rgba(0,0,0,1)] group-hover:-translate-y-1 group-hover:-translate-x-1 group-hover:shadow-[6px_6px_0px_rgba(0,0,0,1)] transition-all duration-300 p-2`}>
@@ -356,7 +401,14 @@ export default function CategoryItems() {
                   </div>
                   
                   <div className="flex-1 min-w-0 py-1">
-                    <h3 className="font-black text-black text-lg sm:text-xl uppercase tracking-wide line-clamp-2">{item.name}</h3>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h3 className="font-black text-black text-lg sm:text-xl uppercase tracking-wide line-clamp-2">{item.name}</h3>
+                      {isSingleMode && (
+                        <span className="bg-yellow-300 text-black text-[9px] font-black px-1.5 py-0.5 rounded border border-black uppercase tracking-wider">
+                          1-Click
+                        </span>
+                      )}
+                    </div>
                     {item.description && (
                       <p className="text-xs font-bold text-gray-700 line-clamp-2 mt-1 uppercase bg-gray-100 p-2 border-2 border-black rounded-lg">{item.description}</p>
                     )}
@@ -379,8 +431,26 @@ export default function CategoryItems() {
                         </div>
                       )}
 
-                      <div>
-                        {qty > 0 ? (
+                      <div onClick={(e) => e.stopPropagation()}>
+                        {isSingleMode ? (
+                          isSelected ? (
+                            <button
+                              onClick={() => handleAddToCart(item, -1)}
+                              className="px-4 py-2.5 bg-[#9AE600] text-black hover:bg-red-500 hover:text-white font-black rounded-xl border-2 border-black shadow-[3px_3px_0px_rgba(0,0,0,1)] transition-all text-xs uppercase tracking-wider flex items-center gap-1.5"
+                              title="Click to remove from cart"
+                            >
+                              <span>✓ In Cart</span>
+                            </button>
+                          ) : (
+                            <button 
+                              onClick={() => handleAddToCart(item, 1)}
+                              className="px-5 py-2.5 bg-black text-[#9AE600] hover:bg-[#9AE600] hover:text-black active:translate-x-1 active:translate-y-1 active:shadow-none font-black rounded-xl border-2 border-black shadow-[4px_4px_0px_rgba(0,0,0,1)] transition-all text-xs uppercase tracking-widest flex items-center gap-1.5"
+                            >
+                              <span>Select</span>
+                              <span className="bg-[#9AE600] text-black text-[9px] px-1.5 py-0.5 rounded font-black border border-black">1-CLICK</span>
+                            </button>
+                          )
+                        ) : qty > 0 ? (
                           <div className="flex items-center bg-[#9AE600] border-2 border-black rounded-xl shadow-[4px_4px_0px_rgba(0,0,0,1)] overflow-hidden">
                             <button onClick={() => handleAddToCart(item, -1)} className="w-10 h-10 flex items-center justify-center text-black hover:bg-black hover:text-[#9AE600] transition-colors border-r-4 border-black">
                               <Minus size={20} strokeWidth={5} />
@@ -392,11 +462,10 @@ export default function CategoryItems() {
                           </div>
                         ) : (
                           <button 
-                            disabled={isDisabled}
-                            onClick={() => { if (!isDisabled) handleAddToCart(item, 1) }}
-                            className={`px-6 py-2.5 ${isDisabled ? 'bg-gray-400 text-gray-700' : 'bg-black text-[#0D8DE3] hover:bg-[#0D8DE3] hover:text-black active:translate-x-1 active:translate-y-1 active:shadow-none'} font-black rounded-xl border-2 border-black shadow-[4px_4px_0px_rgba(0,0,0,1)] transition-all text-sm uppercase tracking-widest`}
+                            onClick={() => handleAddToCart(item, 1)}
+                            className="px-6 py-2.5 bg-black text-[#0D8DE3] hover:bg-[#0D8DE3] hover:text-black active:translate-x-1 active:translate-y-1 active:shadow-none font-black rounded-xl border-2 border-black shadow-[4px_4px_0px_rgba(0,0,0,1)] transition-all text-sm uppercase tracking-widest"
                           >
-                            {isDisabled ? 'Disabled' : 'Add'}
+                            Add
                           </button>
                         )}
                       </div>
