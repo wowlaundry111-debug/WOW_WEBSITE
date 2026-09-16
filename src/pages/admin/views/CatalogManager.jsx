@@ -137,10 +137,10 @@ export default function CatalogManager({ categories = [], items = [], shops = []
           name: catName.trim(), 
           image: catImage,
           parentCategoryId: finalParentId,
-          singleItemSelection: catType === 'sub' ? catSingleItemSelection : undefined
+          singleItemSelection: Boolean(catSingleItemSelection)
         });
       } else {
-        await addCategory(catName.trim(), catImage, activeShopId, finalParentId, catType === 'sub' ? catSingleItemSelection : undefined);
+        await addCategory(catName.trim(), catImage, activeShopId, finalParentId, Boolean(catSingleItemSelection));
         if (finalParentId) {
           setExpandedCategoryId(finalParentId);
         }
@@ -833,15 +833,14 @@ export default function CatalogManager({ categories = [], items = [], shops = []
                 />
               </div>
 
-              {catType === 'sub' && (
-                <div className="space-y-3">
-                  {/* Single Item 1-Click Toggle Button Card */}
-                  <div
-                    onClick={() => setCatSingleItemSelection(!catSingleItemSelection)}
-                    className={`p-3.5 border-2 border-black rounded-lg cursor-pointer transition-all shadow-[2px_2px_0px_rgba(0,0,0,1)] flex items-center justify-between gap-3 ${
-                      catSingleItemSelection ? 'bg-yellow-100 border-black' : 'bg-gray-50 border-gray-400'
-                    }`}
-                  >
+              <div className="space-y-3">
+                {/* Single Item 1-Click Toggle Button Card */}
+                <div
+                  onClick={() => setCatSingleItemSelection(!catSingleItemSelection)}
+                  className={`p-3.5 border-2 border-black rounded-lg cursor-pointer transition-all shadow-[2px_2px_0px_rgba(0,0,0,1)] flex items-center justify-between gap-3 ${
+                    catSingleItemSelection ? 'bg-yellow-100 border-black' : 'bg-gray-50 border-gray-400'
+                  }`}
+                >
                     <div>
                       <p className="font-black text-xs uppercase text-black flex items-center gap-1.5">
                         <span className={`w-2.5 h-2.5 rounded-full border border-black ${catSingleItemSelection ? 'bg-[#9AE600]' : 'bg-gray-300'}`} />
@@ -863,7 +862,7 @@ export default function CatalogManager({ categories = [], items = [], shops = []
                   </div>
 
                   {/* Add Item Button Inside Subcategory Edit Modal */}
-                  {editingCategory && (
+                  {editingCategory && catType === 'sub' && (
                     <div className="p-3 bg-green-50 border-2 border-black rounded-lg flex items-center justify-between">
                       <div>
                         <p className="font-black text-xs uppercase text-black">Sub-Category Items</p>
@@ -885,7 +884,6 @@ export default function CatalogManager({ categories = [], items = [], shops = []
                     </div>
                   )}
                 </div>
-              )}
 
               {/* Vector Image Selector */}
               <div>
