@@ -787,6 +787,8 @@ export const useAppStore = create<AppState>()(
             pickupAddress: deliveryAddress,
             deliveryAddress,
             pickupTime,
+            customerPhone: currentUser?.phone || undefined,
+            customerName: currentUser?.name || undefined,
           });
           const newOrder = res.data;
 
