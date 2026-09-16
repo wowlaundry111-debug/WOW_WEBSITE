@@ -5,10 +5,14 @@ import { ArrowLeft, Trash2, Plus, Minus, MapPin, CheckCircle2, Receipt, AlertTri
 
 export default function Cart() {
   const navigate = useNavigate();
-  const { cart, updateCartQuantity, clearCart, placeOrder, activeCoupon, applyCoupon, removeCoupon, shops, currentTenantId, currentUser } = useAppStore();
+  const { cart, updateCartQuantity, clearCart, placeOrder, activeCoupon, applyCoupon, removeCoupon, shops, currentTenantId, currentUser, initializeAppData } = useAppStore();
   
   const shop = shops.find(s => s._id === currentTenantId);
   const isClosed = shop?.isOpen === false;
+
+  React.useEffect(() => {
+    initializeAppData(true);
+  }, [initializeAppData]);
 
   // Structured Precise Delivery Address (Food App Style)
   const [addrTag, setAddrTag] = useState('Home');
@@ -106,8 +110,9 @@ export default function Cart() {
   const perItemSubtotal = cart.filter(c => !isKgItem(c)).reduce((sum, item) => sum + (item.price || 0) * item.quantity, 0);
   const subtotal = perItemSubtotal;
   
-  const taxPercent = shop?.taxPercent || 5;
-  const deliveryFee = hasKgItems ? (shop?.deliveryFee || 50) : (subtotal > 500 ? 0 : (shop?.deliveryFee || 50));
+  const taxPercent = shop?.taxPercent !== undefined ? Number(shop.taxPercent) : 5;
+  const shopDeliveryFee = (shop?.deliveryFee !== undefined && shop?.deliveryFee !== null) ? Number(shop.deliveryFee) : 0;
+  const deliveryFee = hasKgItems ? shopDeliveryFee : (subtotal > 500 ? 0 : shopDeliveryFee);
   const tax = (subtotal * taxPercent) / 100;
   const discount = activeCoupon ? Math.min((subtotal * activeCoupon.discountPercent) / 100, activeCoupon.maxDiscount) : 0;
   const washPrefsCost = selectedWashPrefs.reduce((sum, p) => sum + p.price, 0);
