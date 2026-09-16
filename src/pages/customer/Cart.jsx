@@ -116,7 +116,7 @@ export default function Cart() {
   const tax = (subtotal * taxPercent) / 100;
   const discount = activeCoupon ? Math.min((subtotal * activeCoupon.discountPercent) / 100, activeCoupon.maxDiscount) : 0;
   const washPrefsCost = selectedWashPrefs.reduce((sum, p) => sum + p.price, 0);
-  const total = subtotal - discount + tax + deliveryFee + washPrefsCost;
+  const total = Math.max(0, subtotal - discount + tax + deliveryFee + washPrefsCost);
 
   const handleApplyCoupon = (e) => {
     e.preventDefault();
@@ -570,10 +570,14 @@ export default function Cart() {
                         <span className="font-black text-black">+₹{washPrefsCost.toFixed(2)}</span>
                       </div>
                     )}
-                    {discount > 0 && (
-                      <div className="flex justify-between text-xs sm:text-sm">
-                        <span className="font-black text-[#0D8DE3] uppercase tracking-wide bg-black px-1.5 py-0.5 rounded-md">Promo</span>
-                        <span className="font-black text-black">-₹{discount.toFixed(2)}</span>
+                    {activeCoupon && (
+                      <div className="flex justify-between text-xs sm:text-sm bg-green-50 p-2 rounded-lg border border-green-300">
+                        <span className="font-black text-green-800 uppercase tracking-wide flex items-center gap-1">
+                          <CheckCircle2 size={13} className="text-green-600" /> Promo ({activeCoupon.code})
+                        </span>
+                        <span className="font-black text-green-700">
+                          {discount > 0 ? `-₹${discount.toFixed(2)}` : `${activeCoupon.discountPercent}% OFF (Deducted at pickup weighing)`}
+                        </span>
                       </div>
                     )}
                     <div className="pt-3 mt-2 border-t-2 border-black border-dashed">

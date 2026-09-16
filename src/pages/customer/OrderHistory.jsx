@@ -3,7 +3,7 @@ import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { useAppStore } from '../../store/useAppStore';
 import { 
   Package, Clock, CheckCircle, Navigation, Sparkles, CreditCard, 
-  Phone, MessageCircle, XCircle, ChevronDown, ChevronUp, Scale, AlertCircle, AlertTriangle 
+  Phone, MessageCircle, XCircle, ChevronDown, ChevronUp, Scale, AlertCircle, AlertTriangle, Receipt 
 } from 'lucide-react';
 import Navbar from '../../components/Navbar';
 
@@ -188,10 +188,15 @@ export default function OrderHistory() {
 
                     {/* Middle Row: Bill Total, Mode & Quick Help Icons */}
                     <div className="flex items-center justify-between gap-2 flex-wrap">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
                         <span className="text-xl sm:text-2xl font-black text-black lilita-one-regular">
                           ₹{order.totalAmount}
                         </span>
+                        {order.discountAmount > 0 && (
+                          <span className="text-[10px] font-black bg-green-100 text-green-800 border border-green-600 px-2 py-0.5 rounded-md uppercase tracking-wide">
+                            ✓ Saved ₹{order.discountAmount}{order.couponCode ? ` (${order.couponCode})` : ''}
+                          </span>
+                        )}
                         {isKgPending ? (
                           <span className="text-[10px] font-black bg-yellow-300 text-black border border-black px-2 py-0.5 rounded-md uppercase tracking-wide flex items-center gap-1">
                             <Scale size={11} strokeWidth={2.5} /> KG Pending at Pickup
@@ -415,6 +420,58 @@ export default function OrderHistory() {
                           </div>
                         </div>
                       )}
+
+                      {/* Detailed Bill Summary Breakdown */}
+                      {(() => {
+                        const perItemSum = perItemProducts.reduce((s, it) => s + (it.price || 0) * (it.quantity || 1), 0);
+                        const kgSum = perKgProducts.reduce((s, it) => s + (it.price || 0), 0);
+                        const itemSubtotal = perItemSum + kgSum;
+                        const washPrefsTotal = (order.washPreferences || []).reduce((s, p) => s + (p.price || 0), 0);
+
+                        return (
+                          <div className="p-3.5 bg-gray-50 border-2 border-black rounded-xl space-y-2">
+                            <h5 className="font-black text-xs uppercase tracking-wider text-black flex items-center gap-1.5 pb-2 border-b border-gray-200">
+                              <Receipt size={14} className="text-[#0D8DE3]" /> Bill Details
+                            </h5>
+                            <div className="space-y-1.5 text-xs">
+                              <div className="flex justify-between text-gray-700 font-bold">
+                                <span>Item Total:</span>
+                                <span className="text-black font-black">
+                                  {itemSubtotal > 0 ? `₹${itemSubtotal.toFixed(2)}` : (isKgPending ? 'Pending Weighing' : '₹0.00')}
+                                </span>
+                              </div>
+                              {order.taxAmount > 0 && (
+                                <div className="flex justify-between text-gray-700 font-bold">
+                                  <span>Taxes &amp; Charges:</span>
+                                  <span className="text-black font-black">+₹{order.taxAmount.toFixed(2)}</span>
+                                </div>
+                              )}
+                              <div className="flex justify-between text-gray-700 font-bold">
+                                <span>Delivery Fee:</span>
+                                <span className="text-black font-black">{!order.deliveryFee ? 'FREE' : `+₹${order.deliveryFee.toFixed(2)}`}</span>
+                              </div>
+                              {washPrefsTotal > 0 && (
+                                <div className="flex justify-between text-gray-700 font-bold">
+                                  <span>Wash Add-ons:</span>
+                                  <span className="text-black font-black">+₹{washPrefsTotal.toFixed(2)}</span>
+                                </div>
+                              )}
+                              {(order.discountAmount > 0 || order.couponCode) && (
+                                <div className="flex justify-between text-green-700 font-black bg-green-100 p-1.5 rounded border border-green-300">
+                                  <span>Promo Discount {order.couponCode ? `(${order.couponCode})` : ''}:</span>
+                                  <span>{order.discountAmount > 0 ? `-₹${order.discountAmount.toFixed(2)}` : 'Applied upon weighing'}</span>
+                                </div>
+                              )}
+                              <div className="flex justify-between items-center pt-2 mt-1 border-t-2 border-black text-sm font-black text-black">
+                                <span>Grand Total:</span>
+                                <span className="text-base text-[#0D8DE3] bg-white border-2 border-black px-2.5 py-0.5 rounded-lg shadow-[1px_1px_0px_rgba(0,0,0,1)]">
+                                  ₹{order.totalAmount}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })()}
                     </div>
                   )}
                 </div>

@@ -485,8 +485,29 @@ export default function DeliveryDashboard() {
                   kgTotal += weight * ratePerKg;
                 });
 
-                const prefsTotal = (weighModalOrder.washPreferences || []).reduce((s, p) => s + (p.price || 0), 0);
-                const grandTotal = Math.round((perItemSubtotal + kgTotal + (weighModalOrder.taxAmount || 0) + (weighModalOrder.deliveryFee || 0) - (weighModalOrder.discountAmount || 0) + prefsTotal) * 100) / 100;
+                const itemSubtotal = perItemSubtotal + kgTotal;
+                const shop = shops.find(s => s._id === weighModalOrder.shopId);
+                let liveDiscount = Number(weighModalOrder.discountAmount) || 0;
+
+                if (weighModalOrder.couponCode) {
+                  let discountPercent = Number(weighModalOrder.couponDiscountPercent) || (shop?.promoCode?.code?.toUpperCase() === weighModalOrder.couponCode?.toUpperCase() ? Number(shop.promoCode.discountPercent) : 0);
+                  let maxDiscount = weighModalOrder.couponMaxDiscount !== undefined ? Number(weighModalOrder.couponMaxDiscount) : (shop?.promoCode?.maxDiscount !== undefined ? Number(shop.promoCode.maxDiscount) : Infinity);
+                  let minOrder = Number(weighModalOrder.couponMinOrderValue) || Number(shop?.promoCode?.minOrderValue) || 0;
+
+                  if (discountPercent > 0) {
+                    if (itemSubtotal >= minOrder) {
+                      liveDiscount = Math.min((itemSubtotal * discountPercent) / 100, maxDiscount);
+                      liveDiscount = Math.round(liveDiscount * 100) / 100;
+                    } else {
+                      liveDiscount = 0;
+                    }
+                  }
+                }
+
+                const taxPercent = shop?.taxPercent !== undefined ? Number(shop.taxPercent) : 0;
+                const taxAmt = Math.round((itemSubtotal * taxPercent / 100) * 100) / 100;
+                const deliveryAmt = weighModalOrder.deliveryFee !== undefined ? Number(weighModalOrder.deliveryFee) : Number(shop?.deliveryFee || 0);
+                const grandTotal = Math.max(0, Math.round((itemSubtotal + taxAmt + deliveryAmt - liveDiscount + prefsTotal) * 100) / 100);
 
                 return (
                   <div className="bg-yellow-50 border-2 border-black p-4 rounded-xl space-y-2">
@@ -503,6 +524,24 @@ export default function DeliveryDashboard() {
                       <div className="flex justify-between text-xs font-bold text-gray-700">
                         <span>Wash Add-ons:</span>
                         <span>+₹{prefsTotal}</span>
+                      </div>
+                    )}
+                    {taxAmt > 0 && (
+                      <div className="flex justify-between text-xs font-bold text-gray-700">
+                        <span>Taxes ({taxPercent}%):</span>
+                        <span>+₹{taxAmt}</span>
+                      </div>
+                    )}
+                    {deliveryAmt > 0 && (
+                      <div className="flex justify-between text-xs font-bold text-gray-700">
+                        <span>Delivery Fee:</span>
+                        <span>+₹{deliveryAmt}</span>
+                      </div>
+                    )}
+                    {(liveDiscount > 0 || weighModalOrder.couponCode) && (
+                      <div className="flex justify-between text-xs font-black text-green-700 bg-green-100 px-2 py-1 rounded border border-green-400">
+                        <span>Promo Discount ({weighModalOrder.couponCode}):</span>
+                        <span>-₹{liveDiscount}</span>
                       </div>
                     )}
                     <div className="flex justify-between items-center pt-2 border-t-2 border-black text-base font-black text-black">
