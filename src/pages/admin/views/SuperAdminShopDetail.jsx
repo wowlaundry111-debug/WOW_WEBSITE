@@ -42,8 +42,10 @@ export default function SuperAdminShopDetail({ shopId, onBack, onOpenCatalog, on
   const customerIds = new Set(shopOrders.map(o => o.customerId));
   const shopCustomers = users.filter(u => customerIds.has(u._id));
 
-  const totalRevenue = shopOrders.reduce((sum, o) => sum + (o.totalAmount || 0), 0);
-  const pendingOrders = shopOrders.filter(o => !['DELIVERED'].includes(o.status)).length;
+  const totalRevenue = shopOrders
+    .filter(o => o.status !== 'CANCELLED')
+    .reduce((sum, o) => sum + (o.totalAmount || 0), 0);
+  const pendingOrders = shopOrders.filter(o => !['DELIVERED', 'CANCELLED'].includes(o.status)).length;
   const completedOrders = shopOrders.filter(o => o.status === 'DELIVERED').length;
 
   const handleSaveShop = async () => {

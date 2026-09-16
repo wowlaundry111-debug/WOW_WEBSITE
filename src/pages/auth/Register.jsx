@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
-import { User, Mail, Phone, Lock, ArrowRight, ArrowLeft, AlertTriangle, CheckCircle, Info } from 'lucide-react';
+import { User, Mail, Phone, Lock, ArrowRight, ArrowLeft, AlertTriangle, CheckCircle, Info, ShieldCheck } from 'lucide-react';
 import logo from '../../assets/logo.webp';
 import { useAppStore } from '../../store/useAppStore';
 
@@ -18,7 +18,7 @@ export default function Register() {
   const [redirectNotice, setRedirectNotice] = useState(
     location.state?.redirectedFromLogin ? 'No account found with this email. Please register below to continue!' : ''
   );
-  const [otp, setOtp] = useState('');
+  const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [otpMessage, setOtpMessage] = useState('');
@@ -27,7 +27,7 @@ export default function Register() {
 
   // Step 1 — Submit form, backend sends OTP
   const handleRegister = async (e) => {
-    e.preventDefault();
+    if (e && e.preventDefault) e.preventDefault();
     if (!formData.name || !formData.email || !formData.phone) return;
     setLoading(true);
     setError('');
@@ -44,7 +44,7 @@ export default function Register() {
       setOtpMessage(res.message);
       setStep('otp');
     } else if (res.success) {
-      // Account created directly (no OTP needed — shouldn't happen in new flow)
+      // Account created directly (no OTP needed — fallback)
       navigate('/shop-select');
     } else {
       setError(res.message || 'Registration failed');
@@ -52,13 +52,13 @@ export default function Register() {
   };
 
   // Step 2 — Submit OTP
-  const handleVerifyOtp = async (e) => {
-    e.preventDefault();
-    if (otp.trim().length < 4) return;
+  const handleVerifyOtp = async (otpCode) => {
+    const code = typeof otpCode === 'string' ? otpCode : otp.join('');
+    if (code.length < 6) return;
     setLoading(true);
     setError('');
 
-    const res = await verifyOtp(formData.email.trim().toLowerCase(), otp.trim());
+    const res = await verifyOtp(formData.email.trim().toLowerCase(), code);
     setLoading(false);
 
     if (res.success) {
@@ -68,10 +68,45 @@ export default function Register() {
     }
   };
 
+  const handleOtpChange = (val, idx) => {
+    const clean = val.replace(/[^0-9]/g, '');
+    const newOtp = [...otp];
+    newOtp[idx] = clean ? clean.slice(-1) : '';
+    setOtp(newOtp);
+
+    if (clean && idx < 5) {
+      const nextInput = document.getElementById(`register-otp-${idx + 1}`);
+      if (nextInput) nextInput.focus();
+    }
+  };
+
+  const handleOtpKeyDown = (e, idx) => {
+    if (e.key === 'Backspace' && !otp[idx] && idx > 0) {
+      const prevInput = document.getElementById(`register-otp-${idx - 1}`);
+      if (prevInput) prevInput.focus();
+    }
+  };
+
+  const handleOtpPaste = (e) => {
+    e.preventDefault();
+    const pasted = e.clipboardData.getData('text').replace(/[^0-9]/g, '').slice(0, 6);
+    if (pasted.length > 0) {
+      const newOtp = [...otp];
+      for (let i = 0; i < 6; i++) {
+        newOtp[i] = pasted[i] || '';
+      }
+      setOtp(newOtp);
+      if (pasted.length === 6) {
+        handleVerifyOtp(pasted);
+      }
+    }
+  };
+
   const isFormValid =
     formData.name.trim().length >= 2 &&
     formData.email.includes('@') &&
     formData.phone.replace(/[^0-9]/g, '').length === 10;
+  const isOtpValid = otp.join('').length === 6;
 
   return (
     <div className="min-h-screen bg-[#0D8DE3] flex flex-col items-center justify-center p-4 font-outfit selection:bg-black selection:text-[#9AE600]">
@@ -216,47 +251,70 @@ export default function Register() {
 
           {/* ── Step 2: OTP Verification ── */}
           {step === 'otp' && (
-            <form onSubmit={handleVerifyOtp} className="space-y-6">
-              {/* Info */}
-              <div className="flex items-start gap-3 p-4 bg-[#9AE600] border-2 border-black rounded-xl shadow-[3px_3px_0px_rgba(0,0,0,1)]">
-                <CheckCircle size={20} strokeWidth={2.5} className="text-black shrink-0 mt-0.5" />
-                <p className="text-sm font-bold text-black">{otpMessage}</p>
+            <div className="space-y-6 flex flex-col items-center">
+              <div className="w-16 h-16 bg-[#9AE600] rounded-full flex items-center justify-center border-2 border-black shadow-[4px_4px_0px_rgba(0,0,0,1)] transform rotate-6">
+                <ShieldCheck size={32} strokeWidth={3} className="text-black" />
               </div>
 
-              {/* OTP Input */}
-              <div>
-                <label className="block text-xs font-black text-black mb-1.5 uppercase tracking-widest bg-[#9AE600] inline-block px-2 border-2 border-black rounded shadow-[2px_2px_0px_rgba(0,0,0,1)]">
-                  Verification Code
-                </label>
-                <input
-                  type="text"
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value.replace(/[^0-9]/g, ''))}
-                  placeholder="ENTER 6-DIGIT CODE"
-                  maxLength={6}
-                  className="w-full bg-gray-50 border-2 border-black rounded-xl px-4 py-5 focus:outline-none focus:bg-[#9AE600] transition-colors shadow-[4px_4px_0px_rgba(0,0,0,1)] text-black font-black text-2xl text-center tracking-[0.5em] placeholder-gray-400"
-                  autoFocus
-                  required
-                />
+              <div className="text-center">
+                <h2 className="text-2xl font-black text-black mb-2 lilita-one-regular tracking-wide uppercase">
+                  Enter Verification Code
+                </h2>
+                <div className="flex flex-col items-center gap-1 bg-white border-2 border-black px-4 py-2 rounded-xl shadow-[4px_4px_0px_rgba(0,0,0,1)]">
+                  <span className="font-black text-black tracking-wider text-xs">Sent via Resend to {formData.email}</span>
+                  <button
+                    type="button"
+                    onClick={() => { setStep('form'); setError(''); setOtp(['', '', '', '', '', '']); }}
+                    className="text-[#0D8DE3] hover:text-black font-black text-xs uppercase tracking-widest underline mt-1"
+                  >
+                    Change Details
+                  </button>
+                </div>
+              </div>
+
+              {otpMessage && (
+                <p className="text-xs font-bold text-gray-600 text-center">{otpMessage}</p>
+              )}
+
+              {/* 6-digit OTP Input */}
+              <div className="flex gap-2 justify-center my-2" onPaste={handleOtpPaste}>
+                {otp.map((d, idx) => (
+                  <input
+                    key={idx}
+                    id={`register-otp-${idx}`}
+                    type="text"
+                    maxLength={1}
+                    value={d}
+                    onChange={(e) => handleOtpChange(e.target.value, idx)}
+                    onKeyDown={(e) => handleOtpKeyDown(e, idx)}
+                    className={`w-11 h-14 sm:w-12 sm:h-16 text-center text-2xl font-black lilita-one-regular rounded-xl border-2 border-black shadow-[4px_4px_0px_rgba(0,0,0,1)] transition-colors focus:outline-none focus:-translate-y-1 ${
+                      d ? 'bg-[#9AE600] text-black' : 'bg-gray-50 text-black'
+                    }`}
+                    autoFocus={idx === 0}
+                  />
+                ))}
               </div>
 
               <button
-                type="submit"
-                disabled={otp.length < 6 || loading}
-                className="w-full bg-[#0D8DE3] hover:bg-blue-600 disabled:bg-gray-300 text-white font-black py-4 rounded-xl flex items-center justify-center gap-3 border-2 border-black shadow-[6px_6px_0px_rgba(0,0,0,1)] active:translate-y-2 active:shadow-none transition-all text-xl uppercase tracking-widest"
+                type="button"
+                onClick={() => handleVerifyOtp()}
+                disabled={!isOtpValid || loading}
+                className="w-full bg-[#0D8DE3] hover:bg-blue-600 disabled:bg-gray-300 disabled:shadow-[4px_4px_0px_rgba(0,0,0,1)] text-white font-black py-4 rounded-xl flex items-center justify-center gap-3 transition-all border-2 border-black shadow-[6px_6px_0px_rgba(0,0,0,1)] active:translate-y-2 active:translate-x-2 active:shadow-none text-xl uppercase tracking-widest"
               >
-                {loading ? 'VERIFYING...' : <> VERIFY & CREATE ACCOUNT <ArrowRight size={22} strokeWidth={3.5} /></>}
+                {loading ? 'VERIFYING...' : (
+                  <> VERIFY & CREATE ACCOUNT <ArrowRight size={24} strokeWidth={4} /></>
+                )}
               </button>
 
               <button
                 type="button"
                 onClick={handleRegister}
                 disabled={loading}
-                className="w-full text-center text-sm font-black text-gray-500 uppercase tracking-widest hover:text-black transition-colors"
+                className="text-xs font-black uppercase tracking-widest text-gray-500 hover:text-black transition-colors"
               >
                 Resend Code
               </button>
-            </form>
+            </div>
           )}
         </div>
 

@@ -61,10 +61,12 @@ export default function GlobalShops({
   };
 
   // Overall Global Aggregates
-  const totalRevenue = orders.reduce((sum, o) => sum + (o.totalAmount || 0), 0);
+  const totalRevenue = orders
+    .filter(o => o.status !== 'CANCELLED')
+    .reduce((sum, o) => sum + (o.totalAmount || 0), 0);
   const totalCustomers = users.filter(u => u.role === 'Customer').length;
   const totalBranches = shops.reduce((sum, s) => sum + (s.branches?.length || 1), 0);
-  const totalActiveOrders = orders.filter(o => !['DELIVERED'].includes(o.status)).length;
+  const totalActiveOrders = orders.filter(o => !['DELIVERED', 'CANCELLED'].includes(o.status)).length;
 
   const handleCreateShop = async (e) => {
     e.preventDefault();
@@ -194,7 +196,9 @@ export default function GlobalShops({
           {shops.map(shop => {
             const shortId = shop._id.includes('_') ? shop._id.split('_').pop().toUpperCase() : shop._id.slice(-6).toUpperCase();
             const branchOrders = orders.filter(o => o.shopId === shop._id);
-            const branchRev = branchOrders.reduce((sum, o) => sum + (o.totalAmount || 0), 0);
+            const branchRev = branchOrders
+              .filter(o => o.status !== 'CANCELLED')
+              .reduce((sum, o) => sum + (o.totalAmount || 0), 0);
 
             return (
               <div 

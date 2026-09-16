@@ -690,7 +690,7 @@ export default function OrderBoard({
                 <div className="text-right text-xs font-bold text-gray-600">
                   <p>Total Revenue:</p>
                   <p className="text-base font-black text-[#0D8DE3]">
-                    ₹{exportMatchingOrders.reduce((sum, o) => sum + (o.totalAmount || 0), 0).toLocaleString('en-IN')}
+                    ₹{exportMatchingOrders.filter(o => o.status !== 'CANCELLED').reduce((sum, o) => sum + (o.totalAmount || 0), 0).toLocaleString('en-IN')}
                   </p>
                 </div>
               </div>
