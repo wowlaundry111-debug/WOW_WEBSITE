@@ -47,6 +47,7 @@ export default function Navbar() {
     if (!currentUser) return null;
     if (currentUser.role === 'SuperAdmin' || currentUser.role === 'ShopAdmin') return '/admin';
     if (currentUser.role === 'Delivery') return '/delivery';
+    if (currentUser.role === 'Operator') return '/operator';
     return '/order-history';
   };
 

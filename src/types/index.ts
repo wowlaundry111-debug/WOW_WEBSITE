@@ -1,6 +1,6 @@
 // WOW Laundry Core TypeScript Types
 
-export type Role = 'SuperAdmin' | 'ShopAdmin' | 'Customer' | 'Delivery';
+export type Role = 'SuperAdmin' | 'ShopAdmin' | 'Customer' | 'Delivery' | 'Operator';
 
 export type OrderStatus =
   | 'PLACED'

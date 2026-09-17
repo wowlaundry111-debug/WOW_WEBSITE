@@ -19,6 +19,7 @@ const Cart = lazy(() => import('./pages/customer/Cart'));
 const OrderHistory = lazy(() => import('./pages/customer/OrderHistory'));
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
 const DeliveryDashboard = lazy(() => import('./pages/delivery/DeliveryDashboard'));
+const OperatorPortal = lazy(() => import('./pages/operator/OperatorPortal'));
 
 // ── Route Guards ──────────────────────────────────────────────────────────────
 
@@ -37,6 +38,7 @@ const ProtectedShopSelectRoute = () => {
   if (!currentUser) return <Navigate to="/login" replace />;
   if (currentUser.role === 'SuperAdmin' || currentUser.role === 'ShopAdmin') return <Navigate to="/admin" replace />;
   if (currentUser.role === 'Delivery') return <Navigate to="/delivery" replace />;
+  if (currentUser.role === 'Operator') return <Navigate to="/operator" replace />;
   return <ShopSelect />;
 };
 
@@ -119,6 +121,7 @@ function App() {
             {/* Staff routes — protected by role inside the dashboards themselves */}
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/delivery" element={<DeliveryDashboard />} />
+            <Route path="/operator" element={<OperatorPortal />} />
 
             {/* Catch-all */}
             <Route path="*" element={<Navigate to="/" replace />} />

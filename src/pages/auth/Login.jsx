@@ -35,6 +35,8 @@ export default function Login() {
             navigate('/admin');
           } else if (role === 'Delivery') {
             navigate('/delivery');
+          } else if (role === 'Operator') {
+            navigate('/operator');
           } else {
             navigate('/shop-select');
           }
@@ -68,6 +70,8 @@ export default function Login() {
           navigate('/admin');
         } else if (role === 'Delivery') {
           navigate('/delivery');
+        } else if (role === 'Operator') {
+          navigate('/operator');
         } else {
           navigate('/shop-select');
         }

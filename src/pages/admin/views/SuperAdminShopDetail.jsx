@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Save, Trash2, User, Truck, Store, Phone, Mail, Building2, ShoppingBag, DollarSign, Calendar, Clock, X } from 'lucide-react';
+import { ArrowLeft, Save, Trash2, User, Truck, Store, Phone, Mail, Building2, ShoppingBag, DollarSign, Calendar, Clock, X, Shirt } from 'lucide-react';
 import { useAppStore } from '../../../store/useAppStore';
 
 export default function SuperAdminShopDetail({ shopId, onBack, onOpenCatalog, onOpenOrders }) {
-  const { shops, users, orders, updateShop, deleteUser, addDeliveryBoy, setCurrentTenantId, fetchAdminShop } = useAppStore();
+  const { shops, users, orders, updateShop, deleteUser, addDeliveryBoy, addOperator, setCurrentTenantId, fetchAdminShop } = useAppStore();
   const shop = shops.find(s => s._id === shopId);
 
   const [activeTab, setActiveTab] = useState('details');
@@ -34,11 +34,12 @@ export default function SuperAdminShopDetail({ shopId, onBack, onOpenCatalog, on
     }
   }, [shop]);
 
-  // Add Delivery Staff Form State
+  // Add Staff Form State (Delivery Staff or Laundry Floor Operator)
   const [showAddStaffModal, setShowAddStaffModal] = useState(false);
   const [staffEmail, setStaffEmail] = useState('');
   const [staffName, setStaffName] = useState('');
   const [staffPhone, setStaffPhone] = useState('');
+  const [staffRole, setStaffRole] = useState('Operator');
   const [isAddingStaff, setIsAddingStaff] = useState(false);
 
   if (!shop) {
@@ -53,7 +54,7 @@ export default function SuperAdminShopDetail({ shopId, onBack, onOpenCatalog, on
   }
 
   const shopOrders = orders.filter(o => o.shopId === shopId);
-  const shopStaff = users.filter(u => u.shopId === shopId && ['ShopAdmin', 'Delivery'].includes(u.role));
+  const shopStaff = users.filter(u => u.shopId === shopId && ['ShopAdmin', 'Delivery', 'Operator'].includes(u.role));
   
   // Customers who placed orders at this branch
   const customerIds = new Set(shopOrders.map(o => o.customerId));
@@ -92,12 +93,17 @@ export default function SuperAdminShopDetail({ shopId, onBack, onOpenCatalog, on
     if (!staffEmail || !staffEmail.includes('@')) return alert('Valid email address is required');
     setIsAddingStaff(true);
     try {
-      await addDeliveryBoy(staffEmail, shopId, staffName, staffPhone);
+      if (staffRole === 'Operator') {
+        await addOperator(staffEmail, shopId, staffName, staffPhone);
+        alert('Laundry Floor Operator assigned to this branch successfully!');
+      } else {
+        await addDeliveryBoy(staffEmail, shopId, staffName, staffPhone);
+        alert('Delivery staff assigned to this branch successfully!');
+      }
       setStaffEmail('');
       setStaffName('');
       setStaffPhone('');
       setShowAddStaffModal(false);
-      alert('Staff member assigned to this branch successfully!');
     } catch (err) {
       alert(err?.response?.data?.error || err?.message || 'Failed to add staff');
     } finally {
@@ -296,15 +302,25 @@ export default function SuperAdminShopDetail({ shopId, onBack, onOpenCatalog, on
                 <div key={u._id} className="bg-white border-2 border-black p-4 rounded-lg shadow-[3px_3px_0px_rgba(0,0,0,1)] flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className={`w-10 h-10 border-2 border-black rounded-full flex items-center justify-center font-black ${
-                      u.role === 'ShopAdmin' ? 'bg-[#0D8DE3] text-white' : 'bg-[#9AE600] text-black'
+                      u.role === 'ShopAdmin' 
+                        ? 'bg-[#0D8DE3] text-white' 
+                        : u.role === 'Operator'
+                        ? 'bg-amber-400 text-black'
+                        : 'bg-[#9AE600] text-black'
                     }`}>
-                      {u.role === 'ShopAdmin' ? <Store size={18} /> : <Truck size={18} />}
+                      {u.role === 'ShopAdmin' ? <Store size={18} /> : u.role === 'Operator' ? <Shirt size={18} /> : <Truck size={18} />}
                     </div>
                     <div>
                       <h4 className="font-black text-base flex items-center gap-2">
                         {u.name}
-                        <span className="text-[10px] px-2 py-0.5 border border-black rounded-full uppercase bg-gray-100 font-bold">
-                          {u.role}
+                        <span className={`text-[10px] px-2 py-0.5 border border-black rounded-full uppercase font-black ${
+                          u.role === 'Operator' 
+                            ? 'bg-amber-200 text-black' 
+                            : u.role === 'ShopAdmin'
+                            ? 'bg-blue-100 text-blue-900'
+                            : 'bg-[#9AE600]/30 text-green-900'
+                        }`}>
+                          {u.role === 'Operator' ? 'Floor Operator' : u.role === 'Delivery' ? 'Delivery Staff' : u.role}
                         </span>
                       </h4>
                       <p className="font-bold text-xs text-gray-500 flex items-center gap-1 mt-0.5">
@@ -418,12 +434,39 @@ export default function SuperAdminShopDetail({ shopId, onBack, onOpenCatalog, on
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
           <div className="bg-white border-4 border-black shadow-[12px_12px_0px_rgba(0,0,0,1)] w-full max-w-md">
             <div className="flex justify-between items-center p-4 border-b-4 border-black bg-[#9AE600]">
-              <h2 className="text-lg font-black uppercase">Add Delivery Staff for {shop.name}</h2>
+              <h2 className="text-lg font-black uppercase">Add Branch Staff for {shop.name}</h2>
               <button onClick={() => setShowAddStaffModal(false)} className="p-1 hover:bg-black hover:text-white rounded">
                 <X size={20} />
               </button>
             </div>
             <form onSubmit={handleAddStaff} className="p-6 space-y-4">
+              <div>
+                <label className="block font-black text-xs uppercase mb-1.5">Assign Role</label>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setStaffRole('Operator')}
+                    className={`py-2 px-3 border-2 border-black font-black text-xs uppercase transition-all flex items-center justify-center gap-1.5 ${
+                      staffRole === 'Operator'
+                        ? 'bg-[#9AE600] text-black shadow-[2px_2px_0px_rgba(0,0,0,1)]'
+                        : 'bg-white text-gray-700 hover:bg-gray-100'
+                    }`}
+                  >
+                    🧺 Floor Operator
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setStaffRole('Delivery')}
+                    className={`py-2 px-3 border-2 border-black font-black text-xs uppercase transition-all flex items-center justify-center gap-1.5 ${
+                      staffRole === 'Delivery'
+                        ? 'bg-[#0D8DE3] text-white shadow-[2px_2px_0px_rgba(0,0,0,1)]'
+                        : 'bg-white text-gray-700 hover:bg-gray-100'
+                    }`}
+                  >
+                    🚚 Delivery Agent
+                  </button>
+                </div>
+              </div>
               <div>
                 <label className="block font-black text-xs uppercase mb-1">Staff Name</label>
                 <input 

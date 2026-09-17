@@ -16,6 +16,7 @@ export default function SocketManager() {
         if (
           currentUser.role === 'SuperAdmin' ||
           (currentUser.role === 'ShopAdmin' && currentUser.shopId === order.shopId) ||
+          (currentUser.role === 'Operator' && currentUser.shopId === order.shopId) ||
           (currentUser.role === 'Customer' && currentUser._id === order.customerId)
         ) {
           useAppStore.setState((state) => ({
@@ -31,6 +32,7 @@ export default function SocketManager() {
         if (
           currentUser.role === 'SuperAdmin' ||
           (currentUser.role === 'ShopAdmin' && currentUser.shopId === order.shopId) ||
+          (currentUser.role === 'Operator' && currentUser.shopId === order.shopId) ||
           (currentUser.role === 'Customer' && currentUser._id === order.customerId) ||
           (currentUser.role === 'Delivery' && currentUser._id === order.deliveryBoyId)
         ) {
