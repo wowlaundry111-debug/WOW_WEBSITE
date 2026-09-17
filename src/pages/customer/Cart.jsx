@@ -123,11 +123,18 @@ export default function Cart() {
   const washPrefsCost = selectedWashPrefs.reduce((sum, p) => sum + p.price, 0);
   const total = Math.max(0, subtotal - discount + tax + deliveryFee + washPrefsCost);
 
-  const handleApplyCoupon = (e) => {
-    e.preventDefault();
-    if (!couponCode) return;
-    const res = applyCoupon(couponCode);
+  const handleApplyCoupon = (e, overrideCode) => {
+    if (e) e.preventDefault();
+    const code = (overrideCode || couponCode || (shop?.promoCode?.isActive ? shop.promoCode.code : '')).trim();
+    if (!code) {
+      setCouponMsg({ type: 'error', text: 'Please enter a promo code' });
+      return;
+    }
+    const res = applyCoupon(code);
     setCouponMsg({ type: res.success ? 'success' : 'error', text: res.message });
+    if (res.success) {
+      setCouponCode('');
+    }
   };
 
   const handlePlaceOrder = async () => {
@@ -533,64 +540,80 @@ export default function Cart() {
               Apply Promo Code
             </h3>
 
-            {/* Quick 1-tap Promo Code from Shop if available */}
-            {shop?.promoCode?.isActive && shop?.promoCode?.code && (
-              <div className="mb-3 bg-white border-2 border-black rounded-xl p-2.5 shadow-[2px_2px_0px_rgba(0,0,0,1)]">
-                <div className="flex items-center justify-between gap-2">
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-1.5">
-                      <Tag size={13} className="text-[#0D8DE3] shrink-0" strokeWidth={3} />
-                      <span className="font-black text-xs uppercase text-black tracking-wide truncate">
-                        {shop.promoCode.code}
-                      </span>
-                      <span className="text-[10px] font-black bg-[#9AE600] text-black px-1.5 py-0.2 rounded border border-black uppercase">
-                        {shop.promoCode.discountPercent}% OFF
-                      </span>
-                    </div>
-                    <p className="text-[10px] font-extrabold text-gray-600 mt-0.5 truncate">
-                      {shop.promoCode.description || `Min order ₹${shop.promoCode.minOrderValue || 0}, max ₹${shop.promoCode.maxDiscount || 'unlimited'}`}
-                    </p>
+            {activeCoupon ? (
+              <div className="flex items-center justify-between bg-[#9AE600] border-2 border-black p-3 rounded-xl shadow-[2px_2px_0px_rgba(0,0,0,1)]">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 size={18} strokeWidth={3} className="text-black shrink-0" />
+                  <div>
+                    <span className="text-xs font-black text-black uppercase tracking-wider block">{activeCoupon.code} Applied</span>
+                    <span className="text-[10px] font-bold text-black/80">
+                      {activeCoupon.discountPercent}% OFF applied to order
+                    </span>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setCouponCode(shop.promoCode.code);
-                      const res = applyCoupon(shop.promoCode.code);
-                      setCouponMsg({ type: res.success ? 'success' : 'error', text: res.message });
-                    }}
-                    className="bg-black text-[#9AE600] hover:bg-gray-800 text-[10px] font-black py-1.5 px-3 rounded-lg border-2 border-black uppercase tracking-wider shrink-0 shadow-[1px_1px_0px_rgba(0,0,0,1)] active:translate-y-0.5 active:shadow-none transition-all"
-                  >
-                    APPLY NOW
-                  </button>
                 </div>
+                <button 
+                  type="button" 
+                  onClick={() => {
+                    removeCoupon();
+                    setCouponCode('');
+                    setCouponMsg({ type: '', text: '' });
+                  }} 
+                  className="text-xs text-white bg-black px-3 py-1.5 rounded-lg border-2 border-black font-black uppercase tracking-wider hover:bg-red-600 transition-colors shadow-[1px_1px_0px_rgba(0,0,0,1)] active:translate-y-0.5"
+                >
+                  Remove
+                </button>
               </div>
+            ) : (
+              <>
+                {/* Available Shop Promo banner (Tap to autofill & apply with NO duplicate button) */}
+                {shop?.promoCode?.isActive && shop?.promoCode?.code && (
+                  <div
+                    onClick={() => handleApplyCoupon(null, shop.promoCode.code)}
+                    className="mb-2.5 bg-white border-2 border-black rounded-xl p-2.5 shadow-[2px_2px_0px_rgba(0,0,0,1)] cursor-pointer hover:bg-lime-50 active:translate-y-0.5 transition-all flex items-center justify-between gap-2"
+                  >
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        <Tag size={13} className="text-[#0D8DE3] shrink-0" strokeWidth={3} />
+                        <span className="font-black text-xs uppercase text-black tracking-wide truncate">
+                          {shop.promoCode.code}
+                        </span>
+                        <span className="text-[10px] font-black bg-[#9AE600] text-black px-1.5 py-0.2 rounded border border-black uppercase">
+                          {shop.promoCode.discountPercent}% OFF
+                        </span>
+                      </div>
+                      <p className="text-[10px] font-extrabold text-gray-600 mt-0.5 truncate">
+                        {shop.promoCode.description || `Min order ₹${shop.promoCode.minOrderValue || 0}, max ₹${shop.promoCode.maxDiscount || 'unlimited'}`}
+                      </p>
+                    </div>
+                    <span className="text-[10px] font-black uppercase text-black bg-[#9AE600] px-2 py-1 rounded border border-black shrink-0 tracking-wider">
+                      Tap To Use
+                    </span>
+                  </div>
+                )}
+
+                {/* Single unified Apply Form */}
+                <form onSubmit={handleApplyCoupon} className="flex gap-2 relative mt-1">
+                  <input 
+                    type="text"
+                    value={couponCode}
+                    onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                    placeholder={shop?.promoCode?.isActive && shop?.promoCode?.code ? `e.g. ${shop.promoCode.code}` : "ENTER CODE"}
+                    className="flex-1 bg-white border-2 border-black rounded-xl px-3 py-2.5 text-black font-black uppercase tracking-wider text-xs sm:text-sm focus:outline-none focus:bg-[#9AE600] transition-colors shadow-[2px_2px_0px_rgba(0,0,0,1)]"
+                  />
+                  <button 
+                    type="submit" 
+                    className="bg-black text-[#9AE600] hover:bg-gray-800 px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-colors border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] active:translate-y-0.5 active:shadow-none shrink-0"
+                  >
+                    APPLY
+                  </button>
+                </form>
+              </>
             )}
 
-            <form onSubmit={handleApplyCoupon} className="flex gap-2 relative mt-1">
-              <input 
-                type="text"
-                value={couponCode}
-                onChange={(e) => setCouponCode(e.target.value)}
-                placeholder="ENTER CODE"
-                className="flex-1 bg-white border-2 border-black rounded-xl px-3 py-2.5 text-black font-black uppercase tracking-wider text-xs sm:text-sm focus:outline-none focus:bg-[#9AE600] transition-colors shadow-[2px_2px_0px_rgba(0,0,0,1)]"
-              />
-              <button type="submit" className="bg-black text-[#0D8DE3] px-4 rounded-xl text-xs font-black uppercase tracking-wider hover:bg-gray-800 transition-colors border-2 border-black">
-                APPLY
-              </button>
-            </form>
             {couponMsg.text && (
               <p className={`mt-2 text-xs font-black bg-white inline-block px-2.5 py-0.5 rounded-md border border-black uppercase ${couponMsg.type === 'error' ? 'text-red-600' : 'text-green-600'}`}>
                 {couponMsg.text}
               </p>
-            )}
-            {activeCoupon && (
-              <div className="mt-3 flex items-center justify-between bg-[#9AE600] border-2 border-black p-2.5 rounded-xl shadow-[2px_2px_0px_rgba(0,0,0,1)]">
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 size={16} strokeWidth={3} className="text-black" />
-                  <span className="text-xs font-black text-black uppercase tracking-wider">{activeCoupon.code} Applied!</span>
-                </div>
-                <button type="button" onClick={removeCoupon} className="text-[10px] text-white bg-black px-2 py-1 rounded-md border border-black font-black uppercase tracking-wider hover:bg-red-600">Remove</button>
-              </div>
             )}
           </div>
 
