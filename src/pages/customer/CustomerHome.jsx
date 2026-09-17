@@ -4,6 +4,7 @@ import { Search, ChevronDown, FileText, CheckCircle2, Droplets, Sparkles, Truck,
 import { useAppStore } from '../../store/useAppStore';
 import Navbar from '../../components/Navbar';
 import { resolveVectorImage } from '../../utils/vectorGallery';
+import { sortShopsWithLpuFirst } from '../../utils/branchHelper';
 
 import imgNormal from '../../assets/normal.png';
 import imgDryClean from '../../assets/dryClean.png';
@@ -143,7 +144,7 @@ export default function CustomerHome() {
                   onChange={(e) => setCurrentTenantId(e.target.value)}
                   className="bg-transparent font-extrabold text-xs uppercase tracking-wider text-black cursor-pointer focus:outline-none"
                 >
-                  {shops.map((s) => (
+                  {sortShopsWithLpuFirst(shops).map((s) => (
                     <option key={s._id} value={s._id}>
                       {s.name}
                     </option>

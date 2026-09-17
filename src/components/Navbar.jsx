@@ -4,6 +4,7 @@ import { useAppStore } from '../store/useAppStore';
 import { ShoppingCart, User, LogOut, LayoutDashboard, Package, Store, X, Phone, Mail, Shield } from 'lucide-react';
 import logo from '../assets/logo.webp';
 import { setAuthToken } from '../services/api';
+import { sortShopsWithLpuFirst } from '../utils/branchHelper';
 
 export default function Navbar() {
   const { currentUser, setCurrentUser, cart, shops, currentTenantId, setCurrentTenantId } = useAppStore();
@@ -49,7 +50,8 @@ export default function Navbar() {
     return '/order-history';
   };
 
-  const activeShopId = currentTenantId || (shops.length > 0 ? shops[0]._id : '');
+  const sortedShops = sortShopsWithLpuFirst(shops);
+  const activeShopId = currentTenantId || (sortedShops.length > 0 ? sortedShops[0]._id : '');
 
   return (
     <nav className="bg-[#9AE600] border-b-2 border-black sticky top-0 z-50 shadow-[0_4px_0_rgba(0,0,0,1)] w-full">
@@ -67,7 +69,7 @@ export default function Navbar() {
             </Link>
 
             {/* Shop Switcher Dropdown */}
-            {shops.length > 0 && (
+            {sortedShops.length > 0 && (
               <div className="hidden md:flex items-center gap-1.5 bg-white border-2 border-black rounded-xl px-3 py-1.5 shadow-[2px_2px_0px_rgba(0,0,0,1)]">
                 <Store size={16} strokeWidth={2.5} className="text-[#0D8DE3]" />
                 <select
@@ -76,7 +78,7 @@ export default function Navbar() {
                   className="bg-transparent font-black text-xs uppercase tracking-wider text-black cursor-pointer focus:outline-none"
                   title="Select Shop Branch"
                 >
-                  {shops.map((s) => (
+                  {sortedShops.map((s) => (
                     <option key={s._id} value={s._id}>
                       {s.name}
                     </option>

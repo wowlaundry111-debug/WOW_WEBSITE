@@ -5,6 +5,7 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 
 import { Shop, User, Category, Item, Order, Offer, OrderStatus, PaymentStatus, PaymentMode, Role, OrderItem, CartItem } from '../types';
 import api, { setAuthToken, uploadImageToCloudinary, swrGet, invalidateCache } from '../services/api';
+import { sortShopsWithLpuFirst } from '../utils/branchHelper';
 
 interface AppState {
   // Auth Contexts
@@ -267,9 +268,14 @@ export const useAppStore = create<AppState>()(
               swrGet(offersUrl, OFFERS_SWR_TTL),
             ]);
 
+            const sortedShops = sortShopsWithLpuFirst(shopsData || []);
+            const isSuper = get().currentUser?.role === 'SuperAdmin';
+            const activeTenantId = isSuper ? get().currentTenantId : (get().currentTenantId || sortedShops[0]?._id || '');
+
             set({
-              shops: shopsData,
+              shops: sortedShops,
               offers: offersData,
+              currentTenantId: activeTenantId,
               shopsLastFetched: Date.now(),
               offersLastFetched: Date.now(),
               isLoading: false,
@@ -1260,7 +1266,7 @@ export const useAppStore = create<AppState>()(
           });
           newShop = shopRes.data as Shop;
           // Surgical: add new shop to local state
-          set(state => ({ shops: [...state.shops, newShop] }));
+          set(state => ({ shops: sortShopsWithLpuFirst([...state.shops, newShop]) }));
         } catch (err: any) {
           console.error('Failed to create shop:', err);
           throw new Error('Failed to create shop: ' + (err.response?.data?.error || err.message));
@@ -1331,8 +1337,9 @@ export const useAppStore = create<AppState>()(
         try {
           const res = await api.get('/catalog/shops/admin/all');
           if (Array.isArray(res.data)) {
-            set({ shops: res.data });
-            return res.data;
+            const sorted = sortShopsWithLpuFirst(res.data);
+            set({ shops: sorted });
+            return sorted;
           }
           return [];
         } catch (err) {

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Edit2, Package, Trash2, Plus, X, Check, Image as ImageIcon, Search, ChevronRight, Layers, Tag } from 'lucide-react';
 import { useAppStore } from '../../../store/useAppStore';
+import { sortShopsWithLpuFirst } from '../../../utils/branchHelper';
 
 // Preset Vector Images from Assets
 import bagImg from '../../../assets/bag.png';
@@ -364,8 +365,8 @@ export default function CatalogManager({ categories = [], items = [], shops = []
             Select Laundry Branch to Manage Menu:
           </span>
           <div className="flex gap-2 overflow-x-auto custom-scrollbar pb-1">
-            {shops.map(s => {
-              const isActive = (currentTenantId || shops[0]?._id) === s._id;
+            {sortShopsWithLpuFirst(shops).map(s => {
+              const isActive = (currentTenantId || sortShopsWithLpuFirst(shops)[0]?._id) === s._id;
               return (
                 <button
                   key={s._id}

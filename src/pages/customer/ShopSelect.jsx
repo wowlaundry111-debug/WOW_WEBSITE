@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '../../store/useAppStore';
 import { MapPin, Building, ChevronRight, Store } from 'lucide-react';
 import Navbar from '../../components/Navbar';
+import { sortShopsWithLpuFirst, sortBranchesWithLpuFirst } from '../../utils/branchHelper';
 
 export default function ShopSelect() {
   const { shops, currentUser, setCurrentTenantId } = useAppStore();
@@ -12,6 +13,8 @@ export default function ShopSelect() {
     setCurrentTenantId(shopId);
     navigate('/order');
   };
+
+  const sortedShops = sortShopsWithLpuFirst(shops);
 
   return (
     <div className="min-h-screen bg-[#FAF7F2] flex flex-col font-outfit selection:bg-black selection:text-white">
@@ -29,8 +32,9 @@ export default function ShopSelect() {
         </div>
 
         <div className="space-y-6">
-          {shops.map((shop, idx) => {
+          {sortedShops.map((shop, idx) => {
             const isOpen = shop.isOpen ?? true;
+            const branchList = sortBranchesWithLpuFirst(shop.branches);
             return (
               <button
                 key={shop._id}
@@ -58,7 +62,7 @@ export default function ShopSelect() {
                   <div className="flex items-center gap-2 mt-3 text-black font-extrabold bg-white border-2 border-black px-3 py-1.5 rounded-lg inline-flex">
                     <MapPin size={16} strokeWidth={3} />
                     <span className="text-sm uppercase tracking-wider">
-                      {shop.branches?.join(' · ') || shop.address || 'Location unknown'}
+                      {branchList.join(' · ') || shop.address || 'Location unknown'}
                     </span>
                   </div>
                 </div>

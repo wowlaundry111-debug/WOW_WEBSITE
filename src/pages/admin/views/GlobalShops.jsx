@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Building2, Plus, Store, Trash2, IndianRupee, Users, ShoppingBag, ArrowRight, ExternalLink, Settings, X, Smartphone, Download } from 'lucide-react';
 import SuperAdminShopDetail from './SuperAdminShopDetail';
+import { sortShopsWithLpuFirst, sortBranchesWithLpuFirst } from '../../../utils/branchHelper';
 
 export default function GlobalShops({ 
   shops = [], 
@@ -193,12 +194,13 @@ export default function GlobalShops({
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {shops.map(shop => {
+          {sortShopsWithLpuFirst(shops).map(shop => {
             const shortId = shop._id.includes('_') ? shop._id.split('_').pop().toUpperCase() : shop._id.slice(-6).toUpperCase();
             const branchOrders = orders.filter(o => o.shopId === shop._id);
             const branchRev = branchOrders
               .filter(o => o.status !== 'CANCELLED')
               .reduce((sum, o) => sum + (o.totalAmount || 0), 0);
+            const branchList = sortBranchesWithLpuFirst(shop.branches);
 
             return (
               <div 
@@ -222,10 +224,10 @@ export default function GlobalShops({
                     {shop.name}
                   </h3>
                   
-                  {shop.branches?.[0] && (
+                  {branchList?.[0] && (
                     <p className="text-xs font-bold text-gray-500 flex items-center gap-1 mt-1">
                       <Store size={14} className="text-black shrink-0" />
-                      {shop.branches[0]}
+                      {branchList[0]}
                     </p>
                   )}
                 </div>
