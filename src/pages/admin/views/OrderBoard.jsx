@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Clock, CreditCard, Phone, Truck, X, MapPin, Printer, MessageCircle, ChevronRight, Download, FileSpreadsheet, Calendar, CheckCircle2, Sparkles, ArrowUpDown } from 'lucide-react';
+import { Clock, CreditCard, Phone, Truck, X, MapPin, Printer, MessageCircle, ChevronRight, Download, FileSpreadsheet, Calendar, CheckCircle2, Sparkles, ArrowUpDown, Scale } from 'lucide-react';
 import { useAppStore } from '../../../store/useAppStore';
 import { downloadOrdersReport } from '../../../utils/exportCsv';
 
@@ -25,7 +25,7 @@ export default function OrderBoard({
   stripeColor,
   deliveryBoys = []
 }) {
-  const { updateOrderStatus, updateOrderAdminDetails, assignDeliveryBoy } = useAppStore();
+  const { updateOrderStatus, updateOrderAdminDetails, assignDeliveryBoy, updateKgWeight, items } = useAppStore();
 
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [editPrice, setEditPrice] = useState('');
@@ -34,6 +34,68 @@ export default function OrderBoard({
   
   const [assignModalOpen, setAssignModalOpen] = useState(false);
   const [orderToAssign, setOrderToAssign] = useState(null);
+
+  // Admin Weighing & Live Price Calculation Modal State
+  const [weighModalOrder, setWeighModalOrder] = useState(null);
+  const [kgWeights, setKgWeights] = useState({});
+  const [isUpdatingKg, setIsUpdatingKg] = useState(false);
+
+  const isKgItem = (it) => it?.unit === 'KG' || (typeof it?.name === 'string' && (it.name.toLowerCase().includes('per kg') || it.name.toLowerCase().includes('/ kg'))) || Boolean(it?.kgWeight && it.kgWeight > 0);
+
+  const handleOpenWeighModal = (order) => {
+    const initial = {};
+    (order.items || []).forEach(it => {
+      if (isKgItem(it)) {
+        initial[it.itemId] = (it.kgWeight !== undefined && it.kgWeight !== null && it.kgWeight > 0) ? String(it.kgWeight) : '';
+      }
+    });
+    setKgWeights(initial);
+    setWeighModalOrder(order);
+  };
+
+  const handleSaveKgWeights = async (andConfirmPickup = false) => {
+    if (!weighModalOrder) return;
+    setIsUpdatingKg(true);
+    try {
+      const payload = Object.entries(kgWeights).map(([itemId, weight]) => ({
+        itemId,
+        kgWeight: Number(weight) || 0
+      }));
+
+      await updateKgWeight(weighModalOrder._id, payload, andConfirmPickup);
+
+      if (selectedOrder && selectedOrder._id === weighModalOrder._id) {
+        setSelectedOrder(prev => {
+          if (!prev) return null;
+          const newStatus = andConfirmPickup && ['PLACED', 'ACCEPTED', 'PICKUP_ASSIGNED'].includes(prev.status) ? 'PICKED_UP' : prev.status;
+          return {
+            ...prev,
+            status: newStatus,
+            kgPriceUpdated: true,
+            items: (prev.items || []).map(it => {
+              const update = payload.find(p => String(p.itemId) === String(it.itemId));
+              if (update && isKgItem(it)) {
+                const catItem = (items || []).find(i => String(i._id) === String(it.itemId));
+                const rate = catItem?.pricePerKg || it.price || 0;
+                return { ...it, kgWeight: update.kgWeight, price: Math.round(update.kgWeight * rate * 100) / 100, unit: 'KG' };
+              }
+              return it;
+            })
+          };
+        });
+      }
+
+      alert(andConfirmPickup 
+        ? 'Garments weighed, final price calculated, and order marked as Picked Up!' 
+        : 'Garment weights updated and bill recalculated successfully!');
+      setWeighModalOrder(null);
+    } catch (err) {
+      alert('Failed to update weights: ' + (err?.response?.data?.error || err.message));
+    } finally {
+      setIsUpdatingKg(false);
+    }
+  };
+
 
   // Sorting state for Admin Order History
   const [sortBy, setSortBy] = useState('newest'); // 'newest' | 'oldest' | 'price_high' | 'price_low' | 'customer' | 'payment_mode'
@@ -550,23 +612,58 @@ export default function OrderBoard({
                     </div>
                   )}
 
-                  <div className="flex gap-3" onClick={e => e.stopPropagation()}>
+                  <div className="flex gap-2" onClick={e => e.stopPropagation()}>
                     {(order.status === 'PLACED' || order.status === 'ACCEPTED') && (
-                      <button 
-                        onClick={() => handleAssign(order._id)}
-                        className="flex-1 bg-[#9AE600] text-black border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] py-2.5 font-black uppercase text-sm hover:translate-y-[1px] hover:shadow-[1px_1px_0px_rgba(0,0,0,1)] transition-all flex justify-center items-center gap-2"
-                      >
-                        <Truck size={16}/> Assign Delivery
-                      </button>
+                      <div className="flex gap-2 w-full">
+                        {order.items?.some(it => isKgItem(it)) ? (
+                          <button 
+                            onClick={() => handleOpenWeighModal(order)}
+                            className="flex-1 bg-[#9AE600] text-black border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] py-2 font-black uppercase text-xs sm:text-sm hover:translate-y-[1px] hover:shadow-[1px_1px_0px_rgba(0,0,0,1)] transition-all flex justify-center items-center gap-1.5"
+                          >
+                            <Scale size={15}/> Weigh & Pick Up
+                          </button>
+                        ) : (
+                          <button 
+                            onClick={() => handleStatusUpdate(order._id, 'PICKED_UP')}
+                            className="flex-1 bg-[#9AE600] text-black border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] py-2 font-black uppercase text-xs sm:text-sm hover:translate-y-[1px] hover:shadow-[1px_1px_0px_rgba(0,0,0,1)] transition-all flex justify-center items-center gap-1.5"
+                          >
+                            <CheckCircle2 size={15}/> Mark Picked Up
+                          </button>
+                        )}
+                        <button 
+                          onClick={() => handleAssign(order._id)}
+                          className="px-3 bg-white text-black border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] py-2 font-black uppercase text-xs hover:bg-gray-100 transition-all flex items-center gap-1"
+                        >
+                          <Truck size={14}/> Assign
+                        </button>
+                      </div>
                     )}
                     {order.status === 'PICKUP_ASSIGNED' && (
                       <div className="flex gap-2 w-full">
-                        <button 
-                          onClick={() => handleStatusUpdate(order._id, 'PICKED_UP')}
-                          className="flex-1 bg-[#9AE600] text-black border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] py-2 font-black uppercase text-xs sm:text-sm hover:translate-y-[1px] hover:shadow-[1px_1px_0px_rgba(0,0,0,1)] transition-all flex justify-center items-center gap-1.5"
-                        >
-                          Mark Picked Up (To Wash)
-                        </button>
+                        {order.items?.some(it => isKgItem(it)) && !order.kgPriceUpdated ? (
+                          <button 
+                            onClick={() => handleOpenWeighModal(order)}
+                            className="flex-1 bg-[#9AE600] text-black border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] py-2 font-black uppercase text-xs sm:text-sm hover:translate-y-[1px] hover:shadow-[1px_1px_0px_rgba(0,0,0,1)] transition-all flex justify-center items-center gap-1.5"
+                          >
+                            <Scale size={15}/> Weigh & Pick Up
+                          </button>
+                        ) : (
+                          <button 
+                            onClick={() => handleStatusUpdate(order._id, 'PICKED_UP')}
+                            className="flex-1 bg-[#9AE600] text-black border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] py-2 font-black uppercase text-xs sm:text-sm hover:translate-y-[1px] hover:shadow-[1px_1px_0px_rgba(0,0,0,1)] transition-all flex justify-center items-center gap-1.5"
+                          >
+                            Mark Picked Up (To Wash)
+                          </button>
+                        )}
+                        {order.items?.some(it => isKgItem(it)) && (
+                          <button 
+                            onClick={() => handleOpenWeighModal(order)}
+                            className="px-2.5 bg-yellow-200 text-black border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] py-2 font-black uppercase text-xs hover:bg-yellow-300 transition-all flex items-center gap-1"
+                            title="Weigh Clothes"
+                          >
+                            <Scale size={13}/>
+                          </button>
+                        )}
                         <button 
                           onClick={() => handleAssign(order._id)}
                           className="px-3 bg-white text-black border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] py-2 font-black uppercase text-xs hover:bg-gray-100 transition-all flex items-center gap-1"
@@ -576,12 +673,23 @@ export default function OrderBoard({
                       </div>
                     )}
                     {(order.status === 'PICKED_UP' || order.status === 'WASHING') && (
-                      <button 
-                        onClick={() => handleStatusUpdate(order._id, 'IRONING')}
-                        className="flex-1 bg-white text-black border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] py-2.5 font-black uppercase text-sm hover:bg-gray-50 transition-colors"
-                      >
-                        Move to Ironing
-                      </button>
+                      <div className="flex gap-2 w-full">
+                        <button 
+                          onClick={() => handleStatusUpdate(order._id, 'IRONING')}
+                          className="flex-1 bg-white text-black border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] py-2.5 font-black uppercase text-sm hover:bg-gray-50 transition-colors"
+                        >
+                          Move to Ironing
+                        </button>
+                        {order.items?.some(it => isKgItem(it)) && (
+                          <button 
+                            onClick={() => handleOpenWeighModal(order)}
+                            className="px-3 bg-yellow-100 text-black border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] py-2 font-black uppercase text-xs hover:bg-yellow-200 transition-all flex items-center gap-1"
+                            title="Adjust Weight & Recalculate"
+                          >
+                            <Scale size={13}/> Edit Weight
+                          </button>
+                        )}
+                      </div>
                     )}
                     {order.status === 'IRONING' && (
                       <button 
@@ -766,12 +874,21 @@ export default function OrderBoard({
                           Order Items ({selectedOrder.items?.length || 0})
                         </h3>
                       </div>
-                      {selectedOrder.items?.some(it => it.unit === 'KG') && (
-                        <span className={`text-xs px-3 py-1 rounded-lg font-black uppercase border-2 border-black ${
-                          selectedOrder.kgPriceUpdated ? 'bg-[#9AE600] text-black' : 'bg-yellow-300 text-black'
-                        }`}>
-                          {selectedOrder.kgPriceUpdated ? 'KG WEIGHED' : 'KG PENDING WEIGHING'}
-                        </span>
+                      {selectedOrder.items?.some(it => isKgItem(it)) && (
+                        <div className="flex items-center gap-2">
+                          <span className={`text-xs px-3 py-1 rounded-lg font-black uppercase border-2 border-black ${
+                            selectedOrder.kgPriceUpdated ? 'bg-[#9AE600] text-black' : 'bg-yellow-300 text-black'
+                          }`}>
+                            {selectedOrder.kgPriceUpdated ? 'KG WEIGHED' : 'KG PENDING WEIGHING'}
+                          </span>
+                          <button
+                            onClick={() => handleOpenWeighModal(selectedOrder)}
+                            className="bg-[#9AE600] text-black font-black text-xs uppercase px-3 py-1 rounded-lg border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] hover:bg-white hover:text-black transition-all flex items-center gap-1"
+                          >
+                            <Scale size={13} />
+                            {selectedOrder.kgPriceUpdated ? 'Edit Weight & Recalculate' : 'Weigh & Calculate Price'}
+                          </button>
+                        </div>
                       )}
                     </div>
 
@@ -1002,6 +1119,41 @@ export default function OrderBoard({
                 </div>
               </div>
 
+              {/* Pickup & Wash Cycle Quick Action (Direct Admin Pickup) */}
+              {['PLACED', 'ACCEPTED', 'PICKUP_ASSIGNED'].includes(selectedOrder.status) && (
+                <div className="border-4 border-black p-5 bg-[#FAF7F2] rounded-2xl shadow-[4px_4px_0px_rgba(0,0,0,1)] flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-[#0D8DE3] block">PICKUP WORKFLOW</span>
+                    <h4 className="font-black text-lg uppercase">Direct Shop Pickup / In-Store Handover</h4>
+                    <p className="text-xs font-bold text-gray-600">
+                      {selectedOrder.items?.some(it => isKgItem(it)) 
+                        ? 'Weigh garments on your scale, calculate the new bill, and mark order as picked up.'
+                        : 'Confirm physical receipt of clothes and move order directly to the washing stage.'}
+                    </p>
+                  </div>
+                  <div className="flex gap-2">
+                    {selectedOrder.items?.some(it => isKgItem(it)) ? (
+                      <button
+                        onClick={() => handleOpenWeighModal(selectedOrder)}
+                        className="bg-[#9AE600] text-black font-black uppercase text-sm px-5 py-3 border-2 border-black shadow-[3px_3px_0px_rgba(0,0,0,1)] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_rgba(0,0,0,1)] transition-all flex items-center gap-2"
+                      >
+                        <Scale size={18} /> Weigh & Mark Picked Up
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => {
+                          handleStatusUpdate(selectedOrder._id, 'PICKED_UP');
+                          setSelectedOrder(prev => prev ? ({ ...prev, status: 'PICKED_UP' }) : null);
+                        }}
+                        className="bg-[#9AE600] text-black font-black uppercase text-sm px-5 py-3 border-2 border-black shadow-[3px_3px_0px_rgba(0,0,0,1)] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_rgba(0,0,0,1)] transition-all flex items-center gap-2"
+                      >
+                        <CheckCircle2 size={18} /> Mark Picked Up (To Wash)
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+
               {/* Admin Note / Adjust Price (In Wash Cycle) */}
               {['WASHING', 'PICKED_UP', 'IRONING'].includes(selectedOrder.status) && (
                 <div className="border-4 border-black p-6 bg-blue-50 space-y-4">
@@ -1075,6 +1227,244 @@ export default function OrderBoard({
               ) : (
                 <p className="font-bold text-gray-500 text-center py-4">No delivery boys found for this shop. Please add them in Shop Settings.</p>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─── ADMIN WEIGH & LIVE PRICE CALCULATION MODAL ─────────────── */}
+      {weighModalOrder && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-white border-4 border-black shadow-[12px_12px_0px_rgba(0,0,0,1)] w-full max-w-xl max-h-[90vh] flex flex-col animate-scale-up">
+            {/* Header */}
+            <div className="p-5 border-b-4 border-black bg-[#0D8DE3] text-white flex justify-between items-center">
+              <div>
+                <span className="text-[10px] font-black uppercase tracking-widest bg-black px-2.5 py-0.5 rounded text-[#9AE600]">
+                  Admin Pickup & Weighing Scale
+                </span>
+                <h2 className="text-2xl font-black uppercase mt-1 flex items-center gap-2">
+                  <Scale size={24} /> Weigh Clothes & Calculate Price
+                </h2>
+                <p className="text-xs font-bold text-white/90 mt-0.5">
+                  Order #{weighModalOrder._id.slice(-6).toUpperCase()} • {users.find(u => u._id === weighModalOrder.customerId)?.name || weighModalOrder.customerName || 'Customer'}
+                </p>
+              </div>
+              <button 
+                onClick={() => setWeighModalOrder(null)}
+                className="p-1 hover:bg-black hover:text-white rounded border-2 border-transparent hover:border-black transition-colors"
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            {/* Content Body */}
+            <div className="p-6 overflow-y-auto bg-gray-50 flex-1 space-y-4 border-b-4 border-black">
+              <div className="bg-blue-50 border-2 border-black p-3.5 rounded-xl text-xs font-bold text-gray-800">
+                Put the clothes on the physical weighing scale and enter the weight in KG below. Prices, add-ons, promo discounts, and taxes recalculate live on your end.
+              </div>
+
+              {weighModalOrder.items.filter(it => isKgItem(it)).map(it => {
+                const catalogItem = (items || []).find(i => String(i._id) === String(it.itemId) || i.name === it.name);
+                const ratePerKg = catalogItem?.pricePerKg || (it.unit === 'KG' && it.price > 0 && !it.kgWeight ? it.price : 0) || 60;
+                const currWeight = Number(kgWeights[it.itemId]) || 0;
+                const itemLineTotal = Math.round(currWeight * ratePerKg * 100) / 100;
+
+                return (
+                  <div key={it.itemId} className="bg-white border-2 border-black p-4 rounded-xl shadow-[3px_3px_0px_rgba(0,0,0,1)] space-y-3">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h4 className="font-black text-base uppercase text-black">{it.name}</h4>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <span className="text-xs font-black text-[#0D8DE3] uppercase bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
+                            Rate: ₹{ratePerKg} / KG
+                          </span>
+                          {(it.categoryName || it.subCategoryName) && (
+                            <span className="text-[10px] font-bold text-gray-500 uppercase">
+                              {it.categoryName}{it.subCategoryName ? ` › ${it.subCategoryName}` : ''}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <span className="text-xs font-black uppercase bg-[#9AE600] border border-black px-2.5 py-1 rounded shadow-[1px_1px_0px_rgba(0,0,0,1)]">
+                        {it.quantity} bundle{it.quantity > 1 ? 's' : ''}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-3 pt-1">
+                      <div className="flex-1">
+                        <label className="block text-[10px] font-black uppercase text-gray-500 mb-1">
+                          Weight on Scale (KG)
+                        </label>
+                        <div className="flex items-center border-2 border-black rounded-lg bg-white overflow-hidden focus-within:ring-2 focus-within:ring-[#0D8DE3]">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const curr = parseFloat(kgWeights[it.itemId] || '0') || 0;
+                              const next = Math.max(0, Math.round((curr - 0.5) * 10) / 10);
+                              setKgWeights(prev => ({ ...prev, [it.itemId]: next > 0 ? String(next) : '0' }));
+                            }}
+                            className="px-3 py-2.5 bg-gray-100 border-r-2 border-black font-black text-sm hover:bg-black hover:text-white transition-colors"
+                          >
+                            -0.5
+                          </button>
+                          <input 
+                            type="number"
+                            step="0.1"
+                            min="0"
+                            placeholder="e.g. 2.5"
+                            value={kgWeights[it.itemId] ?? ''}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              setKgWeights(prev => ({ ...prev, [it.itemId]: val }));
+                            }}
+                            className="w-full p-2.5 font-black text-lg outline-none bg-transparent text-center"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const curr = parseFloat(kgWeights[it.itemId] || '0') || 0;
+                              const next = Math.round((curr + 0.5) * 10) / 10;
+                              setKgWeights(prev => ({ ...prev, [it.itemId]: String(next) }));
+                            }}
+                            className="px-3 py-2.5 bg-gray-100 border-l-2 border-black font-black text-sm hover:bg-black hover:text-white transition-colors"
+                          >
+                            +0.5
+                          </button>
+                          <span className="bg-gray-100 font-black text-xs uppercase px-3 py-3 border-l-2 border-black text-gray-600">
+                            KG
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="text-right shrink-0">
+                        <span className="text-[10px] font-black uppercase text-gray-500 block mb-1">Calculated</span>
+                        <span className="font-black text-lg text-black bg-[#9AE600] border-2 border-black px-3 py-1.5 rounded-lg inline-block shadow-[1.5px_1.5px_0px_rgba(0,0,0,1)]">
+                          ₹{itemLineTotal}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+
+              {/* Real-time Recalculated Live Total Breakdown */}
+              {(() => {
+                const perItemSubtotal = (weighModalOrder.items || [])
+                  .filter(it => !isKgItem(it))
+                  .reduce((s, it) => s + ((it.price || 0) * (it.quantity || 1)), 0);
+
+                let kgTotal = 0;
+                (weighModalOrder.items || []).filter(it => isKgItem(it)).forEach(it => {
+                  const catalogItem = (items || []).find(i => String(i._id) === String(it.itemId) || i.name === it.name);
+                  const rate = catalogItem?.pricePerKg || (it.unit === 'KG' && it.price > 0 && !it.kgWeight ? it.price : 0) || 60;
+                  const weight = Number(kgWeights[it.itemId]) || 0;
+                  kgTotal += weight * rate;
+                });
+
+                const itemSubtotal = perItemSubtotal + kgTotal;
+                const shop = (shops || []).find(s => s._id === weighModalOrder.shopId);
+                let liveDiscount = Number(weighModalOrder.discountAmount) || 0;
+
+                if (weighModalOrder.couponCode) {
+                  let discountPercent = Number(weighModalOrder.couponDiscountPercent) || (shop?.promoCode?.code?.toUpperCase() === weighModalOrder.couponCode?.toUpperCase() ? Number(shop.promoCode.discountPercent) : 0);
+                  let maxDiscount = weighModalOrder.couponMaxDiscount !== undefined ? Number(weighModalOrder.couponMaxDiscount) : (shop?.promoCode?.maxDiscount !== undefined ? Number(shop.promoCode.maxDiscount) : Infinity);
+                  let minOrder = Number(weighModalOrder.couponMinOrderValue) || Number(shop?.promoCode?.minOrderValue) || 0;
+
+                  if (discountPercent > 0) {
+                    if (itemSubtotal >= minOrder) {
+                      liveDiscount = Math.min((itemSubtotal * discountPercent) / 100, maxDiscount);
+                      liveDiscount = Math.round(liveDiscount * 100) / 100;
+                    } else {
+                      liveDiscount = 0;
+                    }
+                  }
+                }
+
+                const prefsTotal = (weighModalOrder.washPreferences && weighModalOrder.washPreferences.length > 0)
+                  ? weighModalOrder.washPreferences.reduce((sum, p) => sum + (p.price || 0), 0)
+                  : 0;
+
+                const taxPercent = shop?.taxPercent !== undefined ? Number(shop.taxPercent) : 0;
+                const taxAmt = Math.round((itemSubtotal * taxPercent / 100) * 100) / 100;
+                const deliveryAmt = weighModalOrder.deliveryFee !== undefined ? Number(weighModalOrder.deliveryFee) : Number(shop?.deliveryFee || 0);
+                const grandTotal = Math.max(0, Math.round((itemSubtotal + taxAmt + deliveryAmt - liveDiscount + prefsTotal) * 100) / 100);
+
+                return (
+                  <div className="bg-yellow-50 border-2 border-black p-4 rounded-xl space-y-2">
+                    <div className="flex justify-between items-center border-b border-black/20 pb-1.5">
+                      <h5 className="font-black text-xs uppercase tracking-wider text-black flex items-center gap-1.5">
+                        <Sparkles size={14} className="text-[#0D8DE3]" /> Live Total Preview (Admin Calculation)
+                      </h5>
+                      <span className="text-[10px] font-black uppercase bg-black text-white px-2 py-0.5 rounded">
+                        Auto Recalculating
+                      </span>
+                    </div>
+
+                    <div className="flex justify-between text-xs font-bold text-gray-700">
+                      <span>Per-Item Subtotal:</span>
+                      <span>₹{perItemSubtotal}</span>
+                    </div>
+                    <div className="flex justify-between text-xs font-bold text-[#0D8DE3]">
+                      <span>Weighed KG Subtotal:</span>
+                      <span>+₹{Math.round(kgTotal * 100) / 100}</span>
+                    </div>
+                    {prefsTotal > 0 && (
+                      <div className="flex justify-between text-xs font-bold text-gray-700">
+                        <span>Wash Add-ons:</span>
+                        <span>+₹{prefsTotal}</span>
+                      </div>
+                    )}
+                    {taxAmt > 0 && (
+                      <div className="flex justify-between text-xs font-bold text-gray-700">
+                        <span>Taxes ({taxPercent}%):</span>
+                        <span>+₹{taxAmt}</span>
+                      </div>
+                    )}
+                    {deliveryAmt > 0 && (
+                      <div className="flex justify-between text-xs font-bold text-gray-700">
+                        <span>Delivery Fee:</span>
+                        <span>+₹{deliveryAmt}</span>
+                      </div>
+                    )}
+                    {(liveDiscount > 0 || weighModalOrder.couponCode) && (
+                      <div className="flex justify-between text-xs font-black text-green-700 bg-green-100 px-2.5 py-1 rounded border border-green-400">
+                        <span>Promo Discount ({weighModalOrder.couponCode || 'Coupon'}):</span>
+                        <span>-₹{liveDiscount}</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between items-center pt-2 border-t-2 border-black text-base font-black text-black">
+                      <span>New Grand Total:</span>
+                      <span className="text-2xl text-[#0D8DE3] bg-white border-2 border-black px-3 py-0.5 rounded-lg shadow-[2px_2px_0px_rgba(0,0,0,1)]">
+                        ₹{grandTotal}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
+
+            {/* Modal Footer Controls */}
+            <div className="p-5 bg-white flex flex-wrap gap-3">
+              <button 
+                onClick={() => setWeighModalOrder(null)}
+                className="flex-1 min-w-[100px] border-2 border-black py-3 font-black uppercase hover:bg-gray-100 transition-colors text-sm rounded-lg"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={() => handleSaveKgWeights(false)}
+                disabled={isUpdatingKg}
+                className="flex-1 min-w-[160px] bg-white text-black border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] py-3 font-black uppercase hover:bg-gray-100 transition-all text-sm disabled:opacity-50"
+              >
+                {isUpdatingKg ? 'Calculating...' : 'Save Weight Only'}
+              </button>
+              <button 
+                onClick={() => handleSaveKgWeights(true)}
+                disabled={isUpdatingKg}
+                className="flex-[2] min-w-[200px] bg-[#9AE600] text-black border-2 border-black shadow-[3px_3px_0px_rgba(0,0,0,1)] py-3 font-black uppercase hover:translate-y-[1px] hover:shadow-[1px_1px_0px_rgba(0,0,0,1)] transition-all text-sm disabled:opacity-50 flex items-center justify-center gap-1.5 rounded-lg"
+              >
+                {isUpdatingKg ? 'Finalizing Bill & Status...' : 'Save & Mark Picked Up'}
+              </button>
             </div>
           </div>
         </div>
