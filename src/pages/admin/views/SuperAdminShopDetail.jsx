@@ -452,7 +452,7 @@ export default function SuperAdminShopDetail({ shopId, onBack, onOpenCatalog, on
                         : 'bg-white text-gray-700 hover:bg-gray-100'
                     }`}
                   >
-                    🧺 Floor Operator
+                    <Shirt size={15} /> Floor Operator
                   </button>
                   <button
                     type="button"
@@ -463,7 +463,7 @@ export default function SuperAdminShopDetail({ shopId, onBack, onOpenCatalog, on
                         : 'bg-white text-gray-700 hover:bg-gray-100'
                     }`}
                   >
-                    🚚 Delivery Agent
+                    <Truck size={15} /> Delivery Agent
                   </button>
                 </div>
               </div>

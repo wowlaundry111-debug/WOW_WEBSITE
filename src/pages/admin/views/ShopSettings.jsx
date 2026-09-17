@@ -598,7 +598,7 @@ export default function ShopSettings({
                       : 'bg-white text-gray-600 hover:bg-gray-50'
                   }`}
                 >
-                  <Shirt size={16} /> 🧺 Floor Operator
+                  <Shirt size={16} /> Floor Operator
                 </button>
                 <button
                   type="button"
@@ -609,7 +609,7 @@ export default function ShopSettings({
                       : 'bg-white text-gray-600 hover:bg-gray-50'
                   }`}
                 >
-                  <Truck size={16} /> 🚚 Delivery Agent
+                  <Truck size={16} /> Delivery Agent
                 </button>
               </div>
             </div>

@@ -476,7 +476,7 @@ export default function OperatorPortal() {
                         disabled={isUpdating}
                         className="w-full bg-[#0D8DE3] text-white border-2 border-black shadow-[3px_3px_0px_rgba(0,0,0,1)] py-3 font-black uppercase text-sm hover:translate-y-[1px] hover:shadow-[1px_1px_0px_rgba(0,0,0,1)] transition-all flex items-center justify-center gap-2"
                       >
-                        <Shirt size={17} /> {isUpdating ? 'Updating...' : 'START WASHING 🧺'}
+                        <Shirt size={17} /> {isUpdating ? 'Updating...' : 'START WASHING'}
                       </button>
                     )}
 
@@ -486,7 +486,7 @@ export default function OperatorPortal() {
                         disabled={isUpdating}
                         className="w-full bg-purple-600 text-white border-2 border-black shadow-[3px_3px_0px_rgba(0,0,0,1)] py-3 font-black uppercase text-sm hover:translate-y-[1px] hover:shadow-[1px_1px_0px_rgba(0,0,0,1)] transition-all flex items-center justify-center gap-2"
                       >
-                        <ArrowRight size={17} /> {isUpdating ? 'Updating...' : 'MOVE TO IRONING 👔'}
+                        <ArrowRight size={17} /> {isUpdating ? 'Updating...' : 'MOVE TO IRONING'}
                       </button>
                     )}
 
@@ -496,7 +496,7 @@ export default function OperatorPortal() {
                         disabled={isUpdating}
                         className="w-full bg-[#9AE600] text-black border-2 border-black shadow-[3px_3px_0px_rgba(0,0,0,1)] py-3 font-black uppercase text-sm hover:translate-y-[1px] hover:shadow-[1px_1px_0px_rgba(0,0,0,1)] transition-all flex items-center justify-center gap-2"
                       >
-                        <CheckCircle2 size={17} /> {isUpdating ? 'Updating...' : 'IRONING DONE (READY FOR DELIVERY) 🚚'}
+                        <CheckCircle2 size={17} /> {isUpdating ? 'Updating...' : 'IRONING DONE (READY FOR DELIVERY)'}
                       </button>
                     )}
 
@@ -627,7 +627,7 @@ export default function OperatorPortal() {
                     onClick={() => handleAdvanceStatus(selectedOrder._id, 'WASHING')}
                     className="flex-1 bg-[#0D8DE3] text-white border-2 border-black py-3 font-black uppercase text-xs shadow-[2px_2px_0px_rgba(0,0,0,1)]"
                   >
-                    Start Washing 🧺
+                    Start Washing
                   </button>
                 )}
                 {selectedOrder.status === 'WASHING' && (
@@ -635,7 +635,7 @@ export default function OperatorPortal() {
                     onClick={() => handleAdvanceStatus(selectedOrder._id, 'IRONING')}
                     className="flex-1 bg-purple-600 text-white border-2 border-black py-3 font-black uppercase text-xs shadow-[2px_2px_0px_rgba(0,0,0,1)]"
                   >
-                    Move to Ironing 👔
+                    Move to Ironing
                   </button>
                 )}
                 {selectedOrder.status === 'IRONING' && (
@@ -643,7 +643,7 @@ export default function OperatorPortal() {
                     onClick={() => handleAdvanceStatus(selectedOrder._id, 'OUT_FOR_DELIVERY')}
                     className="flex-1 bg-[#9AE600] text-black border-2 border-black py-3 font-black uppercase text-xs shadow-[2px_2px_0px_rgba(0,0,0,1)]"
                   >
-                    Ironing Complete 🚚
+                    Ironing Complete
                   </button>
                 )}
               </div>
