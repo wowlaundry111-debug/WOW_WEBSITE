@@ -6,7 +6,7 @@ import {
   Settings, Users, Grid, List, Activity, Package, Edit, Trash2, X, 
   Printer, Phone, MessageCircle, MapPin, Clock, CreditCard, Truck, 
   ChevronRight, Download, Building2, Store, LogOut, CheckCircle, Plus,
-  Globe, ArrowLeft
+  Globe, ArrowLeft, Shirt
 } from 'lucide-react';
 import ShopDashboard from './views/ShopDashboard';
 import OrderBoard from './views/OrderBoard';
@@ -14,6 +14,7 @@ import CatalogManager from './views/CatalogManager';
 import GlobalShops from './views/GlobalShops';
 import GlobalUsers from './views/GlobalUsers';
 import ShopSettings from './views/ShopSettings';
+import OperatorPortal from '../operator/OperatorPortal';
 
 const FILTERS = [
   { key: 'new',      label: 'New Orders',      statuses: ['PLACED', 'ACCEPTED', 'PICKUP_ASSIGNED'] },
@@ -41,7 +42,7 @@ export default function AdminDashboard() {
   const { 
     currentUser, shops, currentTenantId, setCurrentTenantId, fetchOrders, fetchUsers, fetchCatalog,
     orders, categories, items, users,
-    createShop, updateShop, deleteShop, deleteUser, addDeliveryBoy, fetchAdminShop
+    createShop, updateShop, deleteShop, deleteUser, addDeliveryBoy, addOperator, fetchAdminShop
   } = useAppStore();
   
   const navigate = useNavigate();
@@ -65,6 +66,7 @@ export default function AdminDashboard() {
   const [settingsForm, setSettingsForm] = useState({
     upiId: '', bankName: '', accountNo: '', minOrderValue: 0, taxPercent: 0, deliveryFee: 0, contactNumber: '', instructions: ''
   });
+  const [staffRole, setStaffRole] = useState('Operator'); // 'Operator' | 'Delivery'
   const [deliveryEmail, setDeliveryEmail] = useState('');
   const [deliveryName, setDeliveryName] = useState('');
   const [deliveryPhone, setDeliveryPhone] = useState('');
@@ -158,6 +160,14 @@ export default function AdminDashboard() {
     )
   );
 
+  const branchStaff = users.filter(u => 
+    (u.role === 'Delivery' || u.role === 'Operator') && (
+      !activeShopId || 
+      !u.shopId || 
+      u.shopId === activeShopId
+    )
+  );
+
   // Full order lifecycle filters for all admins
   const displayFilters = FILTERS;
 
@@ -198,22 +208,28 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleAddDeliveryBoy = async () => {
+  const handleAddDeliveryBoy = async (roleOverride) => {
+    const roleToUse = roleOverride || staffRole;
     if (!deliveryEmail || !deliveryEmail.includes('@')) return alert('Valid email address is required');
     const targetShop = currentShop?._id || currentTenantId || currentUser?.shopId;
     if (!targetShop) {
-      return alert('Please select a shop branch from the admin panel before adding delivery staff.');
+      return alert('Please select a shop branch from the admin panel before adding staff.');
     }
     
     setIsAddingDelivery(true);
     try {
-      await addDeliveryBoy(deliveryEmail, targetShop, deliveryName, deliveryPhone);
+      if (roleToUse === 'Operator') {
+        await addOperator(deliveryEmail, targetShop, deliveryName, deliveryPhone);
+        alert('Laundry Floor Operator added successfully!');
+      } else {
+        await addDeliveryBoy(deliveryEmail, targetShop, deliveryName, deliveryPhone);
+        alert('Delivery staff added successfully!');
+      }
       setDeliveryEmail('');
       setDeliveryName('');
       setDeliveryPhone('');
-      alert('Delivery staff added successfully!');
     } catch (err) {
-      alert(err?.response?.data?.error || err?.message || 'Failed to add delivery staff');
+      alert(err?.response?.data?.error || err?.message || 'Failed to add staff member');
     } finally {
       setIsAddingDelivery(false);
     }
@@ -227,6 +243,7 @@ export default function AdminDashboard() {
         return [
           { id: 'shops', icon: Globe, label: 'Global Overview' },
           { id: 'orders', icon: List, label: 'All Orders' },
+          { id: 'operator', icon: Shirt, label: 'Floor / Wash Console' },
           { id: 'catalog', icon: Grid, label: 'Catalog Manager' },
           { id: 'users', icon: Users, label: 'All Users & Fleet' }
         ];
@@ -235,6 +252,7 @@ export default function AdminDashboard() {
         return [
           { id: 'dashboard', icon: Activity, label: 'Branch Dashboard' },
           { id: 'orders', icon: List, label: 'Branch Orders' },
+          { id: 'operator', icon: Shirt, label: 'Floor / Wash Console' },
           { id: 'catalog', icon: Grid, label: 'Branch Catalog' },
           { id: 'settings', icon: Settings, label: 'Branch Settings' }
         ];
@@ -244,6 +262,7 @@ export default function AdminDashboard() {
       return [
         { id: 'dashboard', icon: Activity, label: 'Dashboard' },
         { id: 'orders', icon: List, label: 'Order Board' },
+        { id: 'operator', icon: Shirt, label: 'Floor / Wash Console' },
         { id: 'catalog', icon: Grid, label: 'Catalog' },
         { id: 'settings', icon: Settings, label: 'Shop Settings' }
       ];
@@ -357,6 +376,13 @@ export default function AdminDashboard() {
             />
           )}
 
+          {activeTab === 'operator' && (
+            <OperatorPortal 
+              isEmbedded={true} 
+              embeddedShopId={activeShopId} 
+            />
+          )}
+
           {activeTab === 'catalog' && (
             <CatalogManager 
               categories={categories} 
@@ -405,6 +431,10 @@ export default function AdminDashboard() {
               isAddingDelivery={isAddingDelivery}
               handleAddDeliveryBoy={handleAddDeliveryBoy} 
               deliveryBoys={deliveryBoys}
+              branchStaff={branchStaff}
+              staffRole={staffRole}
+              setStaffRole={setStaffRole}
+              onOpenOperatorConsole={() => setActiveTab('operator')}
               deleteUser={deleteUser}
               isSuperAdmin={isSuperAdmin}
             />

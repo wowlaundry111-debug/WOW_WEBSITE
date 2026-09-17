@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Truck, Trash2, Sparkles, Smartphone, Clock, Tag, X } from 'lucide-react';
+import { Plus, Truck, Trash2, Sparkles, Smartphone, Clock, Tag, X, Shirt, ArrowRight } from 'lucide-react';
 
 export default function ShopSettings({ 
   currentShop, 
@@ -17,6 +17,10 @@ export default function ShopSettings({
   isAddingDelivery,
   handleAddDeliveryBoy,
   deliveryBoys,
+  branchStaff = [],
+  staffRole = 'Operator',
+  setStaffRole,
+  onOpenOperatorConsole,
   deleteUser
 }) {
   const [newSlotInput, setNewSlotInput] = useState('');
@@ -568,89 +572,173 @@ export default function ShopSettings({
         </div>
       </div>
 
-      {/* Fleet Management Form */}
-      <div className="bg-white border-4 border-black shadow-[4px_4px_0px_rgba(0,0,0,1)] p-6 rounded-xl h-fit">
-        <h2 className="text-2xl font-black uppercase mb-2">Add Delivery Personnel</h2>
-        <p className="font-bold text-gray-500 mb-6">
-          Add delivery staff to <span className="text-black font-black underline">{currentShop?.name || 'this branch'}</span>. They can log in using their email and OTP.
-        </p>
+      {/* Fleet & Operator Management Form */}
+      <div className="bg-white border-4 border-black shadow-[4px_4px_0px_rgba(0,0,0,1)] p-6 rounded-xl h-fit space-y-6">
         
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-black uppercase mb-2">Agent Name (Optional)</label>
-            <input 
-              type="text" 
-              value={deliveryName || ''}
-              onChange={e => setDeliveryName(e.target.value)}
-              placeholder="e.g. Rahul Sharma"
-              className="w-full bg-gray-50 border-2 border-black p-3 font-bold outline-none focus:bg-[#0D8DE3]/10" 
-            />
+        {/* Quick link to Floor / Wash Console */}
+        {onOpenOperatorConsole && (
+          <div className="bg-[#9AE600] border-2 border-black p-4 rounded-xl shadow-[3px_3px_0px_rgba(0,0,0,1)] flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-black text-white rounded-lg flex items-center justify-center border-2 border-black">
+                <Shirt size={20} />
+              </div>
+              <div>
+                <p className="font-black text-xs uppercase tracking-wider text-black">Branch Wash Console</p>
+                <p className="text-[11px] font-bold text-black/70">Washing & Ironing status bucket</p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={onOpenOperatorConsole}
+              className="bg-black text-white px-3.5 py-2 text-xs font-black uppercase tracking-wider rounded border-2 border-black hover:bg-gray-800 transition-all flex items-center gap-1.5 shadow-[2px_2px_0px_rgba(0,0,0,1)] hover:translate-y-[1px]"
+            >
+              Open Console <ArrowRight size={14} />
+            </button>
           </div>
+        )}
 
-          <div>
-            <label className="block text-sm font-black uppercase mb-2">Agent Phone Number (Optional)</label>
-            <input 
-              type="tel" 
-              value={deliveryPhone || ''}
-              onChange={e => setDeliveryPhone(e.target.value)}
-              placeholder="10-digit mobile number"
-              className="w-full bg-gray-50 border-2 border-black p-3 font-bold outline-none focus:bg-[#0D8DE3]/10" 
-            />
-          </div>
+        <div>
+          <h2 className="text-2xl font-black uppercase mb-1">
+            {staffRole === 'Operator' ? 'Add Floor Operator' : 'Add Delivery Personnel'}
+          </h2>
+          <p className="font-bold text-gray-500 mb-4">
+            {staffRole === 'Operator' ? (
+              <>Add a floor operator to <span className="text-black font-black underline">{currentShop?.name || 'this branch'}</span>. They update wash & iron statuses in the Wash Console.</>
+            ) : (
+              <>Add delivery staff to <span className="text-black font-black underline">{currentShop?.name || 'this branch'}</span>. They can log in using their email and OTP to deliver orders.</>
+            )}
+          </p>
 
-          <div>
-            <label className="block text-sm font-black uppercase mb-2">Agent Email Address *</label>
-            <input 
-              type="email" 
-              value={deliveryEmail}
-              onChange={e => setDeliveryEmail(e.target.value)}
-              placeholder="delivery.name@example.com"
-              className="w-full bg-gray-50 border-2 border-black p-3 font-bold outline-none focus:bg-[#0D8DE3]/10" 
-            />
-          </div>
+          {/* Role selector toggle */}
+          {setStaffRole && (
+            <div className="mb-4">
+              <label className="block text-xs font-black uppercase mb-1.5 text-gray-700">Assign Role</label>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setStaffRole('Operator')}
+                  className={`py-2.5 px-3 border-2 border-black font-black text-xs uppercase transition-all flex items-center justify-center gap-2 ${
+                    staffRole === 'Operator'
+                      ? 'bg-amber-300 text-black shadow-[3px_3px_0px_rgba(0,0,0,1)] -translate-y-0.5'
+                      : 'bg-white text-gray-600 hover:bg-gray-50'
+                  }`}
+                >
+                  <Shirt size={16} /> 🧺 Floor Operator
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setStaffRole('Delivery')}
+                  className={`py-2.5 px-3 border-2 border-black font-black text-xs uppercase transition-all flex items-center justify-center gap-2 ${
+                    staffRole === 'Delivery'
+                      ? 'bg-[#0D8DE3] text-white shadow-[3px_3px_0px_rgba(0,0,0,1)] -translate-y-0.5'
+                      : 'bg-white text-gray-600 hover:bg-gray-50'
+                  }`}
+                >
+                  <Truck size={16} /> 🚚 Delivery Agent
+                </button>
+              </div>
+            </div>
+          )}
           
-          <button 
-            onClick={handleAddDeliveryBoy} 
-            disabled={isAddingDelivery}
-            className={`w-full bg-[#0D8DE3] text-white border-2 border-black shadow-[4px_4px_0px_rgba(0,0,0,1)] py-4 font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 ${isAddingDelivery ? 'opacity-70 cursor-not-allowed' : 'hover:translate-y-[2px] hover:shadow-[2px_2px_0px_rgba(0,0,0,1)]'}`}
-          >
-            <Plus size={20}/> {isAddingDelivery ? 'Adding Staff...' : 'Add Delivery Staff'}
-          </button>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-black uppercase mb-1.5">Staff Name (Optional)</label>
+              <input 
+                type="text" 
+                value={deliveryName || ''}
+                onChange={e => setDeliveryName(e.target.value)}
+                placeholder={staffRole === 'Operator' ? 'e.g. Ramesh Kumar' : 'e.g. Rahul Sharma'}
+                className="w-full bg-gray-50 border-2 border-black p-3 font-bold outline-none focus:bg-[#0D8DE3]/10" 
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-black uppercase mb-1.5">Phone Number (Optional)</label>
+              <input 
+                type="tel" 
+                value={deliveryPhone || ''}
+                onChange={e => setDeliveryPhone(e.target.value)}
+                placeholder="10-digit mobile number"
+                className="w-full bg-gray-50 border-2 border-black p-3 font-bold outline-none focus:bg-[#0D8DE3]/10" 
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-black uppercase mb-1.5">Staff Email Address *</label>
+              <input 
+                type="email" 
+                value={deliveryEmail}
+                onChange={e => setDeliveryEmail(e.target.value)}
+                placeholder={staffRole === 'Operator' ? 'operator@example.com' : 'delivery.name@example.com'}
+                className="w-full bg-gray-50 border-2 border-black p-3 font-bold outline-none focus:bg-[#0D8DE3]/10" 
+              />
+            </div>
+            
+            <button 
+              onClick={() => handleAddDeliveryBoy(staffRole)} 
+              disabled={isAddingDelivery}
+              className={`w-full text-black border-2 border-black shadow-[4px_4px_0px_rgba(0,0,0,1)] py-4 font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 ${
+                staffRole === 'Operator' ? 'bg-amber-300 hover:bg-amber-400' : 'bg-[#0D8DE3] text-white hover:bg-[#0D8DE3]/90'
+              } ${isAddingDelivery ? 'opacity-70 cursor-not-allowed' : 'hover:translate-y-[2px] hover:shadow-[2px_2px_0px_rgba(0,0,0,1)]'}`}
+            >
+              <Plus size={20}/> {isAddingDelivery ? 'Adding Staff...' : (staffRole === 'Operator' ? 'Add Floor Operator' : 'Add Delivery Staff')}
+            </button>
+          </div>
         </div>
 
         {/* Current Staff List */}
-        <div className="mt-8 border-t-2 border-black pt-6">
-          <h3 className="font-black text-lg uppercase mb-4">Current Staff ({deliveryBoys?.length || 0})</h3>
-          
-          {(!deliveryBoys || deliveryBoys.length === 0) ? (
-            <div className="flex flex-col items-center justify-center py-6 bg-gray-50 border-2 border-dashed border-gray-300">
-              <Truck size={32} className="text-gray-400 mb-2" />
-              <p className="font-bold text-gray-500 text-center">No Delivery Staff</p>
-              <p className="text-sm font-bold text-gray-400 text-center">Add staff members to assign deliveries.</p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {deliveryBoys.map(staff => (
-                <div key={staff._id} className="flex justify-between items-center p-3 border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] bg-white">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-orange-100 border-2 border-black flex items-center justify-center">
-                      <Truck size={20} className="text-orange-600" />
-                    </div>
-                    <div>
-                      <p className="font-black text-sm uppercase">{staff.name}</p>
-                      <p className="font-bold text-xs text-gray-500">{staff.email}</p>
-                    </div>
+        <div className="border-t-2 border-black pt-6">
+          {(() => {
+            const allStaff = (branchStaff && branchStaff.length > 0) ? branchStaff : (deliveryBoys || []);
+            return (
+              <>
+                <h3 className="font-black text-lg uppercase mb-4">Current Branch Staff ({allStaff.length})</h3>
+                
+                {allStaff.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-6 bg-gray-50 border-2 border-dashed border-gray-300">
+                    <Truck size={32} className="text-gray-400 mb-2" />
+                    <p className="font-bold text-gray-500 text-center">No Staff Members Yet</p>
+                    <p className="text-sm font-bold text-gray-400 text-center">Add operators or delivery agents above.</p>
                   </div>
-                  <button 
-                    onClick={() => { if(window.confirm(`Remove ${staff.name}?`)) deleteUser(staff._id) }} 
-                    className="p-2 text-red-500 hover:bg-red-50 hover:text-red-700 transition-colors border-2 border-transparent hover:border-red-500 rounded"
-                  >
-                    <Trash2 size={18} />
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
+                ) : (
+                  <div className="space-y-3">
+                    {allStaff.map(staff => {
+                      const isOp = staff.role === 'Operator';
+                      return (
+                        <div key={staff._id} className="flex justify-between items-center p-3 border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] bg-white">
+                          <div className="flex items-center gap-3">
+                            <div className={`w-10 h-10 border-2 border-black flex items-center justify-center ${
+                              isOp ? 'bg-amber-300 text-black' : 'bg-orange-100 text-orange-600'
+                            }`}>
+                              {isOp ? <Shirt size={20} /> : <Truck size={20} />}
+                            </div>
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <p className="font-black text-sm uppercase">{staff.name}</p>
+                                <span className={`text-[9px] font-black uppercase px-2 py-0.5 border border-black rounded-full ${
+                                  isOp ? 'bg-amber-100 text-amber-900' : 'bg-blue-100 text-blue-900'
+                                }`}>
+                                  {isOp ? 'Floor Operator' : 'Delivery Agent'}
+                                </span>
+                              </div>
+                              <p className="font-bold text-xs text-gray-500">{staff.email}</p>
+                            </div>
+                          </div>
+                          <button 
+                            onClick={() => { if(window.confirm(`Remove ${staff.name} (${isOp ? 'Operator' : 'Delivery'})?`)) deleteUser(staff._id) }} 
+                            className="p-2 text-red-500 hover:bg-red-50 hover:text-red-700 transition-colors border-2 border-transparent hover:border-red-500 rounded"
+                            title="Remove staff member"
+                          >
+                            <Trash2 size={18} />
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </>
+            );
+          })()}
         </div>
       </div>
     </div>
