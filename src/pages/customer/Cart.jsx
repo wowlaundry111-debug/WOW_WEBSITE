@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '../../store/useAppStore';
-import { ArrowLeft, Trash2, Plus, Minus, MapPin, CheckCircle2, Receipt, AlertTriangle, Sparkles, Check, Home, Briefcase, Scale, Clock, Tag } from 'lucide-react';
+import { ArrowLeft, Trash2, Plus, Minus, MapPin, CheckCircle2, Receipt, AlertTriangle, Sparkles, Check, Home, Briefcase, Scale, Clock, Tag, ChevronDown, ChevronUp } from 'lucide-react';
 
 export default function Cart() {
   const navigate = useNavigate();
@@ -76,6 +76,11 @@ export default function Cart() {
     setPickupSlot(slot);
     setPickupTime(`${pickupDay}, ${slot}`);
   };
+
+  const [isScheduleOpen, setIsScheduleOpen] = useState(false);
+  const [isWashPrefsOpen, setIsWashPrefsOpen] = useState(false);
+  const [isItemSummaryOpen, setIsItemSummaryOpen] = useState(true);
+
   const [couponCode, setCouponCode] = useState('');
   const [couponMsg, setCouponMsg] = useState({ type: '', text: '' });
   const [selectedWashPrefs, setSelectedWashPrefs] = useState([]);
@@ -285,126 +290,191 @@ export default function Cart() {
                 />
               </div>
 
-              {/* Pickup Slot */}
-              <div>
+              {/* Pickup Schedule Accordion Card */}
+              <div className="pt-1">
                 <div className="flex items-center justify-between mb-1.5">
                   <label className="text-[11px] font-black text-black uppercase tracking-wider flex items-center gap-1.5">
                     <Clock size={13} strokeWidth={3} />
                     Pickup Schedule
                   </label>
                   <span className="text-[10px] font-black bg-black text-[#9AE600] px-2 py-0.5 rounded-md uppercase">
-                    {pickupTime}
+                    {pickupDay} • {pickupSlot}
                   </span>
                 </div>
 
-                {/* Day Selector */}
-                <div className="grid grid-cols-3 gap-1.5 mb-2.5">
-                  {['Today', 'Tomorrow', 'Day After'].map((d) => (
-                    <button
-                      key={d}
-                      type="button"
-                      onClick={() => handleSelectDay(d)}
-                      className={`py-1.5 px-2 rounded-xl border-2 border-black font-black text-xs transition-all uppercase ${
-                        pickupDay === d
-                          ? 'bg-black text-[#9AE600] shadow-[2px_2px_0px_rgba(0,0,0,1)]'
-                          : 'bg-white text-black hover:bg-gray-100'
-                      }`}
-                    >
-                      {d}
-                    </button>
-                  ))}
-                </div>
+                <div className="bg-white border-2 border-black rounded-xl overflow-hidden shadow-[2px_2px_0px_rgba(0,0,0,1)]">
+                  <button
+                    type="button"
+                    onClick={() => setIsScheduleOpen(!isScheduleOpen)}
+                    className="w-full p-2.5 flex items-center justify-between text-left hover:bg-gray-50 transition-colors"
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0 pr-2">
+                      <div className="w-7 h-7 rounded-lg bg-black text-[#9AE600] flex items-center justify-center shrink-0 border border-black">
+                        <Clock size={14} strokeWidth={2.5} />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-[11px] font-black text-black uppercase truncate">
+                          {pickupDay}, {pickupSlot}
+                        </p>
+                        <p className="text-[10px] font-bold text-gray-500">
+                          {isScheduleOpen ? 'Tap slot below to confirm' : 'Tap to change pickup timing'}
+                        </p>
+                      </div>
+                    </div>
+                    <span className="text-[10px] font-black uppercase px-2 py-1 bg-[#9AE600] text-black border border-black rounded-md flex items-center gap-1 shrink-0 shadow-[1px_1px_0px_rgba(0,0,0,1)]">
+                      {isScheduleOpen ? 'Done' : 'Change'}
+                      {isScheduleOpen ? <ChevronUp size={12} strokeWidth={3} /> : <ChevronDown size={12} strokeWidth={3} />}
+                    </span>
+                  </button>
 
-                {/* Available Shop Time Slots */}
-                <div className="grid grid-cols-2 gap-1.5 mb-2">
-                  {availablePickupSlots.map((slot) => {
-                    const isSlotSelected = pickupSlot === slot;
-                    return (
-                      <button
-                        key={slot}
-                        type="button"
-                        onClick={() => handleSelectSlot(slot)}
-                        className={`p-2 rounded-xl border-2 border-black font-extrabold text-[11px] sm:text-xs transition-all flex items-center justify-between ${
-                          isSlotSelected
-                            ? 'bg-black text-[#9AE600] shadow-[2px_2px_0px_rgba(0,0,0,1)]'
-                            : 'bg-white text-black hover:bg-gray-50'
-                        }`}
-                      >
-                        <span className="truncate">{slot}</span>
-                        {isSlotSelected && <Check size={13} strokeWidth={3.5} className="shrink-0 ml-1" />}
-                      </button>
-                    );
-                  })}
-                </div>
+                  {/* Dropdown Content */}
+                  {isScheduleOpen && (
+                    <div className="p-2.5 border-t-2 border-dashed border-gray-300 bg-gray-50/80 space-y-2.5">
+                      {/* Day Selector */}
+                      <div className="grid grid-cols-3 gap-1.5">
+                        {['Today', 'Tomorrow', 'Day After'].map((d) => (
+                          <button
+                            key={d}
+                            type="button"
+                            onClick={() => handleSelectDay(d)}
+                            className={`py-1.5 px-2 rounded-lg border-2 border-black font-black text-xs transition-all uppercase ${
+                              pickupDay === d
+                                ? 'bg-black text-[#9AE600] shadow-[2px_2px_0px_rgba(0,0,0,1)]'
+                                : 'bg-white text-black hover:bg-gray-100'
+                            }`}
+                          >
+                            {d}
+                          </button>
+                        ))}
+                      </div>
 
-                {/* Editable/Custom Pickup instructions or slot */}
-                <input 
-                  type="text"
-                  value={pickupTime}
-                  onChange={(e) => setPickupTime(e.target.value)}
-                  placeholder="Custom pickup timing or note..."
-                  className="w-full bg-white/90 border-2 border-black rounded-xl p-2 text-black font-extrabold focus:outline-none text-[11px] sm:text-xs shadow-[2px_2px_0px_rgba(0,0,0,1)]"
-                />
+                      {/* Available Time Slots Grid */}
+                      <div className="grid grid-cols-2 gap-1.5 max-h-48 overflow-y-auto pr-1">
+                        {availablePickupSlots.map((slot) => {
+                          const isSlotSelected = pickupSlot === slot;
+                          return (
+                            <button
+                              key={slot}
+                              type="button"
+                              onClick={() => {
+                                handleSelectSlot(slot);
+                              }}
+                              className={`p-2 rounded-lg border-2 border-black font-extrabold text-[11px] transition-all flex items-center justify-between ${
+                                isSlotSelected
+                                  ? 'bg-black text-[#9AE600] shadow-[2px_2px_0px_rgba(0,0,0,1)]'
+                                  : 'bg-white text-black hover:bg-gray-100'
+                              }`}
+                            >
+                              <span className="truncate">{slot}</span>
+                              {isSlotSelected && <Check size={12} strokeWidth={3.5} className="shrink-0 ml-1" />}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
 
           {/* Wash Add-ons & Preferences */}
           {availableWashPrefs.length > 0 && (
-            <div className="bg-[#0D8DE3]/10 rounded-2xl sm:rounded-3xl border-2 border-black p-4 sm:p-5 shadow-[4px_4px_0px_rgba(0,0,0,1)]">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <Sparkles size={18} className="text-[#0D8DE3]" strokeWidth={3} />
-                  <h2 className="font-black text-black text-base sm:text-lg uppercase lilita-one-regular tracking-wide">Wash Add-ons</h2>
+            <div className="bg-[#0D8DE3]/10 rounded-2xl sm:rounded-3xl border-2 border-black overflow-hidden shadow-[4px_4px_0px_rgba(0,0,0,1)]">
+              <button
+                type="button"
+                onClick={() => setIsWashPrefsOpen(!isWashPrefsOpen)}
+                className="w-full p-3.5 sm:p-4 bg-white/70 hover:bg-white/90 border-b-2 border-black flex items-center justify-between transition-colors text-left"
+              >
+                <div className="flex items-center gap-2.5 min-w-0 pr-2">
+                  <div className="w-8 h-8 rounded-lg bg-[#0D8DE3] text-white flex items-center justify-center shrink-0 border-2 border-black shadow-[1px_1px_0px_rgba(0,0,0,1)]">
+                    <Sparkles size={16} strokeWidth={2.5} />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-1.5">
+                      <h2 className="font-black text-black text-sm sm:text-base uppercase lilita-one-regular tracking-wide">Wash Add-ons</h2>
+                      <span className="text-[10px] font-black uppercase bg-[#0D8DE3] text-white px-1.5 py-0.2 rounded border border-black">Optional</span>
+                    </div>
+                    <p className="text-[10px] font-bold text-gray-600 truncate">
+                      {selectedWashPrefs.length > 0
+                        ? `${selectedWashPrefs.length} selected (+₹${washPrefsCost}) • Tap to modify`
+                        : 'Softener, sanitization & stain treatment'}
+                    </p>
+                  </div>
                 </div>
-                <span className="text-[10px] font-black uppercase bg-[#0D8DE3] text-white px-2 py-0.5 rounded-full border border-black">Optional</span>
-              </div>
 
-              <div className="space-y-2">
-                {availableWashPrefs.map((pref) => {
-                  const isSelected = selectedWashPrefs.some(p => p.name === pref.name);
-                  return (
-                    <button
-                      type="button"
-                      key={pref.id || pref.name}
-                      onClick={() => toggleWashPref(pref)}
-                      className={`w-full text-left p-2.5 sm:p-3 rounded-xl border-2 border-black flex items-center justify-between transition-all ${
-                        isSelected
-                          ? 'bg-[#9AE600] shadow-[2px_2px_0px_rgba(0,0,0,1)]'
-                          : 'bg-white hover:bg-gray-50 shadow-[1px_1px_0px_rgba(0,0,0,1)]'
-                      }`}
-                    >
-                      <div className="flex items-center gap-2.5 min-w-0 pr-2">
-                        <div className={`w-5 h-5 rounded-md border-2 border-black shrink-0 flex items-center justify-center transition-colors ${
-                          isSelected ? 'bg-black text-[#9AE600]' : 'bg-white'
-                        }`}>
-                          {isSelected && <Check size={14} strokeWidth={4} />}
-                        </div>
-                        <div className="truncate">
-                          <h4 className="font-black text-xs uppercase text-black truncate">{pref.name}</h4>
-                          {pref.description && (
-                            <p className="text-[10px] font-bold text-gray-600 truncate">{pref.description}</p>
-                          )}
-                        </div>
-                      </div>
+                <div className="flex items-center gap-1.5 shrink-0">
+                  {selectedWashPrefs.length > 0 && (
+                    <span className="text-[10px] font-black uppercase bg-[#9AE600] text-black px-2 py-0.5 rounded-md border border-black shadow-[1px_1px_0px_rgba(0,0,0,1)]">
+                      +{selectedWashPrefs.length} Active
+                    </span>
+                  )}
+                  <span className="p-1 bg-white border-2 border-black rounded-lg shadow-[1px_1px_0px_rgba(0,0,0,1)] text-black">
+                    {isWashPrefsOpen ? <ChevronUp size={13} strokeWidth={3} /> : <ChevronDown size={13} strokeWidth={3} />}
+                  </span>
+                </div>
+              </button>
 
-                      <span className="font-black text-xs uppercase bg-white px-2 py-0.5 rounded-lg border-2 border-black text-black shrink-0">
-                        +₹{pref.price}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
+              {isWashPrefsOpen && (
+                <div className="p-3 sm:p-4 space-y-2 bg-[#FAF7F2]/60">
+                  {availableWashPrefs.map((pref) => {
+                    const isSelected = selectedWashPrefs.some(p => p.name === pref.name);
+                    return (
+                      <button
+                        type="button"
+                        key={pref.id || pref.name}
+                        onClick={() => toggleWashPref(pref)}
+                        className={`w-full text-left p-2.5 sm:p-3 rounded-xl border-2 border-black flex items-center justify-between transition-all ${
+                          isSelected
+                            ? 'bg-[#9AE600] shadow-[2px_2px_0px_rgba(0,0,0,1)]'
+                            : 'bg-white hover:bg-gray-50 shadow-[1px_1px_0px_rgba(0,0,0,1)]'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2.5 min-w-0 pr-2">
+                          <div className={`w-5 h-5 rounded-md border-2 border-black shrink-0 flex items-center justify-center transition-colors ${
+                            isSelected ? 'bg-black text-[#9AE600]' : 'bg-white'
+                          }`}>
+                            {isSelected && <Check size={14} strokeWidth={4} />}
+                          </div>
+                          <div className="truncate">
+                            <h4 className="font-black text-xs uppercase text-black truncate">{pref.name}</h4>
+                            {pref.description && (
+                              <p className="text-[10px] font-bold text-gray-600 truncate">{pref.description}</p>
+                            )}
+                          </div>
+                        </div>
+
+                        <span className="font-black text-xs uppercase bg-white px-2 py-0.5 rounded-lg border-2 border-black text-black shrink-0">
+                          +₹{pref.price}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           )}
 
           {/* Cart Items */}
           <div className="bg-white rounded-2xl sm:rounded-3xl border-2 border-black overflow-hidden shadow-[4px_4px_0px_rgba(0,0,0,1)]">
-            <div className="p-3.5 sm:p-4 border-b-2 border-black bg-[#9AE600] flex justify-between items-center">
-              <h2 className="font-black text-black text-lg sm:text-xl uppercase lilita-one-regular tracking-wide">Item Summary</h2>
-              <span className="bg-black text-[#9AE600] text-xs font-black px-2.5 py-1 rounded-lg border-2 border-black tracking-wider uppercase">{cart.length} ITEMS</span>
-            </div>
-            <div className="divide-y-2 divide-gray-200">
+            <button
+              type="button"
+              onClick={() => setIsItemSummaryOpen(!isItemSummaryOpen)}
+              className="w-full p-3.5 sm:p-4 border-b-2 border-black bg-[#9AE600] flex justify-between items-center text-left hover:bg-[#8ee000] transition-colors"
+            >
+              <div className="flex items-center gap-2">
+                <h2 className="font-black text-black text-base sm:text-xl uppercase lilita-one-regular tracking-wide">Item Summary</h2>
+                <span className="bg-black text-[#9AE600] text-[10px] sm:text-xs font-black px-2 py-0.5 rounded-md border border-black tracking-wider uppercase">
+                  {cart.length} {cart.length === 1 ? 'ITEM' : 'ITEMS'}
+                </span>
+              </div>
+              <span className="flex items-center gap-1 bg-white text-black text-xs font-black px-2.5 py-1 rounded-lg border-2 border-black shadow-[1px_1px_0px_rgba(0,0,0,1)]">
+                <span>{isItemSummaryOpen ? 'Hide' : 'Review'}</span>
+                {isItemSummaryOpen ? <ChevronUp size={13} strokeWidth={3} /> : <ChevronDown size={13} strokeWidth={3} />}
+              </span>
+            </button>
+            {isItemSummaryOpen && (
+              <div className="divide-y-2 divide-gray-200">
               {cart.map((item) => {
                 const isKg = isKgItem(item);
                 return (
@@ -452,6 +522,7 @@ export default function Cart() {
                 );
               })}
             </div>
+            )}
           </div>
         </div>
 
