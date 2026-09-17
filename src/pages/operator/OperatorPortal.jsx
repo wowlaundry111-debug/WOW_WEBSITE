@@ -39,7 +39,7 @@ const isKgItem = (it) =>
   (typeof it?.name === 'string' && (it.name.toLowerCase().includes('per kg') || it.name.toLowerCase().includes('/ kg'))) || 
   Boolean(it?.kgWeight && it.kgWeight > 0);
 
-export default function OperatorPortal({ isEmbedded = false, embeddedShopId = null }) {
+export default function OperatorPortal() {
   const navigate = useNavigate();
   const { 
     currentUser, 
@@ -57,17 +57,11 @@ export default function OperatorPortal({ isEmbedded = false, embeddedShopId = nu
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(null); // orderId
   const [selectedShopId, setSelectedShopId] = useState(
-    embeddedShopId || currentUser?.shopId || currentTenantId || (shops[0]?._id || '')
+    currentUser?.shopId || currentTenantId || (shops[0]?._id || '')
   );
 
-  React.useEffect(() => {
-    if (embeddedShopId) {
-      setSelectedShopId(embeddedShopId);
-    }
-  }, [embeddedShopId]);
-
   const isSuperAdmin = currentUser?.role === 'SuperAdmin';
-  const effectiveShopId = embeddedShopId || (isSuperAdmin ? selectedShopId : (currentUser?.shopId || selectedShopId));
+  const effectiveShopId = isSuperAdmin ? selectedShopId : (currentUser?.shopId || selectedShopId);
   const currentShop = shops.find(s => s._id === effectiveShopId) || shops[0];
 
   // Restrict access
@@ -170,10 +164,10 @@ export default function OperatorPortal({ isEmbedded = false, embeddedShopId = nu
   };
 
   return (
-    <div className={`flex flex-col font-sans ${isEmbedded ? 'w-full pb-8' : 'min-h-screen bg-[#FAF7F2] pb-16'}`}>
+    <div className="min-h-screen bg-[#FAF7F2] flex flex-col font-sans pb-16">
       {/* ─── OPERATOR CONSOLE HEADER ───────────────────────────────── */}
-      <header className={`bg-white border-2 md:border-4 border-black ${isEmbedded ? 'rounded-xl shadow-[4px_4px_0px_rgba(0,0,0,1)] p-4 sm:p-5' : 'border-b-4 sticky top-0 z-40 shadow-[0_4px_0_rgba(0,0,0,1)]'}`}>
-        <div className={`${isEmbedded ? 'w-full' : 'max-w-7xl mx-auto px-4 sm:px-6 py-3.5'} flex flex-wrap items-center justify-between gap-3`}>
+      <header className="bg-white border-b-4 border-black sticky top-0 z-40 shadow-[0_4px_0_rgba(0,0,0,1)]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3.5 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <div className="w-11 h-11 bg-[#9AE600] border-2 border-black rounded-xl flex items-center justify-center shadow-[2px_2px_0px_rgba(0,0,0,1)]">
               <Shirt size={22} className="text-black" />
@@ -188,14 +182,14 @@ export default function OperatorPortal({ isEmbedded = false, embeddedShopId = nu
                 </h1>
               </div>
               <p className="text-xs font-bold text-gray-500">
-                Wash & Iron Floor Console • Real-Time Bucket Queue
+                Wash & Iron Floor Console • Live Status Updates
               </p>
             </div>
           </div>
 
-          {/* SuperAdmin Branch Switcher & Actions */}
+          {/* Actions & SuperAdmin Controls */}
           <div className="flex items-center gap-2 sm:gap-3">
-            {isSuperAdmin && shops.length > 1 && !isEmbedded && (
+            {isSuperAdmin && shops.length > 1 && (
               <div className="flex items-center gap-1.5 bg-[#FAF7F2] border-2 border-black px-2.5 py-1.5 rounded-lg">
                 <Store size={14} className="text-gray-700" />
                 <select
@@ -221,38 +215,26 @@ export default function OperatorPortal({ isEmbedded = false, embeddedShopId = nu
               <RefreshCw size={15} />
             </button>
 
-            {isEmbedded ? (
-              <a
-                href="/operator"
-                target="_blank"
-                rel="noreferrer"
-                className="bg-black text-white font-black uppercase text-xs px-3.5 py-2.5 border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] hover:bg-gray-800 transition-all flex items-center gap-1.5"
+            {isSuperAdmin && (
+              <button
+                onClick={() => navigate('/admin')}
+                className="bg-black text-white font-black uppercase text-xs px-3.5 py-2.5 border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] hover:bg-gray-800 transition-all hidden sm:flex items-center gap-1.5"
               >
-                Open Fullscreen ↗
-              </a>
-            ) : (
-              <>
-                {isSuperAdmin && (
-                  <button
-                    onClick={() => navigate('/admin')}
-                    className="bg-black text-white font-black uppercase text-xs px-3.5 py-2.5 border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] hover:bg-gray-800 transition-all hidden sm:flex items-center gap-1.5"
-                  >
-                    Admin Board
-                  </button>
-                )}
-                <button
-                  onClick={handleLogout}
-                  className="bg-red-500 hover:bg-red-600 text-white font-black uppercase text-xs px-3.5 py-2.5 border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] hover:translate-y-[1px] transition-all flex items-center gap-1.5"
-                >
-                  <LogOut size={15} /> <span className="hidden sm:inline">Logout</span>
-                </button>
-              </>
+                Admin Board
+              </button>
             )}
+
+            <button
+              onClick={handleLogout}
+              className="bg-red-500 hover:bg-red-600 text-white font-black uppercase text-xs px-3.5 py-2.5 border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] hover:translate-y-[1px] transition-all flex items-center gap-1.5"
+            >
+              <LogOut size={15} /> <span className="hidden sm:inline">Logout</span>
+            </button>
           </div>
         </div>
       </header>
 
-      <main className={`${isEmbedded ? 'w-full pt-6' : 'max-w-7xl mx-auto px-4 sm:px-6 pt-6'} flex-1 w-full space-y-6`}>
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 pt-6 flex-1 w-full space-y-6">
         {/* ─── FLOOR METRIC TILES ─────────────────────────────────────── */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
           <div 

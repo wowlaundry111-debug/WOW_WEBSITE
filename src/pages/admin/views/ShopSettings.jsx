@@ -16,11 +16,9 @@ export default function ShopSettings({
   setDeliveryPhone,
   isAddingDelivery,
   handleAddDeliveryBoy,
-  deliveryBoys,
   branchStaff = [],
   staffRole = 'Operator',
   setStaffRole,
-  onOpenOperatorConsole,
   deleteUser
 }) {
   const [newSlotInput, setNewSlotInput] = useState('');
@@ -574,29 +572,6 @@ export default function ShopSettings({
 
       {/* Fleet & Operator Management Form */}
       <div className="bg-white border-4 border-black shadow-[4px_4px_0px_rgba(0,0,0,1)] p-6 rounded-xl h-fit space-y-6">
-        
-        {/* Quick link to Floor / Wash Console */}
-        {onOpenOperatorConsole && (
-          <div className="bg-[#9AE600] border-2 border-black p-4 rounded-xl shadow-[3px_3px_0px_rgba(0,0,0,1)] flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-black text-white rounded-lg flex items-center justify-center border-2 border-black">
-                <Shirt size={20} />
-              </div>
-              <div>
-                <p className="font-black text-xs uppercase tracking-wider text-black">Branch Wash Console</p>
-                <p className="text-[11px] font-bold text-black/70">Washing & Ironing status bucket</p>
-              </div>
-            </div>
-            <button
-              type="button"
-              onClick={onOpenOperatorConsole}
-              className="bg-black text-white px-3.5 py-2 text-xs font-black uppercase tracking-wider rounded border-2 border-black hover:bg-gray-800 transition-all flex items-center gap-1.5 shadow-[2px_2px_0px_rgba(0,0,0,1)] hover:translate-y-[1px]"
-            >
-              Open Console <ArrowRight size={14} />
-            </button>
-          </div>
-        )}
-
         <div>
           <h2 className="text-2xl font-black uppercase mb-1">
             {staffRole === 'Operator' ? 'Add Floor Operator' : 'Add Delivery Personnel'}

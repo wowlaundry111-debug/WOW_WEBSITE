@@ -14,7 +14,6 @@ import CatalogManager from './views/CatalogManager';
 import GlobalShops from './views/GlobalShops';
 import GlobalUsers from './views/GlobalUsers';
 import ShopSettings from './views/ShopSettings';
-import OperatorPortal from '../operator/OperatorPortal';
 
 const FILTERS = [
   { key: 'new',      label: 'New Orders',      statuses: ['PLACED', 'ACCEPTED', 'PICKUP_ASSIGNED'] },
@@ -243,7 +242,6 @@ export default function AdminDashboard() {
         return [
           { id: 'shops', icon: Globe, label: 'Global Overview' },
           { id: 'orders', icon: List, label: 'All Orders' },
-          { id: 'operator', icon: Shirt, label: 'Floor / Wash Console' },
           { id: 'catalog', icon: Grid, label: 'Catalog Manager' },
           { id: 'users', icon: Users, label: 'All Users & Fleet' }
         ];
@@ -252,7 +250,6 @@ export default function AdminDashboard() {
         return [
           { id: 'dashboard', icon: Activity, label: 'Branch Dashboard' },
           { id: 'orders', icon: List, label: 'Branch Orders' },
-          { id: 'operator', icon: Shirt, label: 'Floor / Wash Console' },
           { id: 'catalog', icon: Grid, label: 'Branch Catalog' },
           { id: 'settings', icon: Settings, label: 'Branch Settings' }
         ];
@@ -262,7 +259,6 @@ export default function AdminDashboard() {
       return [
         { id: 'dashboard', icon: Activity, label: 'Dashboard' },
         { id: 'orders', icon: List, label: 'Order Board' },
-        { id: 'operator', icon: Shirt, label: 'Floor / Wash Console' },
         { id: 'catalog', icon: Grid, label: 'Catalog' },
         { id: 'settings', icon: Settings, label: 'Shop Settings' }
       ];
@@ -376,13 +372,6 @@ export default function AdminDashboard() {
             />
           )}
 
-          {activeTab === 'operator' && (
-            <OperatorPortal 
-              isEmbedded={true} 
-              embeddedShopId={activeShopId} 
-            />
-          )}
-
           {activeTab === 'catalog' && (
             <CatalogManager 
               categories={categories} 
@@ -434,7 +423,6 @@ export default function AdminDashboard() {
               branchStaff={branchStaff}
               staffRole={staffRole}
               setStaffRole={setStaffRole}
-              onOpenOperatorConsole={() => setActiveTab('operator')}
               deleteUser={deleteUser}
               isSuperAdmin={isSuperAdmin}
             />
