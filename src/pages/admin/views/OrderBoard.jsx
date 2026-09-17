@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Clock, CreditCard, Phone, Truck, X, MapPin, Printer, MessageCircle, ChevronRight, Download, FileSpreadsheet, Calendar, CheckCircle2, Sparkles, ArrowUpDown, Scale } from 'lucide-react';
+import { Clock, CreditCard, Phone, Truck, X, MapPin, Printer, MessageCircle, ChevronRight, Download, FileSpreadsheet, Calendar, CheckCircle2, Sparkles, ArrowUpDown, Scale, Trash2 } from 'lucide-react';
 import { useAppStore } from '../../../store/useAppStore';
 import { downloadOrdersReport } from '../../../utils/exportCsv';
 
@@ -25,12 +25,13 @@ export default function OrderBoard({
   stripeColor,
   deliveryBoys = []
 }) {
-  const { updateOrderStatus, updateOrderAdminDetails, assignDeliveryBoy, updateKgWeight, items } = useAppStore();
+  const { updateOrderStatus, updateOrderAdminDetails, assignDeliveryBoy, updateKgWeight, deleteOrder, items } = useAppStore();
 
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [editPrice, setEditPrice] = useState('');
   const [editNotes, setEditNotes] = useState('');
   const [isSavingDetails, setIsSavingDetails] = useState(false);
+  const [isDeletingOrder, setIsDeletingOrder] = useState(false);
   
   const [assignModalOpen, setAssignModalOpen] = useState(false);
   const [orderToAssign, setOrderToAssign] = useState(null);
@@ -96,6 +97,32 @@ export default function OrderBoard({
     }
   };
 
+
+  const handleDeleteOrder = async (order) => {
+    if (!order) return;
+    const orderNum = order._id.slice(-6).toUpperCase();
+    const confirmed = window.confirm(
+      `⚠️ ARE YOU SURE YOU WANT TO PERMANENTLY DELETE ORDER #${orderNum}?\n\nThis will remove the order completely from the database and system. This action CANNOT be undone.`
+    );
+    if (!confirmed) return;
+
+    setIsDeletingOrder(true);
+    try {
+      const res = await deleteOrder(order._id);
+      if (res.success) {
+        if (selectedOrder && selectedOrder._id === order._id) {
+          setSelectedOrder(null);
+        }
+        alert(`Order #${orderNum} was permanently deleted.`);
+      } else {
+        alert('Failed to delete order: ' + (res.message || 'Unknown error'));
+      }
+    } catch (err) {
+      alert('Error deleting order: ' + (err?.message || 'Unknown error'));
+    } finally {
+      setIsDeletingOrder(false);
+    }
+  };
 
   // Sorting state for Admin Order History
   const [sortBy, setSortBy] = useState('newest'); // 'newest' | 'oldest' | 'price_high' | 'price_low' | 'customer' | 'payment_mode'
@@ -456,9 +483,22 @@ export default function OrderBoard({
                         <h3 className="font-black text-xl leading-none mt-1">{customerName}</h3>
                       </div>
                     </div>
-                    <span className="border-2 border-black px-3 py-1 bg-white font-black text-xs uppercase shadow-[2px_2px_0px_rgba(0,0,0,1)]">
-                      {order.status.replace(/_/g, ' ')}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className="border-2 border-black px-3 py-1 bg-white font-black text-xs uppercase shadow-[2px_2px_0px_rgba(0,0,0,1)]">
+                        {order.status.replace(/_/g, ' ')}
+                      </span>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteOrder(order);
+                        }}
+                        disabled={isDeletingOrder}
+                        title="Permanently Delete Order"
+                        className="p-1.5 bg-red-100 hover:bg-red-500 text-red-600 hover:text-white border-2 border-black rounded-lg shadow-[2px_2px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-y-[1px] transition-all"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
                   </div>
 
                   {/* Category & Items Section on Outer Card */}
@@ -842,12 +882,20 @@ export default function OrderBoard({
                 <p className="font-black text-xs text-black uppercase tracking-widest">ORDER DETAILS</p>
                 <h2 className="text-2xl font-black uppercase">#{selectedOrder._id.slice(-6).toUpperCase()}</h2>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 sm:gap-3">
                 <button 
                   onClick={() => handlePrintOrder(selectedOrder)}
                   className="bg-black text-[#9AE600] font-black text-xs uppercase tracking-wider px-3.5 py-2 rounded-xl border-2 border-black shadow-[3px_3px_0px_rgba(0,0,0,1)] hover:bg-[#9AE600] hover:text-black transition-all flex items-center gap-1.5"
                 >
-                  <Printer size={15} /> Print Receipt
+                  <Printer size={15} /> Print
+                </button>
+                <button 
+                  onClick={() => handleDeleteOrder(selectedOrder)}
+                  disabled={isDeletingOrder}
+                  title="Permanently Delete Order"
+                  className="bg-red-600 text-white font-black text-xs uppercase tracking-wider px-3.5 py-2 rounded-xl border-2 border-black shadow-[3px_3px_0px_rgba(0,0,0,1)] hover:bg-red-700 transition-all flex items-center gap-1.5"
+                >
+                  <Trash2 size={15} /> {isDeletingOrder ? 'Deleting...' : 'Delete'}
                 </button>
                 <button onClick={() => setSelectedOrder(null)} className="hover:bg-black hover:text-white rounded-full p-2 border-2 border-transparent hover:border-black transition-colors">
                   <X size={24} />
@@ -1195,6 +1243,24 @@ export default function OrderBoard({
                   <p className="font-bold">{selectedOrder.adminNotes}</p>
                 </div>
               )}
+
+              {/* Danger Zone: Permanently Delete Order */}
+              <div className="border-4 border-red-600 bg-red-50 p-5 rounded-2xl shadow-[5px_5px_0px_rgba(220,38,38,1)] flex flex-wrap items-center justify-between gap-4 mt-8">
+                <div className="max-w-md">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-red-600 block">DANGER ZONE</span>
+                  <h4 className="font-black text-lg uppercase text-red-800">Permanently Delete Order</h4>
+                  <p className="text-xs font-bold text-gray-700 mt-0.5">
+                    Completely and irreversibly removes order #{selectedOrder._id.slice(-6).toUpperCase()} from the database.
+                  </p>
+                </div>
+                <button
+                  onClick={() => handleDeleteOrder(selectedOrder)}
+                  disabled={isDeletingOrder}
+                  className="bg-red-600 text-white font-black uppercase text-xs px-5 py-3.5 border-2 border-black shadow-[3px_3px_0px_rgba(0,0,0,1)] hover:bg-red-700 hover:translate-y-[1px] hover:shadow-[1px_1px_0px_rgba(0,0,0,1)] transition-all flex items-center gap-2"
+                >
+                  <Trash2 size={16} /> {isDeletingOrder ? 'Deleting...' : 'Delete Order From System'}
+                </button>
+              </div>
 
             </div>
           </div>

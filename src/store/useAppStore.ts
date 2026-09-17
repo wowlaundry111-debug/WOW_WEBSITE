@@ -68,6 +68,7 @@ interface AppState {
   cancelOrder: (orderId: string, reason?: string) => Promise<{ success: boolean; message?: string }>;
 
   // Actions - Shop Admin Operations
+  deleteOrder: (orderId: string) => Promise<{ success: boolean; message: string }>;
   updateOrderStatus: (orderId: string, status: OrderStatus, paymentMode?: PaymentMode, paymentStatus?: PaymentStatus) => Promise<void>;
   updateOrderAdminDetails: (orderId: string, updates: { totalAmount?: number, adminNotes?: string }) => Promise<void>;
   assignDeliveryBoy: (orderId: string, deliveryBoyId: string) => Promise<void>;
@@ -907,6 +908,24 @@ export const useAppStore = create<AppState>()(
       },
 
       // ── Admin Actions ────────────────────────────────────────────────────────
+      deleteOrder: async (orderId: string) => {
+        try {
+          const res = await api.delete(`/orders/${orderId}`);
+          if (res.data?.success) {
+            invalidateCache('/orders');
+            set(state => ({
+              orders: state.orders.filter(o => o._id !== orderId),
+              orderTotal: Math.max(0, (state.orderTotal || state.orders.length) - 1),
+            }));
+            return { success: true, message: 'Order deleted successfully' };
+          }
+          return { success: false, message: res.data?.error || 'Failed to delete order' };
+        } catch (err: any) {
+          const msg = err?.response?.data?.error || err.message || 'Failed to delete order';
+          return { success: false, message: msg };
+        }
+      },
+
       updateOrderStatus: async (orderId, status, paymentMode, paymentStatus) => {
         try {
           const payload: any = { status };

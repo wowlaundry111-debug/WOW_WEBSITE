@@ -44,6 +44,13 @@ export default function SocketManager() {
         }
       };
 
+      const onOrderDeleted = ({ orderId }) => {
+        useAppStore.setState((state) => ({
+          orders: state.orders.filter((o) => o._id !== orderId),
+          orderTotal: Math.max(0, (state.orderTotal || state.orders.length) - 1),
+        }));
+      };
+
       // ── Shop Events ──────────────────────────────────────────────────────────────
       const onShopCreated = (shop) => {
         useAppStore.setState((state) => ({
@@ -142,6 +149,7 @@ export default function SocketManager() {
       // Register listeners
       socket.on('order_created', onOrderCreated);
       socket.on('order_updated', onOrderUpdated);
+      socket.on('order_deleted', onOrderDeleted);
       socket.on('shop_created', onShopCreated);
       socket.on('shop_updated', onShopUpdated);
       socket.on('shop_deleted', onShopDeleted);
@@ -161,6 +169,7 @@ export default function SocketManager() {
       return () => {
         socket.off('order_created', onOrderCreated);
         socket.off('order_updated', onOrderUpdated);
+        socket.off('order_deleted', onOrderDeleted);
         socket.off('shop_created', onShopCreated);
         socket.off('shop_updated', onShopUpdated);
         socket.off('shop_deleted', onShopDeleted);
