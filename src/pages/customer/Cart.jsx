@@ -15,6 +15,15 @@ export default function Cart() {
   }, [initializeAppData]);
 
   // Structured Precise Delivery Address (Food App Style)
+  const isStaffOrBranchAdmin =
+    currentUser?.email?.toLowerCase().trim() === 'wowlaundry111@gmail.com' ||
+    currentUser?.role === 'SuperAdmin' ||
+    currentUser?.role === 'ShopAdmin';
+
+  const [walkInName, setWalkInName] = useState('');
+  const [walkInPhone, setWalkInPhone] = useState('');
+  const [walkInMode, setWalkInMode] = useState('BRANCH_PICKUP'); // 'BRANCH_PICKUP' | 'HOME_DELIVERY'
+
   const [addrTag, setAddrTag] = useState('Home');
   const [flatNo, setFlatNo] = useState('');
   const [area, setArea] = useState('');
@@ -40,6 +49,9 @@ export default function Cart() {
   }, [currentUser]);
 
   const computeFormattedAddress = () => {
+    if (isStaffOrBranchAdmin && walkInMode === 'BRANCH_PICKUP') {
+      return `In-Store Branch Drop-off / Walk-in Counter (${shop?.name || 'Shop Branch'})`;
+    }
     const parts = [
       flatNo.trim() ? (flatNo.trim().toLowerCase().startsWith('flat') || flatNo.trim().toLowerCase().startsWith('house') ? flatNo.trim() : `Flat/House: ${flatNo.trim()}`) : '',
       area.trim() ? area.trim() : '',
@@ -117,7 +129,8 @@ export default function Cart() {
   
   const taxPercent = shop?.taxPercent !== undefined ? Number(shop.taxPercent) : 5;
   const shopDeliveryFee = (shop?.deliveryFee !== undefined && shop?.deliveryFee !== null) ? Number(shop.deliveryFee) : 0;
-  const deliveryFee = hasKgItems ? shopDeliveryFee : (subtotal > 500 ? 0 : shopDeliveryFee);
+  const isWalkIn = isStaffOrBranchAdmin && walkInMode === 'BRANCH_PICKUP';
+  const deliveryFee = isWalkIn ? 0 : (hasKgItems ? shopDeliveryFee : (subtotal > 500 ? 0 : shopDeliveryFee));
   const tax = (subtotal * taxPercent) / 100;
   const discount = activeCoupon ? Math.min((subtotal * activeCoupon.discountPercent) / 100, activeCoupon.maxDiscount) : 0;
   const washPrefsCost = selectedWashPrefs.reduce((sum, p) => sum + p.price, 0);
@@ -142,9 +155,22 @@ export default function Cart() {
       setError('This branch is currently closed and not accepting orders.');
       return;
     }
+
+    if (isStaffOrBranchAdmin) {
+      if (!walkInName.trim()) {
+        setError('Please enter the walk-in customer\'s full name.');
+        return;
+      }
+      const cleanPhone = walkInPhone.replace(/\D/g, '');
+      if (cleanPhone.length < 10) {
+        setError('Please enter a valid 10-digit mobile number for the walk-in customer.');
+        return;
+      }
+    }
+
     const finalAddress = computeFormattedAddress();
     if (!finalAddress.trim()) {
-      setError('Please provide your delivery address.');
+      setError('Please provide customer delivery address.');
       return;
     }
     const minOrderValue = shop?.minOrderValue || 0;
@@ -156,7 +182,17 @@ export default function Cart() {
     setLoading(true);
     setError('');
     
-    const res = await placeOrder(finalAddress, pickupTime, selectedWashPrefs);
+    const res = await placeOrder(
+      finalAddress,
+      pickupTime,
+      selectedWashPrefs,
+      isStaffOrBranchAdmin ? {
+        name: walkInName.trim(),
+        phone: walkInPhone.replace(/\D/g, ''),
+        address: finalAddress,
+        isWalkIn: walkInMode === 'BRANCH_PICKUP',
+      } : undefined
+    );
     
     setLoading(false);
 
@@ -229,73 +265,167 @@ export default function Cart() {
             </div>
           )}
 
+          {/* Walk-in Counter Order POS Card (for Staff & wowlaundry111@gmail.com) */}
+          {isStaffOrBranchAdmin && (
+            <div className="bg-[#9AE600] border-2 border-black rounded-2xl sm:rounded-3xl p-4 sm:p-5 shadow-[4px_4px_0px_rgba(0,0,0,1)]">
+              <div className="flex items-center justify-between mb-3 border-b-2 border-black pb-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-xl">🏬</span>
+                  <h3 className="font-black text-black text-sm sm:text-base uppercase tracking-wider lilita-one-regular">
+                    Walk-in Customer Details
+                  </h3>
+                </div>
+                <span className="bg-black text-[#9AE600] text-[10px] font-black px-2.5 py-1 rounded-full uppercase tracking-widest border border-black shadow-[1px_1px_0px_rgba(0,0,0,1)]">
+                  Branch POS Mode
+                </span>
+              </div>
+
+              <div className="space-y-3">
+                {/* Customer Name */}
+                <div>
+                  <label className="block text-[11px] font-black text-black mb-1 uppercase tracking-wider">
+                    Customer Full Name *
+                  </label>
+                  <input
+                    type="text"
+                    value={walkInName}
+                    onChange={(e) => setWalkInName(e.target.value)}
+                    placeholder="Enter customer's name (e.g. Rahul Sharma)"
+                    className="w-full bg-white border-2 border-black rounded-xl p-2.5 text-black font-extrabold focus:outline-none text-xs sm:text-sm shadow-[2px_2px_0px_rgba(0,0,0,1)]"
+                    required
+                  />
+                </div>
+
+                {/* Customer Phone */}
+                <div>
+                  <label className="block text-[11px] font-black text-black mb-1 uppercase tracking-wider">
+                    Customer Phone Number (10 Digits) *
+                  </label>
+                  <input
+                    type="tel"
+                    value={walkInPhone}
+                    onChange={(e) => setWalkInPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                    placeholder="Enter 10-digit mobile number"
+                    className="w-full bg-white border-2 border-black rounded-xl p-2.5 text-black font-extrabold focus:outline-none text-xs sm:text-sm shadow-[2px_2px_0px_rgba(0,0,0,1)] tracking-wider"
+                    required
+                  />
+                </div>
+
+                {/* Order Type Toggle */}
+                <div>
+                  <label className="block text-[11px] font-black text-black mb-1 uppercase tracking-wider">
+                    Order Delivery Mode
+                  </label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setWalkInMode('BRANCH_PICKUP')}
+                      className={`py-2 px-3 rounded-xl border-2 border-black font-black text-xs uppercase transition-all flex items-center justify-center gap-1.5 ${
+                        walkInMode === 'BRANCH_PICKUP'
+                          ? 'bg-black text-[#9AE600] shadow-[2px_2px_0px_rgba(0,0,0,1)]'
+                          : 'bg-white text-black hover:bg-gray-100'
+                      }`}
+                    >
+                      <span>🏢 In-Store Drop-off (₹0)</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setWalkInMode('HOME_DELIVERY')}
+                      className={`py-2 px-3 rounded-xl border-2 border-black font-black text-xs uppercase transition-all flex items-center justify-center gap-1.5 ${
+                        walkInMode === 'HOME_DELIVERY'
+                          ? 'bg-black text-[#9AE600] shadow-[2px_2px_0px_rgba(0,0,0,1)]'
+                          : 'bg-white text-black hover:bg-gray-100'
+                      }`}
+                    >
+                      <span>🚚 Home Delivery</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Delivery Details */}
           <div className="bg-[#9AE600] rounded-2xl sm:rounded-3xl border-2 border-black p-4 sm:p-5 shadow-[4px_4px_0px_rgba(0,0,0,1)]">
             <div className="flex items-center gap-2 mb-3.5 bg-black text-[#9AE600] py-1.5 px-3 rounded-lg border-2 border-black shadow-[-2px_2px_0px_white] inline-flex">
               <MapPin size={18} strokeWidth={3} />
-              <h2 className="font-black text-sm sm:text-base uppercase lilita-one-regular tracking-wider">Delivery Address</h2>
+              <h2 className="font-black text-sm sm:text-base uppercase lilita-one-regular tracking-wider">
+                {isStaffOrBranchAdmin && walkInMode === 'BRANCH_PICKUP' ? 'Branch Drop-off Location' : 'Delivery Address'}
+              </h2>
             </div>
             
-            <div className="space-y-3">
-              {/* Address Tag Selector */}
-              <div>
-                <label className="block text-[11px] font-black text-black mb-1 uppercase tracking-wider">
-                  Save Address As
-                </label>
-                <div className="grid grid-cols-3 gap-2">
-                  {[
-                    { tag: 'Home', label: 'Home', icon: Home },
-                    { tag: 'Work', label: 'Work', icon: Briefcase },
-                    { tag: 'Other', label: 'Other', icon: MapPin }
-                  ].map(t => {
-                    const IconComponent = t.icon;
-                    const isSelected = addrTag === t.tag;
-                    return (
-                      <button
-                        key={t.tag}
-                        type="button"
-                        onClick={() => setAddrTag(t.tag)}
-                        className={`py-1.5 px-2 rounded-xl border-2 border-black font-black text-xs transition-all flex items-center justify-center gap-1.5 ${
-                          isSelected
-                            ? 'bg-black text-[#9AE600] shadow-[2px_2px_0px_rgba(0,0,0,1)]'
-                            : 'bg-white text-black hover:bg-gray-100'
-                        }`}
-                      >
-                        <IconComponent size={13} strokeWidth={2.5} />
-                        <span>{t.label}</span>
-                      </button>
-                    );
-                  })}
+            {isStaffOrBranchAdmin && walkInMode === 'BRANCH_PICKUP' ? (
+              <div className="bg-white border-2 border-black rounded-xl p-3.5 shadow-[2px_2px_0px_rgba(0,0,0,1)]">
+                <p className="text-xs font-black uppercase text-black">
+                  🏢 In-Store Walk-in Drop-off
+                </p>
+                <p className="text-[11px] font-extrabold text-gray-700 mt-1">
+                  Customer is placing and dropping off laundry directly at <span className="text-black font-black underline">{shop?.name || 'the shop branch'}</span>. No home delivery fee applies.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {/* Address Tag Selector */}
+                <div>
+                  <label className="block text-[11px] font-black text-black mb-1 uppercase tracking-wider">
+                    Save Address As
+                  </label>
+                  <div className="grid grid-cols-3 gap-2">
+                    {[
+                      { tag: 'Home', label: 'Home', icon: Home },
+                      { tag: 'Work', label: 'Work', icon: Briefcase },
+                      { tag: 'Other', label: 'Other', icon: MapPin }
+                    ].map(t => {
+                      const IconComponent = t.icon;
+                      const isSelected = addrTag === t.tag;
+                      return (
+                        <button
+                          key={t.tag}
+                          type="button"
+                          onClick={() => setAddrTag(t.tag)}
+                          className={`py-1.5 px-2 rounded-xl border-2 border-black font-black text-xs transition-all flex items-center justify-center gap-1.5 ${
+                            isSelected
+                              ? 'bg-black text-[#9AE600] shadow-[2px_2px_0px_rgba(0,0,0,1)]'
+                              : 'bg-white text-black hover:bg-gray-100'
+                          }`}
+                        >
+                          <IconComponent size={13} strokeWidth={2.5} />
+                          <span>{t.label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Field 1: Flat / House No */}
+                <div>
+                  <label className="block text-[11px] font-black text-black mb-1 uppercase tracking-wider">
+                    House / Flat / Building
+                  </label>
+                  <input 
+                    type="text"
+                    value={flatNo}
+                    onChange={(e) => setFlatNo(e.target.value)}
+                    placeholder="e.g. Flat 402, Palm Heights"
+                    className="w-full bg-white border-2 border-black rounded-xl p-2.5 text-black font-extrabold focus:outline-none text-xs sm:text-sm shadow-[2px_2px_0px_rgba(0,0,0,1)]"
+                  />
+                </div>
+
+                {/* Field 2: Area & Street */}
+                <div>
+                  <label className="block text-[11px] font-black text-black mb-1 uppercase tracking-wider">
+                    Area, Street & City
+                  </label>
+                  <input 
+                    type="text"
+                    value={area}
+                    onChange={(e) => setArea(e.target.value)}
+                    placeholder="e.g. Lawgate, Hostel Block 1"
+                    className="w-full bg-white border-2 border-black rounded-xl p-2.5 text-black font-extrabold focus:outline-none text-xs sm:text-sm shadow-[2px_2px_0px_rgba(0,0,0,1)]"
+                  />
                 </div>
               </div>
-
-              {/* Field 1: Flat / House No */}
-              <div>
-                <label className="block text-[11px] font-black text-black mb-1 uppercase tracking-wider">
-                  House / Flat / Building
-                </label>
-                <input 
-                  type="text"
-                  value={flatNo}
-                  onChange={(e) => setFlatNo(e.target.value)}
-                  placeholder="e.g. Flat 402, Palm Heights"
-                  className="w-full bg-white border-2 border-black rounded-xl p-2.5 text-black font-extrabold focus:outline-none text-xs sm:text-sm shadow-[2px_2px_0px_rgba(0,0,0,1)]"
-                />
-              </div>
-
-              {/* Field 2: Area & Street */}
-              <div>
-                <label className="block text-[11px] font-black text-black mb-1 uppercase tracking-wider">
-                  Area, Street & City
-                </label>
-                <input 
-                  type="text"
-                  value={area}
-                  onChange={(e) => setArea(e.target.value)}
-                  placeholder="e.g. Lawgate, Hostel Block 1"
-                  className="w-full bg-white border-2 border-black rounded-xl p-2.5 text-black font-extrabold focus:outline-none text-xs sm:text-sm shadow-[2px_2px_0px_rgba(0,0,0,1)]"
-                />
-              </div>
+            )}
 
               {/* Pickup Schedule Accordion Card */}
               <div className="pt-1">
@@ -383,7 +513,6 @@ export default function Cart() {
                 </div>
               </div>
             </div>
-          </div>
 
           {/* Wash Add-ons & Preferences */}
           {availableWashPrefs.length > 0 && (

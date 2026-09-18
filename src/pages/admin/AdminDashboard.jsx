@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Navigate } from 'react-router-dom';
 import { useAppStore } from '../../store/useAppStore';
 import Navbar from '../../components/Navbar';
 import { 
@@ -45,6 +45,12 @@ export default function AdminDashboard() {
   } = useAppStore();
   
   const navigate = useNavigate();
+
+  // wowlaundry111@gmail.com should NEVER see the Admin Dashboard under any condition
+  if (currentUser?.email?.toLowerCase().trim() === 'wowlaundry111@gmail.com') {
+    return <Navigate to="/shop-select" replace />;
+  }
+
   const isSuperAdmin = currentUser?.role === 'SuperAdmin';
   
   // Default tab based on role and context
@@ -73,7 +79,11 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     if (!currentUser || (currentUser.role !== 'ShopAdmin' && currentUser.role !== 'SuperAdmin')) {
-      navigate('/login');
+      if (currentUser?.email?.toLowerCase().trim() === 'wowlaundry111@gmail.com') {
+        navigate('/shop-select', { replace: true });
+      } else {
+        navigate('/login', { replace: true });
+      }
       return;
     }
     

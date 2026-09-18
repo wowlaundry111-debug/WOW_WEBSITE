@@ -45,6 +45,8 @@ export default function Navbar() {
 
   const getDashboardLink = () => {
     if (!currentUser) return null;
+    const isSpecial = (currentUser.email || '').toLowerCase().trim() === 'wowlaundry111@gmail.com';
+    if (isSpecial) return '/order-history';
     if (currentUser.role === 'SuperAdmin' || currentUser.role === 'ShopAdmin') return '/admin';
     if (currentUser.role === 'Delivery') return '/delivery';
     if (currentUser.role === 'Operator') return '/operator';
@@ -92,13 +94,13 @@ export default function Navbar() {
 
 
           <div className="flex items-center gap-4 sm:gap-6">
-            {(!currentUser || currentUser.role === 'Customer') && (
+            {(!currentUser || currentUser.role === 'Customer' || currentUser.email?.toLowerCase().trim() === 'wowlaundry111@gmail.com' || currentUser.role === 'SuperAdmin' || currentUser.role === 'ShopAdmin') && (
               <Link to="/order" className="text-black hover:text-[#0D8DE3] font-black text-sm uppercase tracking-widest hidden sm:block transition-colors">
-                Services
+                {currentUser && currentUser.email?.toLowerCase().trim() !== 'wowlaundry111@gmail.com' && (currentUser.role === 'SuperAdmin' || currentUser.role === 'ShopAdmin') ? '🛍️ Walk-in POS' : 'Services'}
               </Link>
             )}
 
-            {(!currentUser || currentUser.role === 'Customer') && (
+            {(!currentUser || currentUser.role === 'Customer' || currentUser.email?.toLowerCase().trim() === 'wowlaundry111@gmail.com' || currentUser.role === 'SuperAdmin' || currentUser.role === 'ShopAdmin') && (
               <Link to="/cart" aria-label={`Shopping Cart${cartItemsCount > 0 ? `, ${cartItemsCount} items` : ''}`} className="relative p-1.5 bg-white border-2 border-black rounded-xl text-black hover:bg-black hover:text-[#9AE600] shadow-[2px_2px_0px_rgba(0,0,0,1)] transition-colors">
                 <ShoppingCart size={20} strokeWidth={3} />
                 {cartItemsCount > 0 && (
@@ -140,8 +142,8 @@ export default function Navbar() {
                       onClick={() => setShowMenu(false)}
                       className="flex items-center gap-3 px-5 py-3 text-sm font-black text-black hover:bg-[#9AE600] hover:border-y-4 hover:border-black uppercase tracking-widest transition-colors"
                     >
-                      {currentUser.role === 'Customer' ? <Package size={20} strokeWidth={3} /> : <LayoutDashboard size={20} strokeWidth={3} />}
-                      {currentUser.role === 'Customer' ? 'My Orders' : 'Dashboard'}
+                      {currentUser.role === 'Customer' || currentUser.email?.toLowerCase().trim() === 'wowlaundry111@gmail.com' ? <Package size={20} strokeWidth={3} /> : <LayoutDashboard size={20} strokeWidth={3} />}
+                      {currentUser.role === 'Customer' || currentUser.email?.toLowerCase().trim() === 'wowlaundry111@gmail.com' ? 'My Orders' : 'Dashboard'}
                     </Link>
                     
                     <button 

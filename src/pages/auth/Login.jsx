@@ -12,8 +12,14 @@ export default function Login() {
   const [error, setError] = useState('');
   const [otpMessage, setOtpMessage] = useState('');
 
-  const { sendLoginOtp, verifyLoginOtp } = useAppStore();
+  const { sendLoginOtp, verifyLoginOtp, currentUser } = useAppStore();
   const navigate = useNavigate();
+
+  React.useEffect(() => {
+    if (currentUser?.email?.toLowerCase().trim() === 'wowlaundry111@gmail.com') {
+      navigate('/shop-select', { replace: true });
+    }
+  }, [currentUser, navigate]);
 
   const handleSendOTP = async (e) => {
     e.preventDefault();
@@ -28,8 +34,13 @@ export default function Login() {
           setOtpMessage(res.message);
           setStep('OTP');
         } else {
-          // Direct login (staff member or password authenticated)
+          // Direct login (staff member or special counter user)
           const user = useAppStore.getState().currentUser;
+          const isSpecial = (user?.email || email || '').toLowerCase().trim() === 'wowlaundry111@gmail.com';
+          if (isSpecial) {
+            navigate('/shop-select', { replace: true });
+            return;
+          }
           const role = user?.role === 'Admin' ? 'ShopAdmin' : user?.role;
           if (role === 'SuperAdmin' || role === 'ShopAdmin') {
             navigate('/admin');
@@ -65,6 +76,11 @@ export default function Login() {
       const res = await verifyLoginOtp(email.trim().toLowerCase(), code);
       if (res.success) {
         const user = useAppStore.getState().currentUser;
+        const isSpecial = (user?.email || email || '').toLowerCase().trim() === 'wowlaundry111@gmail.com';
+        if (isSpecial) {
+          navigate('/shop-select', { replace: true });
+          return;
+        }
         const role = user?.role === 'Admin' ? 'ShopAdmin' : user?.role;
         if (role === 'SuperAdmin' || role === 'ShopAdmin') {
           navigate('/admin');

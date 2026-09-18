@@ -23,23 +23,40 @@ const OperatorPortal = lazy(() => import('./pages/operator/OperatorPortal'));
 
 // ── Route Guards ──────────────────────────────────────────────────────────────
 
-// Customer-only route: must be logged in AND have a shop selected
+// Customer-only or Staff POS route: must be logged in AND have a shop selected
 const ProtectedCustomerRoute = () => {
   const { currentUser, currentTenantId } = useAppStore();
   if (!currentUser) return <Navigate to="/login" replace />;
-  if (currentUser.role !== 'Customer') return <Navigate to="/" replace />;
+  const isAllowed =
+    currentUser.role === 'Customer' ||
+    currentUser.email?.toLowerCase().trim() === 'wowlaundry111@gmail.com' ||
+    currentUser.role === 'SuperAdmin' ||
+    currentUser.role === 'ShopAdmin';
+  if (!isAllowed) return <Navigate to="/" replace />;
   if (!currentTenantId) return <Navigate to="/shop-select" replace />;
   return <Outlet />;
 };
 
-// Shop-select: logged in required, routes staff directly to their dashboard
+// Shop-select: logged in required, routes delivery/operator directly to their dashboard
 const ProtectedShopSelectRoute = () => {
   const currentUser = useAppStore((state) => state.currentUser);
   if (!currentUser) return <Navigate to="/login" replace />;
-  if (currentUser.role === 'SuperAdmin' || currentUser.role === 'ShopAdmin') return <Navigate to="/admin" replace />;
   if (currentUser.role === 'Delivery') return <Navigate to="/delivery" replace />;
   if (currentUser.role === 'Operator') return <Navigate to="/operator" replace />;
   return <ShopSelect />;
+};
+
+// Staff Admin route: blocks wowlaundry111@gmail.com and customers from admin pages
+const ProtectedAdminRoute = () => {
+  const currentUser = useAppStore((state) => state.currentUser);
+  if (!currentUser) return <Navigate to="/login" replace />;
+  if (currentUser.email?.toLowerCase().trim() === 'wowlaundry111@gmail.com') {
+    return <Navigate to="/shop-select" replace />;
+  }
+  if (currentUser.role !== 'ShopAdmin' && currentUser.role !== 'SuperAdmin') {
+    return <Navigate to="/shop-select" replace />;
+  }
+  return <AdminDashboard />;
 };
 
 function SkeletonFallback() {
@@ -119,7 +136,7 @@ function App() {
             </Route>
 
             {/* Staff routes — protected by role inside the dashboards themselves */}
-            <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/admin" element={<ProtectedAdminRoute />} />
             <Route path="/delivery" element={<DeliveryDashboard />} />
             <Route path="/operator" element={<OperatorPortal />} />
 
