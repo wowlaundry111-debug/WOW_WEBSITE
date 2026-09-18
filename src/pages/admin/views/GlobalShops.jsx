@@ -28,7 +28,8 @@ export default function GlobalShops({
   // App Links State for Super Admin Overview
   const [appLinksForm, setAppLinksForm] = useState({
     androidAppUrl: shops[0]?.androidAppUrl || '',
-    iosAppUrl: shops[0]?.iosAppUrl || ''
+    iosAppUrl: shops[0]?.iosAppUrl || '',
+    partnerAppUrl: shops[0]?.partnerAppUrl || ''
   });
   const [isSavingAppLinks, setIsSavingAppLinks] = useState(false);
 
@@ -36,7 +37,8 @@ export default function GlobalShops({
     if (shops && shops.length > 0) {
       setAppLinksForm({
         androidAppUrl: shops[0].androidAppUrl || '',
-        iosAppUrl: shops[0].iosAppUrl || ''
+        iosAppUrl: shops[0].iosAppUrl || '',
+        partnerAppUrl: shops[0].partnerAppUrl || ''
       });
     }
   }, [shops]);
@@ -49,7 +51,8 @@ export default function GlobalShops({
       await Promise.all(
         shops.map(s => updateShop(s._id, {
           androidAppUrl: appLinksForm.androidAppUrl ? appLinksForm.androidAppUrl.trim() : '',
-          iosAppUrl: appLinksForm.iosAppUrl ? appLinksForm.iosAppUrl.trim() : ''
+          iosAppUrl: appLinksForm.iosAppUrl ? appLinksForm.iosAppUrl.trim() : '',
+          partnerAppUrl: appLinksForm.partnerAppUrl ? appLinksForm.partnerAppUrl.trim() : ''
         }))
       );
       alert('Platform Mobile App Download Links updated successfully across all branches!');
@@ -304,11 +307,11 @@ export default function GlobalShops({
           </button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
-          {/* Android APK Link */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
+          {/* Customer Android APK Link */}
           <div>
             <label className="block text-xs font-black uppercase mb-1.5 text-black">
-              Android APK / Google Drive Direct Link
+              Customer Android APK Link
             </label>
             <input
               type="text"
@@ -318,7 +321,24 @@ export default function GlobalShops({
               className="w-full bg-gray-50 border-2 border-black p-3 font-mono text-xs font-bold outline-none focus:bg-[#9AE600]/10 rounded-xl"
             />
             <p className="text-[10px] font-bold text-gray-500 mt-1.5 uppercase">
-              Tip: Paste any Google Drive link here. The website converts it to a direct download link automatically.
+              Customer app direct download link on website.
+            </p>
+          </div>
+
+          {/* Partner Android APK Link */}
+          <div>
+            <label className="block text-xs font-black uppercase mb-1.5 text-black">
+              WoW Partner App APK Link (Staff / Delivery)
+            </label>
+            <input
+              type="text"
+              placeholder="https://drive.google.com/file/d/.../view or direct .apk link"
+              value={appLinksForm.partnerAppUrl}
+              onChange={(e) => setAppLinksForm({ ...appLinksForm, partnerAppUrl: e.target.value })}
+              className="w-full bg-gray-50 border-2 border-black p-3 font-mono text-xs font-bold outline-none focus:bg-[#9AE600]/10 rounded-xl"
+            />
+            <p className="text-[10px] font-bold text-gray-500 mt-1.5 uppercase">
+              Operations & Partner app APK for Admins, Drivers, Operators.
             </p>
           </div>
 
@@ -335,7 +355,7 @@ export default function GlobalShops({
               className="w-full bg-gray-50 border-2 border-black p-3 font-mono text-xs font-bold outline-none focus:bg-[#9AE600]/10 rounded-xl"
             />
             <p className="text-[10px] font-bold text-gray-500 mt-1.5 uppercase">
-              Note: Leave blank to show the "iOS App Coming Soon!" interactive modal on website.
+              Note: Leave blank to show the "iOS App Coming Soon!" modal on website.
             </p>
           </div>
         </div>
