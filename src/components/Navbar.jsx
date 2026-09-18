@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAppStore } from '../store/useAppStore';
-import { ShoppingCart, User, LogOut, LayoutDashboard, Package, Store, X, Phone, Mail, Shield } from 'lucide-react';
+import { ShoppingCart, User, LogOut, LayoutDashboard, Package, Store, X, Phone, Mail, Shield, ShoppingBag } from 'lucide-react';
 import logo from '../assets/logo.webp';
 import { setAuthToken } from '../services/api';
 import { sortShopsWithLpuFirst } from '../utils/branchHelper';
@@ -96,7 +96,9 @@ export default function Navbar() {
           <div className="flex items-center gap-4 sm:gap-6">
             {(!currentUser || currentUser.role === 'Customer' || currentUser.email?.toLowerCase().trim() === 'wowlaundry111@gmail.com' || currentUser.role === 'SuperAdmin' || currentUser.role === 'ShopAdmin') && (
               <Link to="/order" className="text-black hover:text-[#0D8DE3] font-black text-sm uppercase tracking-widest hidden sm:block transition-colors">
-                {currentUser && currentUser.email?.toLowerCase().trim() !== 'wowlaundry111@gmail.com' && (currentUser.role === 'SuperAdmin' || currentUser.role === 'ShopAdmin') ? '🛍️ Walk-in POS' : 'Services'}
+                {currentUser && currentUser.email?.toLowerCase().trim() !== 'wowlaundry111@gmail.com' && (currentUser.role === 'SuperAdmin' || currentUser.role === 'ShopAdmin') ? (
+                  <span className="inline-flex items-center gap-1.5"><ShoppingBag size={16} strokeWidth={2.5} /> Walk-in POS</span>
+                ) : 'Services'}
               </Link>
             )}
 

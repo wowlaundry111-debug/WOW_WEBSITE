@@ -102,7 +102,7 @@ export default function OrderBoard({
     if (!order) return;
     const orderNum = order._id.slice(-6).toUpperCase();
     const confirmed = window.confirm(
-      `⚠️ ARE YOU SURE YOU WANT TO PERMANENTLY DELETE ORDER #${orderNum}?\n\nThis will remove the order completely from the database and system. This action CANNOT be undone.`
+      `ARE YOU SURE YOU WANT TO PERMANENTLY DELETE ORDER #${orderNum}?\n\nThis will remove the order completely from the database and system. This action CANNOT be undone.`
     );
     if (!confirmed) return;
 

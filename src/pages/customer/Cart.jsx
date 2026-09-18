@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '../../store/useAppStore';
-import { ArrowLeft, Trash2, Plus, Minus, MapPin, CheckCircle2, Receipt, AlertTriangle, Sparkles, Check, Home, Briefcase, Scale, Clock, Tag, ChevronDown, ChevronUp } from 'lucide-react';
+import { ArrowLeft, Trash2, Plus, Minus, MapPin, CheckCircle2, Receipt, AlertTriangle, Sparkles, Check, Home, Briefcase, Scale, Clock, Tag, ChevronDown, ChevronUp, Store, Truck } from 'lucide-react';
 
 export default function Cart() {
   const navigate = useNavigate();
@@ -270,7 +270,7 @@ export default function Cart() {
             <div className="bg-[#9AE600] border-2 border-black rounded-2xl sm:rounded-3xl p-4 sm:p-5 shadow-[4px_4px_0px_rgba(0,0,0,1)]">
               <div className="flex items-center justify-between mb-3 border-b-2 border-black pb-2">
                 <div className="flex items-center gap-2">
-                  <span className="text-xl">🏬</span>
+                  <Store size={20} strokeWidth={2.5} className="text-black" />
                   <h3 className="font-black text-black text-sm sm:text-base uppercase tracking-wider lilita-one-regular">
                     Walk-in Customer Details
                   </h3>
@@ -326,7 +326,8 @@ export default function Cart() {
                           : 'bg-white text-black hover:bg-gray-100'
                       }`}
                     >
-                      <span>🏢 In-Store Drop-off (₹0)</span>
+                      <Store size={14} strokeWidth={2.5} />
+                      <span>In-Store Drop-off (₹0)</span>
                     </button>
                     <button
                       type="button"
@@ -337,7 +338,8 @@ export default function Cart() {
                           : 'bg-white text-black hover:bg-gray-100'
                       }`}
                     >
-                      <span>🚚 Home Delivery</span>
+                      <Truck size={14} strokeWidth={2.5} />
+                      <span>Home Delivery</span>
                     </button>
                   </div>
                 </div>
@@ -356,8 +358,9 @@ export default function Cart() {
             
             {isStaffOrBranchAdmin && walkInMode === 'BRANCH_PICKUP' ? (
               <div className="bg-white border-2 border-black rounded-xl p-3.5 shadow-[2px_2px_0px_rgba(0,0,0,1)]">
-                <p className="text-xs font-black uppercase text-black">
-                  🏢 In-Store Walk-in Drop-off
+                <p className="text-xs font-black uppercase text-black flex items-center gap-1.5">
+                  <Store size={15} strokeWidth={2.5} className="text-[#0D8DE3]" />
+                  In-Store Walk-in Drop-off
                 </p>
                 <p className="text-[11px] font-extrabold text-gray-700 mt-1">
                   Customer is placing and dropping off laundry directly at <span className="text-black font-black underline">{shop?.name || 'the shop branch'}</span>. No home delivery fee applies.
