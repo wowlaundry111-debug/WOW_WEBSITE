@@ -120,6 +120,7 @@ export interface CartItem {
   unit: 'KG' | 'ITEM';
   price: number;
   pricePerKg?: number;
+  kgWeight?: number;
   image?: string;
   categoryName?: string;
   subCategoryName?: string;

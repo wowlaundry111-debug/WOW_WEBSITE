@@ -41,6 +41,18 @@ export default function OrderBoard({
   const [kgWeights, setKgWeights] = useState({});
   const [isUpdatingKg, setIsUpdatingKg] = useState(false);
 
+  // Admin Payment QR Modal State
+  const [paymentModalOrder, setPaymentModalOrder] = useState(null);
+
+  const handlePaymentConfirm = async (mode) => {
+    if (!paymentModalOrder) return;
+    await updateOrderStatus(paymentModalOrder._id, 'DELIVERED', mode, 'SUCCESS');
+    if (selectedOrder && selectedOrder._id === paymentModalOrder._id) {
+      setSelectedOrder(prev => prev ? ({ ...prev, status: 'DELIVERED', paymentMode: mode, paymentStatus: 'SUCCESS' }) : null);
+    }
+    setPaymentModalOrder(null);
+  };
+
   const isKgItem = (it) => it?.unit === 'KG' || (typeof it?.name === 'string' && (it.name.toLowerCase().includes('per kg') || it.name.toLowerCase().includes('/ kg'))) || Boolean(it?.kgWeight && it.kgWeight > 0);
 
   const handleOpenWeighModal = (order) => {
@@ -742,7 +754,7 @@ export default function OrderBoard({
                     {order.status === 'OUT_FOR_DELIVERY' && (
                       <div className="flex gap-2 w-full">
                         <button 
-                          onClick={() => handleStatusUpdate(order._id, 'DELIVERED')}
+                          onClick={() => setPaymentModalOrder(order)}
                           className="flex-1 bg-[#9AE600] text-black border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] py-2 font-black uppercase text-xs sm:text-sm hover:translate-y-[1px] hover:shadow-[1px_1px_0px_rgba(0,0,0,1)] transition-all"
                         >
                           Mark Delivered
@@ -1236,6 +1248,22 @@ export default function OrderBoard({
                 </div>
               )}
 
+              {/* Delivery & Payment Collection in Details Modal */}
+              {selectedOrder.status === 'OUT_FOR_DELIVERY' && (
+                <div className="border-4 border-black p-5 bg-[#9AE600]/20 space-y-3 mt-6">
+                  <div>
+                    <h3 className="font-black text-base sm:text-lg uppercase text-black">Collect Payment & Complete</h3>
+                    <p className="text-xs font-bold text-gray-700">Display dynamic UPI QR code or accept cash to mark order delivered.</p>
+                  </div>
+                  <button
+                    onClick={() => setPaymentModalOrder(selectedOrder)}
+                    className="w-full bg-[#9AE600] text-black border-2 border-black shadow-[3px_3px_0px_rgba(0,0,0,1)] py-3 font-black uppercase text-sm hover:translate-y-[1px] hover:shadow-[1px_1px_0px_rgba(0,0,0,1)] transition-all flex items-center justify-center gap-2"
+                  >
+                    <CheckCircle2 size={18} /> Collect Payment & Mark Delivered
+                  </button>
+                </div>
+              )}
+
               {/* Readonly Admin Notes (Post-Wash Phase) */}
               {['OUT_FOR_DELIVERY', 'DELIVERED'].includes(selectedOrder.status) && selectedOrder.adminNotes && (
                 <div className="border-4 border-black p-6 bg-yellow-100 shadow-[6px_6px_0px_rgba(0,0,0,1)] mt-8">
@@ -1532,6 +1560,78 @@ export default function OrderBoard({
                 {isUpdatingKg ? 'Finalizing Bill & Status...' : 'Save & Mark Picked Up'}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─── PAYMENT COLLECTION MODAL (Admin & SuperAdmin) ───────── */}
+      {paymentModalOrder && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white border-4 border-black shadow-[12px_12px_0px_rgba(0,0,0,1)] w-full max-w-md text-center animate-scale-up">
+            <div className="p-6 bg-[#9AE600] border-b-4 border-black flex justify-between items-center">
+              <h2 className="text-2xl sm:text-3xl font-black uppercase text-black">Collect Payment</h2>
+              <button 
+                onClick={() => setPaymentModalOrder(null)} 
+                className="hover:bg-black hover:text-white rounded-full p-1 border-2 border-transparent hover:border-black transition-colors"
+              >
+                <X size={24} />
+              </button>
+            </div>
+            
+            <div className="p-6 sm:p-8 border-b-4 border-black">
+              <p className="font-bold text-gray-500 uppercase tracking-widest text-xs sm:text-sm mb-1">Total Amount Due</p>
+              <p className="text-4xl sm:text-5xl font-black text-[#0D8DE3] mb-6">₹{paymentModalOrder.totalAmount}</p>
+
+              {(() => {
+                const shop = shops.find(s => s._id === paymentModalOrder.shopId);
+                const upiId = shop?.paymentInfo?.upiId;
+                const qrData = shop?.paymentInfo?.qrValue 
+                  ? (shop.paymentInfo.qrValue.includes('&am=') ? shop.paymentInfo.qrValue : `${shop.paymentInfo.qrValue}&am=${paymentModalOrder.totalAmount}&tn=LaundryPayment`) 
+                  : (upiId ? `upi://pay?pa=${upiId}&pn=${encodeURIComponent(shop?.name || 'Laundry')}&am=${paymentModalOrder.totalAmount}&cu=INR` : null);
+
+                if (qrData) {
+                  return (
+                    <div className="border-4 border-black p-4 inline-block shadow-[4px_4px_0px_rgba(0,0,0,1)] bg-white mb-4">
+                      <img 
+                        src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(qrData)}`} 
+                        alt="UPI QR Code" 
+                        className="w-44 h-44 mx-auto"
+                      />
+                      {upiId && <p className="font-black mt-3 uppercase tracking-wider text-xs sm:text-sm">{upiId}</p>}
+                      <p className="text-xs text-gray-500 font-bold mt-1">Scan with any UPI app</p>
+                    </div>
+                  );
+                }
+                return (
+                  <div className="bg-red-50 border-2 border-red-500 p-4 mb-4 rounded-xl">
+                    <p className="font-black text-red-600 mb-1 text-sm">No UPI ID Configured</p>
+                    <p className="text-xs font-bold text-gray-600">Please collect cash or configure UPI ID in Shop Settings.</p>
+                  </div>
+                );
+              })()}
+            </div>
+            
+            <div className="p-5 sm:p-6 bg-gray-50 flex gap-4">
+              <button 
+                onClick={() => handlePaymentConfirm('COD')}
+                className="flex-1 bg-green-400 border-4 border-black py-3.5 sm:py-4 font-black uppercase hover:translate-y-[2px] shadow-[4px_4px_0px_rgba(0,0,0,1)] hover:shadow-none transition-all text-base sm:text-lg"
+              >
+                Cash
+              </button>
+              <button 
+                onClick={() => handlePaymentConfirm('UPI')}
+                className="flex-1 bg-[#0D8DE3] text-white border-4 border-black py-3.5 sm:py-4 font-black uppercase hover:translate-y-[2px] shadow-[4px_4px_0px_rgba(0,0,0,1)] hover:shadow-none transition-all text-base sm:text-lg"
+              >
+                Online
+              </button>
+            </div>
+            
+            <button 
+              onClick={() => setPaymentModalOrder(null)}
+              className="w-full border-t-4 border-black p-3.5 font-black uppercase hover:bg-gray-100 transition-colors text-sm"
+            >
+              Cancel
+            </button>
           </div>
         </div>
       )}

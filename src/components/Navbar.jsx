@@ -15,6 +15,14 @@ export default function Navbar() {
 
   const cartItemsCount = cart.reduce((total, item) => total + item.quantity, 0);
 
+  const isStaffOrBranchAdmin = Boolean(
+    currentUser && (
+      currentUser.email?.toLowerCase().trim() === 'wowlaundry111@gmail.com' ||
+      currentUser.role === 'SuperAdmin' ||
+      currentUser.role === 'ShopAdmin'
+    )
+  );
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
@@ -93,16 +101,25 @@ export default function Navbar() {
 
 
 
-          <div className="flex items-center gap-4 sm:gap-6">
-            {(!currentUser || currentUser.role === 'Customer' || currentUser.email?.toLowerCase().trim() === 'wowlaundry111@gmail.com' || currentUser.role === 'SuperAdmin' || currentUser.role === 'ShopAdmin') && (
-              <Link to="/order" className="text-black hover:text-[#0D8DE3] font-black text-sm uppercase tracking-widest hidden sm:block transition-colors">
-                {currentUser && currentUser.email?.toLowerCase().trim() !== 'wowlaundry111@gmail.com' && (currentUser.role === 'SuperAdmin' || currentUser.role === 'ShopAdmin') ? (
-                  <span className="inline-flex items-center gap-1.5"><ShoppingBag size={16} strokeWidth={2.5} /> Walk-in POS</span>
-                ) : 'Services'}
-              </Link>
+          <div className="flex items-center gap-2.5 sm:gap-6">
+            {(!currentUser || currentUser.role === 'Customer' || isStaffOrBranchAdmin) && (
+              isStaffOrBranchAdmin ? (
+                <Link 
+                  to="/order" 
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-[#9AE600] border-2 border-black rounded-xl text-black font-black text-xs sm:text-sm uppercase tracking-wider shadow-[2px_2px_0px_rgba(0,0,0,1)] hover:bg-[#88cc00] transition-transform active:translate-y-0.5"
+                  title="Walk-in POS"
+                >
+                  <ShoppingBag size={16} strokeWidth={2.5} />
+                  <span>Walk-in POS</span>
+                </Link>
+              ) : (
+                <Link to="/order" className="text-black hover:text-[#0D8DE3] font-black text-xs sm:text-sm uppercase tracking-widest transition-colors">
+                  Services
+                </Link>
+              )
             )}
 
-            {(!currentUser || currentUser.role === 'Customer' || currentUser.email?.toLowerCase().trim() === 'wowlaundry111@gmail.com' || currentUser.role === 'SuperAdmin' || currentUser.role === 'ShopAdmin') && (
+            {(!currentUser || currentUser.role === 'Customer' || isStaffOrBranchAdmin) && (
               <Link to="/cart" aria-label={`Shopping Cart${cartItemsCount > 0 ? `, ${cartItemsCount} items` : ''}`} className="relative p-1.5 bg-white border-2 border-black rounded-xl text-black hover:bg-black hover:text-[#9AE600] shadow-[2px_2px_0px_rgba(0,0,0,1)] transition-colors">
                 <ShoppingCart size={20} strokeWidth={3} />
                 {cartItemsCount > 0 && (
@@ -138,6 +155,16 @@ export default function Navbar() {
                     >
                       <User size={20} strokeWidth={3} /> My Profile
                     </button>
+
+                    {isStaffOrBranchAdmin && (
+                      <Link 
+                        to="/order" 
+                        onClick={() => setShowMenu(false)}
+                        className="flex items-center gap-3 px-5 py-3 text-sm font-black text-black hover:bg-[#9AE600] hover:border-y-4 hover:border-black uppercase tracking-widest transition-colors"
+                      >
+                        <ShoppingBag size={20} strokeWidth={3} /> Walk-in POS
+                      </Link>
+                    )}
 
                     <Link 
                       to={getDashboardLink()} 

@@ -5,7 +5,7 @@ import { ArrowLeft, Trash2, Plus, Minus, MapPin, CheckCircle2, Receipt, AlertTri
 
 export default function Cart() {
   const navigate = useNavigate();
-  const { cart, updateCartQuantity, clearCart, placeOrder, activeCoupon, applyCoupon, removeCoupon, shops, currentTenantId, currentUser, initializeAppData } = useAppStore();
+  const { cart, updateCartQuantity, setCartItemWeight, clearCart, placeOrder, activeCoupon, applyCoupon, removeCoupon, shops, currentTenantId, currentUser, initializeAppData } = useAppStore();
   
   const shop = shops.find(s => s._id === currentTenantId);
   const isClosed = shop?.isOpen === false;
@@ -123,14 +123,25 @@ export default function Cart() {
     return false;
   };
 
+  const calculateItemPrice = (c) => {
+    if (isKgItem(c)) {
+      if (c.kgWeight && Number(c.kgWeight) > 0) {
+        const rate = Number(c.pricePerKg) || Number(c.price) || 0;
+        return Math.round(Number(c.kgWeight) * rate * 100) / 100;
+      }
+      return 0; // pending weigh-in
+    }
+    return (c.price || 0) * (c.quantity || 1);
+  };
+
   const hasKgItems = cart.some(isKgItem);
-  const perItemSubtotal = cart.filter(c => !isKgItem(c)).reduce((sum, item) => sum + (item.price || 0) * item.quantity, 0);
-  const subtotal = perItemSubtotal;
+  const hasUnweighedKgItems = cart.some(c => isKgItem(c) && (!c.kgWeight || Number(c.kgWeight) <= 0));
+  const subtotal = cart.reduce((sum, item) => sum + calculateItemPrice(item), 0);
   
   const taxPercent = shop?.taxPercent !== undefined ? Number(shop.taxPercent) : 5;
   const shopDeliveryFee = (shop?.deliveryFee !== undefined && shop?.deliveryFee !== null) ? Number(shop.deliveryFee) : 0;
   const isWalkIn = isStaffOrBranchAdmin && walkInMode === 'BRANCH_PICKUP';
-  const deliveryFee = isWalkIn ? 0 : (hasKgItems ? shopDeliveryFee : (subtotal > 500 ? 0 : shopDeliveryFee));
+  const deliveryFee = isWalkIn ? 0 : (hasUnweighedKgItems ? shopDeliveryFee : (subtotal > 500 ? 0 : shopDeliveryFee));
   const tax = (subtotal * taxPercent) / 100;
   const discount = activeCoupon ? Math.min((subtotal * activeCoupon.discountPercent) / 100, activeCoupon.maxDiscount) : 0;
   const washPrefsCost = selectedWashPrefs.reduce((sum, p) => sum + p.price, 0);
@@ -633,8 +644,29 @@ export default function Cart() {
                         </p>
                       )}
                       {isKg ? (
-                        <div className="flex items-center gap-1 text-[10px] font-black text-[#0D8DE3] uppercase mt-0.5">
-                          <Scale size={11} strokeWidth={2.5} /> {item.pricePerKg ? `₹${item.pricePerKg}/kg · Weighed at pickup` : 'Weighed at pickup'}
+                        <div className="mt-0.5">
+                          <div className="flex items-center gap-1 text-[10px] font-black text-[#0D8DE3] uppercase">
+                            <Scale size={11} strokeWidth={2.5} /> {item.pricePerKg ? `₹${item.pricePerKg}/kg · Weighed at pickup` : 'Weighed at pickup'}
+                          </div>
+                          {isStaffOrBranchAdmin && (
+                            <div className="mt-1.5 flex items-center gap-1.5 bg-yellow-100 border-2 border-black p-1.5 rounded-xl shadow-[1px_1px_0px_rgba(0,0,0,1)]">
+                              <Scale size={13} strokeWidth={3} className="text-black shrink-0" />
+                              <span className="text-[10px] font-black uppercase text-black">Scale:</span>
+                              <input
+                                type="number"
+                                step="0.01"
+                                min="0.01"
+                                placeholder="0.00"
+                                value={item.kgWeight || ''}
+                                onChange={(e) => {
+                                  const val = parseFloat(e.target.value);
+                                  setCartItemWeight(item.itemId, isNaN(val) ? 0 : val);
+                                }}
+                                className="w-16 bg-white border-2 border-black rounded-lg px-1.5 py-0.5 text-xs font-black text-black text-center focus:outline-none shadow-[1px_1px_0px_rgba(0,0,0,1)]"
+                              />
+                              <span className="text-[10px] font-black uppercase text-black">KG</span>
+                            </div>
+                          )}
                         </div>
                       ) : (
                         <p className="text-xs text-gray-700 font-extrabold mt-0.5">₹{item.price} / {item.unit || 'Item'}</p>
@@ -643,7 +675,15 @@ export default function Cart() {
                     
                     <div className="flex flex-col items-end gap-2 shrink-0">
                       {isKg ? (
-                        <span className="font-black text-[10px] text-white bg-[#0D8DE3] px-2 py-0.5 border-2 border-black rounded-md uppercase tracking-wider">Pending</span>
+                        item.kgWeight && Number(item.kgWeight) > 0 ? (
+                          <span className="font-black text-black text-xs sm:text-sm bg-[#9AE600] px-2 py-0.5 border-2 border-black rounded-lg shadow-[1px_1px_0px_rgba(0,0,0,1)]">
+                            ₹{Math.round(Number(item.kgWeight) * (Number(item.pricePerKg) || Number(item.price) || 0) * 100) / 100}
+                          </span>
+                        ) : (
+                          <span className="font-black text-[10px] text-white bg-[#0D8DE3] px-2 py-0.5 border-2 border-black rounded-md uppercase tracking-wider">
+                            {isStaffOrBranchAdmin ? 'Add Wt' : 'Pending'}
+                          </span>
+                        )
                       ) : (
                         <span className="font-black text-black text-sm sm:text-base bg-[#9AE600] px-2 py-0.5 border-2 border-black rounded-lg">₹{(item.price || 0) * item.quantity}</span>
                       )}
