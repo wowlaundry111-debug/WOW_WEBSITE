@@ -847,7 +847,7 @@ export default function Cart() {
                       </div>
                     )}
                     <div className="pt-3 mt-2 border-t-2 border-black border-dashed">
-                      {hasKgItems ? (
+                      {hasUnweighedKgItems ? (
                         <div className="bg-[#9AE600] p-3 sm:p-4 rounded-xl border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)]">
                           <div className="flex justify-between items-center">
                             <div>
@@ -881,9 +881,9 @@ export default function Cart() {
         <div className="max-w-4xl mx-auto flex items-center justify-between gap-3">
           <div className="bg-white py-1 px-3 sm:py-2 sm:px-4 border-2 border-black rounded-xl shadow-[2px_2px_0px_rgba(0,0,0,1)] shrink-0">
             <p className="text-[10px] font-black text-black uppercase tracking-wider bg-[#9AE600] px-1.5 py-0.5 rounded border border-black inline-block">
-              {hasKgItems ? 'Pay After Pickup Weighing' : 'Pay via UPI / Cash'}
+              {hasUnweighedKgItems ? 'Pay After Pickup Weighing' : 'Pay via UPI / Cash'}
             </p>
-            {hasKgItems ? (
+            {hasUnweighedKgItems ? (
               <p className="font-black text-sm sm:text-lg text-black lilita-one-regular uppercase tracking-wider mt-0.5">
                 Pending Weighing
               </p>
