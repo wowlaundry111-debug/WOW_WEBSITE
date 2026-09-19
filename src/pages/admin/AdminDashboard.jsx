@@ -69,7 +69,7 @@ export default function AdminDashboard() {
   // Settings Form State
   const [isShopOpen, setIsShopOpen] = useState(true);
   const [settingsForm, setSettingsForm] = useState({
-    upiId: '', bankName: '', accountNo: '', minOrderValue: 0, taxPercent: 0, deliveryFee: 0, contactNumber: '', instructions: ''
+    upiId: '', bankName: '', accountNo: '', minOrderValue: 0, taxPercent: 0, deliveryFee: 0, contactNumber: '', email: '', instructions: ''
   });
   const [staffRole, setStaffRole] = useState('Operator'); // 'Operator' | 'Delivery'
   const [deliveryEmail, setDeliveryEmail] = useState('');
@@ -124,6 +124,7 @@ export default function AdminDashboard() {
         taxPercent: currentShop.taxPercent ?? 0,
         deliveryFee: currentShop.deliveryFee ?? 0,
         contactNumber: currentShop.contactNumber || '',
+        email: currentShop.email || '',
         instructions: currentShop.instructions || '',
         androidAppUrl: currentShop.androidAppUrl || '',
         iosAppUrl: currentShop.iosAppUrl || '',
@@ -194,6 +195,7 @@ export default function AdminDashboard() {
         taxPercent: Number(settingsForm.taxPercent || 0),
         deliveryFee: Number(settingsForm.deliveryFee || 0),
         contactNumber: settingsForm.contactNumber,
+        email: settingsForm.email ? settingsForm.email.trim() : undefined,
         instructions: settingsForm.instructions,
         androidAppUrl: settingsForm.androidAppUrl ? settingsForm.androidAppUrl.trim() : '',
         iosAppUrl: settingsForm.iosAppUrl ? settingsForm.iosAppUrl.trim() : '',

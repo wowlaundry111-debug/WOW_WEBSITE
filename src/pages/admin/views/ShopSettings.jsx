@@ -97,6 +97,17 @@ export default function ShopSettings({
             </div>
           </div>
 
+          <div>
+            <label className="block text-sm font-black uppercase mb-2">Branch Email ID</label>
+            <input 
+              type="email" 
+              value={settingsForm.email || ''}
+              onChange={e => setSettingsForm({...settingsForm, email: e.target.value})}
+              placeholder="branch@wowlaundry.com"
+              className="w-full bg-gray-50 border-2 border-black p-3 font-bold outline-none focus:bg-[#9AE600]/10" 
+            />
+          </div>
+
           {/* Payment Info */}
           <div>
             <label className="block text-sm font-black uppercase mb-2">Shop UPI ID</label>

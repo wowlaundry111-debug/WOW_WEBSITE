@@ -10,6 +10,7 @@ export default function SuperAdminShopDetail({ shopId, onBack, onOpenCatalog, on
 
   // Edit Shop Profile State
   const [shopName, setShopName] = useState(shop?.name || '');
+  const [branchEmail, setBranchEmail] = useState(shop?.email || '');
   const [branchStr, setBranchStr] = useState(shop?.branches?.join(', ') || '');
   const [upiId, setUpiId] = useState(shop?.paymentInfo?.upiId || '');
   const [bankName, setBankName] = useState(shop?.paymentInfo?.bankName || '');
@@ -26,6 +27,7 @@ export default function SuperAdminShopDetail({ shopId, onBack, onOpenCatalog, on
   React.useEffect(() => {
     if (shop) {
       setShopName(shop.name || '');
+      setBranchEmail(shop.email || '');
       setBranchStr(shop.branches?.join(', ') || '');
       setUpiId(shop.paymentInfo?.upiId || '');
       setBankName(shop.paymentInfo?.bankName || '');
@@ -71,6 +73,7 @@ export default function SuperAdminShopDetail({ shopId, onBack, onOpenCatalog, on
     try {
       await updateShop(shopId, {
         name: shopName,
+        email: branchEmail.trim(),
         branches: branchStr.split(',').map(s => s.trim()).filter(Boolean),
         isOpen,
         paymentInfo: {
@@ -192,13 +195,23 @@ export default function SuperAdminShopDetail({ shopId, onBack, onOpenCatalog, on
         <div className="bg-white border-4 border-black p-6 shadow-[6px_6px_0px_rgba(0,0,0,1)] space-y-6">
           <h2 className="text-xl font-black uppercase border-b-2 border-black pb-2">Edit Branch Information</h2>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
               <label className="block font-black text-xs uppercase mb-2">Shop / Branch Name</label>
               <input 
                 type="text" 
                 value={shopName} 
                 onChange={(e) => setShopName(e.target.value)} 
+                className="w-full border-2 border-black p-3 font-bold bg-white"
+              />
+            </div>
+            <div>
+              <label className="block font-black text-xs uppercase mb-2">Branch Email ID</label>
+              <input 
+                type="email" 
+                value={branchEmail} 
+                onChange={(e) => setBranchEmail(e.target.value)} 
+                placeholder="branch@wowlaundry.com"
                 className="w-full border-2 border-black p-3 font-bold bg-white"
               />
             </div>
