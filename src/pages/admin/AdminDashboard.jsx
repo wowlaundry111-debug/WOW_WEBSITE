@@ -14,6 +14,7 @@ import CatalogManager from './views/CatalogManager';
 import GlobalShops from './views/GlobalShops';
 import GlobalUsers from './views/GlobalUsers';
 import ShopSettings from './views/ShopSettings';
+import { isBranchOrderCheck } from '../../utils/orderUtils';
 
 const FILTERS = [
   { key: 'new',      label: 'New Orders',      statuses: ['PLACED', 'ACCEPTED', 'PICKUP_ASSIGNED'] },
@@ -28,21 +29,8 @@ const SERVICE_LABEL_FOR_CATEGORY = (catName) => {
   return { label: 'Standard Wash & Fold', icon: 'WASH', bg: 'bg-blue-100', color: 'text-blue-600' };
 };
 
-const isBranchOrder = (o, users = []) => {
-  if (!o) return false;
-  if (o.isWalkIn) return true;
-  const customer = (users || []).find(u => u._id === o.customerId);
-  const isStaffAccount = customer?.role === 'ShopAdmin' || customer?.role === 'SuperAdmin' || customer?.role === 'Operator' || (customer?.email || '').toLowerCase().includes('wowlaundry') || (customer?.name || '').toLowerCase().includes('wow laundry');
-  if (isStaffAccount) return true;
-  const combinedText = `${o.adminNotes || ''} ${o.customerAddress || ''} ${o.pickupAddress || ''} ${o.deliveryAddress || ''}`.toLowerCase();
-  return (
-    combinedText.includes('branch') ||
-    combinedText.includes('walk-in') ||
-    combinedText.includes('in-store') ||
-    combinedText.includes('counter') ||
-    combinedText.includes('drop-off')
-  );
-};
+// isBranchOrderCheck is imported from utils/orderUtils — single source of truth
+const isBranchOrder = (o, users = []) => isBranchOrderCheck(o, users);
 
 const stripeColor = (s) => {
   if (['PLACED', 'ACCEPTED'].includes(s)) return 'bg-red-500';

@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Clock, CreditCard, Phone, Truck, X, MapPin, Printer, MessageCircle, ChevronRight, Download, FileSpreadsheet, Calendar, CheckCircle2, Sparkles, ArrowUpDown, Scale, Trash2 } from 'lucide-react';
 import { useAppStore } from '../../../store/useAppStore';
 import { downloadOrdersReport } from '../../../utils/exportCsv';
+import { isBranchOrderCheck } from '../../../utils/orderUtils';
 
 const formatCatTitle = (it) => {
   const cat = (it?.categoryName || '').trim();
@@ -12,22 +13,6 @@ const formatCatTitle = (it) => {
   if (cat) return cat.toUpperCase();
   if (sub) return sub.toUpperCase();
   return 'GENERAL LAUNDRY';
-};
-
-export const isBranchOrderCheck = (order, users = []) => {
-  if (!order) return false;
-  if (order.isWalkIn) return true;
-  const customer = (users || []).find(u => u._id === order.customerId);
-  const isStaffAccount = customer?.role === 'ShopAdmin' || customer?.role === 'SuperAdmin' || customer?.role === 'Operator' || (customer?.email || '').toLowerCase().includes('wowlaundry') || (customer?.name || '').toLowerCase().includes('wow laundry');
-  if (isStaffAccount) return true;
-  const combinedText = `${order.adminNotes || ''} ${order.customerAddress || ''} ${order.pickupAddress || ''} ${order.deliveryAddress || ''}`.toLowerCase();
-  return (
-    combinedText.includes('branch') ||
-    combinedText.includes('walk-in') ||
-    combinedText.includes('in-store') ||
-    combinedText.includes('counter') ||
-    combinedText.includes('drop-off')
-  );
 };
 
 export default function OrderBoard({ 
@@ -505,7 +490,6 @@ export default function OrderBoard({
         <div className="space-y-6">
           {sortedOrders.map(order => {
             const customer = users.find(u => u._id === order.customerId);
-            const isStaffAccount = customer?.role === 'ShopAdmin' || customer?.role === 'SuperAdmin' || (customer?.email || '').toLowerCase().includes('wowlaundry') || (customer?.name || '').toLowerCase().includes('wow laundry');
             const isBranchOrder = isBranchOrderCheck(order, users);
 
             const customerName = (order.customerName && order.customerName !== 'Unknown Customer') 
