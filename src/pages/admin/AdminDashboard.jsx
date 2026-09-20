@@ -28,6 +28,22 @@ const SERVICE_LABEL_FOR_CATEGORY = (catName) => {
   return { label: 'Standard Wash & Fold', icon: 'WASH', bg: 'bg-blue-100', color: 'text-blue-600' };
 };
 
+const isBranchOrder = (o, users = []) => {
+  if (!o) return false;
+  if (o.isWalkIn) return true;
+  const customer = (users || []).find(u => u._id === o.customerId);
+  const isStaffAccount = customer?.role === 'ShopAdmin' || customer?.role === 'SuperAdmin' || customer?.role === 'Operator' || (customer?.email || '').toLowerCase().includes('wowlaundry') || (customer?.name || '').toLowerCase().includes('wow laundry');
+  if (isStaffAccount) return true;
+  const combinedText = `${o.adminNotes || ''} ${o.customerAddress || ''} ${o.pickupAddress || ''} ${o.deliveryAddress || ''}`.toLowerCase();
+  return (
+    combinedText.includes('branch') ||
+    combinedText.includes('walk-in') ||
+    combinedText.includes('in-store') ||
+    combinedText.includes('counter') ||
+    combinedText.includes('drop-off')
+  );
+};
+
 const stripeColor = (s) => {
   if (['PLACED', 'ACCEPTED'].includes(s)) return 'bg-red-500';
   if (s === 'PICKUP_ASSIGNED') return 'bg-purple-500';
@@ -45,12 +61,6 @@ export default function AdminDashboard() {
   } = useAppStore();
   
   const navigate = useNavigate();
-
-  // wowlaundry111@gmail.com should NEVER see the Admin Dashboard under any condition
-  if (currentUser?.email?.toLowerCase().trim() === 'wowlaundry111@gmail.com') {
-    return <Navigate to="/shop-select" replace />;
-  }
-
   const isSuperAdmin = currentUser?.role === 'SuperAdmin';
   
   // Default tab based on role and context
@@ -279,6 +289,15 @@ export default function AdminDashboard() {
 
   const navTabs = getNavTabs();
 
+  // wowlaundry111@gmail.com should NEVER see the Admin Dashboard under any condition
+  if (currentUser?.email?.toLowerCase().trim() === 'wowlaundry111@gmail.com') {
+    return <Navigate to="/shop-select" replace />;
+  }
+
+  if (!currentUser || (currentUser.role !== 'ShopAdmin' && currentUser.role !== 'SuperAdmin')) {
+    return null;
+  }
+
   return (
     <div className="min-h-screen bg-[#FAF7F2] flex flex-col font-sans">
       <Navbar />
@@ -368,8 +387,8 @@ export default function AdminDashboard() {
               tenantOrders={tenantOrders} 
               displayFilters={displayFilters} 
               counts={{
-                new: tenantOrders.filter(o => ['PLACED', 'ACCEPTED', 'PICKUP_ASSIGNED'].includes(o.status)).length,
-                washing: tenantOrders.filter(o => ['PICKED_UP', 'WASHING', 'IRONING'].includes(o.status)).length,
+                new: tenantOrders.filter(o => !isBranchOrder(o, users) && ['PLACED', 'ACCEPTED', 'PICKUP_ASSIGNED'].includes(o.status)).length,
+                washing: tenantOrders.filter(o => (isBranchOrder(o, users) && ['PLACED', 'ACCEPTED', 'PICKUP_ASSIGNED', 'PICKED_UP', 'WASHING', 'IRONING'].includes(o.status)) || (!isBranchOrder(o, users) && ['PICKED_UP', 'WASHING', 'IRONING'].includes(o.status))).length,
                 delivery: tenantOrders.filter(o => ['OUT_FOR_DELIVERY'].includes(o.status)).length,
                 history: tenantOrders.filter(o => ['DELIVERED'].includes(o.status)).length
               }} 

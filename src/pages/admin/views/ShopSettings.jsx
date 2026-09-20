@@ -675,7 +675,7 @@ export default function ShopSettings({
         {/* Current Staff List */}
         <div className="border-t-2 border-black pt-6">
           {(() => {
-            const allStaff = (branchStaff && branchStaff.length > 0) ? branchStaff : (deliveryBoys || []);
+            const allStaff = branchStaff || [];
             return (
               <>
                 <h3 className="font-black text-lg uppercase mb-4">Current Branch Staff ({allStaff.length})</h3>

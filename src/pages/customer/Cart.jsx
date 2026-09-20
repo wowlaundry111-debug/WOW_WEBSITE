@@ -201,7 +201,7 @@ export default function Cart() {
         name: walkInName.trim(),
         phone: walkInPhone.replace(/\D/g, ''),
         address: finalAddress,
-        isWalkIn: walkInMode === 'BRANCH_PICKUP',
+        isWalkIn: true,
       } : undefined
     );
     

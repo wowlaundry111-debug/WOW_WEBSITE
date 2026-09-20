@@ -3,7 +3,8 @@ import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { useAppStore } from '../../store/useAppStore';
 import { 
   Package, Clock, CheckCircle, Navigation, Sparkles, CreditCard, 
-  Phone, MessageCircle, XCircle, ChevronDown, ChevronUp, Scale, AlertCircle, AlertTriangle, Receipt 
+  Phone, MessageCircle, XCircle, ChevronDown, ChevronUp, Scale, AlertCircle, AlertTriangle, Receipt,
+  User, Store
 } from 'lucide-react';
 import Navbar from '../../components/Navbar';
 
@@ -163,6 +164,18 @@ export default function OrderHistory() {
               const canCancel = ['PLACED', 'ACCEPTED', 'PICKUP_ASSIGNED'].includes(order.status) && cancelRemainingMs > 0;
               const cancelMinsLeft = Math.ceil(cancelRemainingMs / 60000);
 
+              const isBranchOrder = Boolean(
+                order.isWalkIn ||
+                order.adminNotes?.toLowerCase().includes('branch') ||
+                order.adminNotes?.toLowerCase().includes('walk-in') ||
+                order.deliveryAddress?.toLowerCase().includes('branch') ||
+                order.deliveryAddress?.toLowerCase().includes('walk-in') ||
+                order.deliveryAddress?.toLowerCase().includes('in-store') ||
+                order.customerName
+              );
+              const displayCustomerName = order.customerName || (isBranchOrder ? 'Walk-in Customer' : '');
+              const displayCustomerPhone = order.customerPhone || '';
+
               return (
                 <div 
                   key={order._id} 
@@ -170,12 +183,20 @@ export default function OrderHistory() {
                 >
                   {/* Order Tab Header / Summary Dock */}
                   <div className="p-3.5 sm:p-5 border-b-2 border-black bg-gray-50 flex flex-col gap-3">
-                    {/* Top Row: Order ID, Date, Status */}
+                    {/* Top Row: Order ID, Branch/Head Name, Date, Status */}
                     <div className="flex items-center justify-between gap-2 flex-wrap">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
                         <span className="text-[10px] font-black text-black bg-[#9AE600] border border-black px-2 py-0.5 rounded-md uppercase tracking-wider">
                           #{order._id.slice(-6).toUpperCase()}
                         </span>
+                        <span className="text-[10px] font-black text-white bg-black border border-black px-2 py-0.5 rounded-md uppercase tracking-wider flex items-center gap-1 shadow-[1px_1px_0px_rgba(0,0,0,1)]">
+                          <Store size={11} className="text-[#9AE600]" /> WOW Laundry
+                        </span>
+                        {isBranchOrder && (
+                          <span className="text-[10px] font-black text-black bg-[#FEF08A] border border-black px-2 py-0.5 rounded-md uppercase tracking-wide">
+                            On-Branch Order
+                          </span>
+                        )}
                         <span className="text-xs font-bold text-gray-600">
                           {new Date(order.createdAt).toLocaleDateString()} · {new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </span>
@@ -185,6 +206,20 @@ export default function OrderHistory() {
                         {order.status.replace(/_/g, ' ')}
                       </span>
                     </div>
+
+                    {/* Customer Information Sub-row (so customer is immediately known at a glance) */}
+                    {(displayCustomerName || displayCustomerPhone) && (
+                      <div className="flex items-center gap-2 flex-wrap bg-white border-2 border-black px-3 py-1.5 rounded-xl shadow-[2px_2px_0px_rgba(0,0,0,1)] w-fit">
+                        <User size={13} className="text-[#0D8DE3]" strokeWidth={2.5} />
+                        <span className="text-[10px] font-black uppercase text-gray-500">Walk-in Customer:</span>
+                        <span className="text-xs font-black text-black uppercase">{displayCustomerName}</span>
+                        {displayCustomerPhone ? (
+                          <span className="text-xs font-bold text-gray-700 bg-gray-100 border border-gray-300 px-1.5 py-0.5 rounded">
+                            +91 {displayCustomerPhone}
+                          </span>
+                        ) : null}
+                      </div>
+                    )}
 
                     {/* Middle Row: Bill Total, Mode & Quick Help Icons */}
                     <div className="flex items-center justify-between gap-2 flex-wrap">
@@ -385,6 +420,51 @@ export default function OrderHistory() {
                           )}
                         </div>
                       </div>
+
+                      {/* On-Branch Customer Info Card */}
+                      {(displayCustomerName || displayCustomerPhone || isBranchOrder) && (
+                        <div className="bg-[#FAF7F2] border-2 border-black rounded-xl p-3.5 shadow-[2px_2px_0px_rgba(0,0,0,1)] flex flex-wrap justify-between items-center gap-3">
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="text-[10px] font-black bg-black text-[#9AE600] px-2 py-0.5 rounded border border-black uppercase tracking-wider flex items-center gap-1">
+                                <Store size={11} /> WOW Laundry
+                              </span>
+                              <span className="text-[10px] font-black text-[#0D8DE3] uppercase tracking-wider border border-[#0D8DE3] bg-blue-50 px-2 py-0.5 rounded">
+                                {isBranchOrder ? 'On-Branch Walk-in Order' : 'Order Customer'}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-bold text-gray-500 uppercase">Customer Name:</span>
+                              <span className="text-sm font-black text-black uppercase">{displayCustomerName || 'Walk-in Customer'}</span>
+                            </div>
+                            {displayCustomerPhone ? (
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs font-bold text-gray-500 uppercase">Customer Phone:</span>
+                                <span className="text-xs font-black text-black">+91 {displayCustomerPhone}</span>
+                              </div>
+                            ) : null}
+                          </div>
+
+                          {displayCustomerPhone ? (
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <a
+                                href={`tel:${displayCustomerPhone}`}
+                                className="px-3 py-1.5 bg-white hover:bg-black hover:text-white text-black border-2 border-black rounded-lg text-xs font-black uppercase flex items-center gap-1.5 shadow-[1px_1px_0px_rgba(0,0,0,1)] transition-colors"
+                              >
+                                <Phone size={12} strokeWidth={2.5} /> Call Customer
+                              </a>
+                              <a
+                                href={getWaLink(displayCustomerPhone, order._id)}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="px-3 py-1.5 bg-[#25D366] hover:bg-green-600 text-white border-2 border-black rounded-lg text-xs font-black uppercase flex items-center gap-1.5 shadow-[1px_1px_0px_rgba(0,0,0,1)] transition-colors"
+                              >
+                                <MessageCircle size={12} strokeWidth={2.5} /> WhatsApp
+                              </a>
+                            </div>
+                          ) : null}
+                        </div>
+                      )}
 
                       {/* Delivery Address & Pickup Slot */}
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2 border-t border-gray-200">

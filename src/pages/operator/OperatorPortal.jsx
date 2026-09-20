@@ -45,7 +45,6 @@ export default function OperatorPortal() {
     currentUser, 
     orders, 
     shops, 
-    users, 
     updateOrderStatus, 
     fetchOrders,
     setCurrentTenantId,
@@ -369,12 +368,24 @@ export default function OperatorPortal() {
                   <div>
                     <div className="bg-[#FAF7F2] border-b-3 border-black p-4 flex items-center justify-between">
                       <div>
-                        <span className="text-[10px] font-black uppercase text-gray-500 tracking-wider block">
-                          ORDER #{order._id.slice(-6).toUpperCase()}
-                        </span>
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className="text-[10px] font-black uppercase text-gray-500 tracking-wider block">
+                            ORDER #{order._id.slice(-6).toUpperCase()}
+                          </span>
+                          {order.isWalkIn && (
+                            <span className="text-[9px] font-black bg-black text-[#9AE600] px-1.5 py-0.5 rounded border border-black uppercase tracking-wider">
+                              Branch Order
+                            </span>
+                          )}
+                        </div>
                         <h3 className="font-black text-lg leading-tight uppercase mt-0.5">
                           {customerName}
                         </h3>
+                        {customerPhone ? (
+                          <span className="text-[11px] font-bold text-gray-600 block mt-0.5">
+                            +91 {customerPhone}
+                          </span>
+                        ) : null}
                       </div>
                       <span className={`px-2.5 py-1 border-2 font-black text-[11px] uppercase rounded-lg shadow-[1px_1px_0px_rgba(0,0,0,1)] ${badge.bg} ${badge.border}`}>
                         {badge.label}
@@ -567,10 +578,17 @@ export default function OperatorPortal() {
             <div className="p-6 space-y-5">
               {/* Customer Info */}
               <div className="p-3.5 bg-gray-50 border-2 border-black rounded-xl">
-                <h4 className="font-black text-sm uppercase text-gray-500 mb-1">Customer</h4>
-                <p className="font-black text-base">{selectedOrder.customerName || 'Customer'}</p>
+                <div className="flex items-center gap-2 mb-1 flex-wrap">
+                  <h4 className="font-black text-sm uppercase text-gray-500">
+                    {selectedOrder.isWalkIn ? 'Branch Walk-in Customer' : 'Customer'}
+                  </h4>
+                  <span className="text-[10px] font-black bg-black text-[#9AE600] px-2 py-0.5 rounded border border-black uppercase tracking-wider">
+                    WOW Laundry
+                  </span>
+                </div>
+                <p className="font-black text-base uppercase">{selectedOrder.customerName || 'Customer'}</p>
                 {selectedOrder.customerPhone && (
-                  <p className="font-bold text-xs text-gray-600 mt-0.5">Phone: +91 {selectedOrder.customerPhone}</p>
+                  <p className="font-bold text-xs text-gray-700 mt-0.5">Phone: +91 {selectedOrder.customerPhone}</p>
                 )}
                 <p className="font-bold text-xs text-gray-600 mt-0.5">
                   Pickup Slot: {selectedOrder.pickupTime || 'Standard'}

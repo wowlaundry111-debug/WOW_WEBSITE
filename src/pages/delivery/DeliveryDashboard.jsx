@@ -151,7 +151,8 @@ export default function DeliveryDashboard() {
           ) : (
             displayOrders.map(order => {
               const customer = users.find(u => u._id === order.customerId);
-              const customerName = customer?.name || order.customerName || 'Unknown Customer';
+              const isStaff = customer?.role === 'ShopAdmin' || customer?.role === 'SuperAdmin' || (customer?.email || '').toLowerCase().includes('wowlaundry');
+              const customerName = (isStaff && order.customerName) ? order.customerName : (order.customerName || customer?.name || 'Unknown Customer');
               const displayAddress = (activeTab === 'PICKUP' ? order.pickupAddress : order.deliveryAddress) || customer?.address || 'No Address Provided';
               const hasKgItems = order.items.some(it => it.unit === 'KG');
 
@@ -239,7 +240,8 @@ export default function DeliveryDashboard() {
               <div className="space-y-3">
                 {pastOrders.slice(0, 5).map(order => {
                   const customer = users.find(u => u._id === order.customerId);
-                  const customerName = customer?.name || order.customerName || 'Unknown Customer';
+                  const isStaff = customer?.role === 'ShopAdmin' || customer?.role === 'SuperAdmin' || (customer?.email || '').toLowerCase().includes('wowlaundry');
+                  const customerName = (isStaff && order.customerName) ? order.customerName : (order.customerName || customer?.name || 'Unknown Customer');
                   
                   return (
                     <div key={order._id} className="bg-white p-4 border-2 border-black flex justify-between items-center shadow-[2px_2px_0px_rgba(0,0,0,1)]">
@@ -486,6 +488,7 @@ export default function DeliveryDashboard() {
                 });
 
                 const itemSubtotal = perItemSubtotal + kgTotal;
+                const prefsTotal = Number(weighModalOrder.washPreferencesFee || weighModalOrder.addonTotal || 0);
                 const shop = shops.find(s => s._id === weighModalOrder.shopId);
                 let liveDiscount = Number(weighModalOrder.discountAmount) || 0;
 

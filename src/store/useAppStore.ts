@@ -788,10 +788,12 @@ export const useAppStore = create<AppState>()(
             (typeof c.name === 'string' && (c.name.toLowerCase().includes('per kg') || c.name.toLowerCase().includes('/ kg')));
           if (!isKg) return c;
           const validWeight = Math.max(0, Number(kgWeight) || 0);
-          const rate = Number(c.pricePerKg) || Number(c.price) || 0;
-          const calculatedPrice = validWeight > 0 ? Math.round(validWeight * rate * 100) / 100 : 0;
+          const baseRate = Number(c.pricePerKg) || (c as any).baseUnitPrice || Number(c.price) || 0;
+          const calculatedPrice = validWeight > 0 ? Math.round(validWeight * baseRate * 100) / 100 : 0;
           return {
             ...c,
+            pricePerKg: c.pricePerKg || baseRate,
+            baseUnitPrice: (c as any).baseUnitPrice || baseRate,
             kgWeight: validWeight > 0 ? validWeight : undefined,
             price: calculatedPrice,
           };
@@ -907,13 +909,17 @@ export const useAppStore = create<AppState>()(
         try {
           const shop = get().shops.find(s => s._id === currentTenantId);
           const taxPercent = shop?.taxPercent || 0;
-          const isWalkIn = walkInCustomer?.isWalkIn ?? (
-            typeof effectiveAddress === 'string' && (
+          const isWalkIn = Boolean(
+            walkInCustomer?.isWalkIn ||
+            Boolean(walkInCustomer && (walkInCustomer.name || walkInCustomer.phone)) ||
+            (currentUser?.role === 'SuperAdmin' || currentUser?.role === 'ShopAdmin' || currentUser?.role === 'Operator' || currentUser?.email?.toLowerCase().trim() === 'wowlaundry111@gmail.com') ||
+            (typeof effectiveAddress === 'string' && (
               effectiveAddress.toLowerCase().includes('walk-in') ||
               effectiveAddress.toLowerCase().includes('branch') ||
               effectiveAddress.toLowerCase().includes('in-store') ||
-              effectiveAddress.toLowerCase().includes('counter')
-            )
+              effectiveAddress.toLowerCase().includes('counter') ||
+              effectiveAddress.toLowerCase().includes('drop-off')
+            ))
           );
           const deliveryFeeAmt = isWalkIn ? 0 : ((shop?.deliveryFee !== undefined && shop?.deliveryFee !== null) ? Number(shop.deliveryFee) : 0);
           const tax = (perItemSubtotal * taxPercent) / 100;
@@ -941,7 +947,14 @@ export const useAppStore = create<AppState>()(
             customerAddress: effectiveAddress,
             isWalkIn,
           });
-          const newOrder = res.data;
+          const rawOrder = res.data;
+          const newOrder = {
+            ...rawOrder,
+            status: rawOrder.status || (isWalkIn ? 'PICKED_UP' : 'PLACED'),
+            customerName: rawOrder.customerName || walkInCustomer?.name || currentUser?.name || 'Customer',
+            customerPhone: rawOrder.customerPhone || walkInCustomer?.phone || currentUser?.phone || '',
+            isWalkIn: rawOrder.isWalkIn ?? isWalkIn,
+          };
           invalidateCache('/orders');
 
           set(state => {

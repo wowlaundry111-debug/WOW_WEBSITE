@@ -158,6 +158,9 @@ export interface Order {
   deliveryAddress?: string;
   pickupTime?: string;
   adminNotes?: string;
+  isWalkIn?: boolean;
+  shopPhone?: string;
+  deliveryBoyPhone?: string;
   createdAt: string;
   updatedAt: string;
 }

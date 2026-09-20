@@ -14,6 +14,22 @@ const formatCatTitle = (it) => {
   return 'GENERAL LAUNDRY';
 };
 
+export const isBranchOrderCheck = (order, users = []) => {
+  if (!order) return false;
+  if (order.isWalkIn) return true;
+  const customer = (users || []).find(u => u._id === order.customerId);
+  const isStaffAccount = customer?.role === 'ShopAdmin' || customer?.role === 'SuperAdmin' || customer?.role === 'Operator' || (customer?.email || '').toLowerCase().includes('wowlaundry') || (customer?.name || '').toLowerCase().includes('wow laundry');
+  if (isStaffAccount) return true;
+  const combinedText = `${order.adminNotes || ''} ${order.customerAddress || ''} ${order.pickupAddress || ''} ${order.deliveryAddress || ''}`.toLowerCase();
+  return (
+    combinedText.includes('branch') ||
+    combinedText.includes('walk-in') ||
+    combinedText.includes('in-store') ||
+    combinedText.includes('counter') ||
+    combinedText.includes('drop-off')
+  );
+};
+
 export default function OrderBoard({ 
   tenantOrders = [], 
   displayFilters, 
@@ -155,7 +171,18 @@ export default function OrderBoard({
   }, [tenantOrders]);
 
   const currentFilter = displayFilters.find(f => f.key === activeFilter) || displayFilters[0];
-  const filteredOrders = uniqueTenantOrders.filter(o => currentFilter.statuses.includes(o.status));
+  const filteredOrders = uniqueTenantOrders.filter(o => {
+    const isBranch = isBranchOrderCheck(o, users);
+    // On-branch / walk-in orders NEVER belong in 'new' (New Orders) queue
+    if (activeFilter === 'new' && isBranch) {
+      return false;
+    }
+    // On-branch orders immediately belong in 'washing' (In Wash Cycle)
+    if (activeFilter === 'washing' && isBranch && ['PLACED', 'ACCEPTED', 'PICKUP_ASSIGNED', 'PICKED_UP', 'WASHING', 'IRONING'].includes(o.status)) {
+      return true;
+    }
+    return currentFilter.statuses.includes(o.status);
+  });
 
   // Compute sorted orders based on active sortBy selection
   const sortedOrders = useMemo(() => {
@@ -289,8 +316,9 @@ export default function OrderBoard({
   const handlePrintOrder = (order) => {
     if (!order) return;
     const customer = users.find(u => u._id === order.customerId) || {};
-    const customerName = customer.name || order.customerName || 'Customer';
-    const customerPhone = customer.phone || order.customerPhone || 'N/A';
+    const isBranchOrder = isBranchOrderCheck(order, users);
+    const customerName = (order.customerName && order.customerName !== 'Unknown Customer') ? order.customerName : (customer.name || 'Customer');
+    const customerPhone = (order.customerPhone && order.customerPhone !== 'N/A') ? order.customerPhone : (customer.phone || 'N/A');
     const shop = shops.find(s => s._id === order.shopId) || {};
     const shopName = shop.name || 'WOW Laundry Express';
 
@@ -360,9 +388,10 @@ export default function OrderBoard({
 
             <div class="grid">
               <div class="box">
-                <strong style="text-transform: uppercase; color: #666; font-size: 10px;">Customer Details</strong><br/>
+                <strong style="text-transform: uppercase; color: #666; font-size: 10px;">${isBranchOrder ? 'Walk-in Customer Details' : 'Customer Details'}</strong><br/>
                 <strong style="font-size: 14px;">${customerName}</strong><br/>
                 <span>Phone: ${customerPhone}</span>
+                ${isBranchOrder ? '<br/><span style="font-size: 10px; color: #0D8DE3; font-weight: bold;">(On-Branch Order • WOW Laundry)</span>' : ''}
               </div>
               <div class="box">
                 <strong style="text-transform: uppercase; color: #666; font-size: 10px;">Delivery Address</strong><br/>
@@ -476,8 +505,15 @@ export default function OrderBoard({
         <div className="space-y-6">
           {sortedOrders.map(order => {
             const customer = users.find(u => u._id === order.customerId);
-            const customerName = customer?.name || order.customerName || 'Unknown Customer';
-            const customerPhone = customer?.phone || order.customerPhone || 'N/A';
+            const isStaffAccount = customer?.role === 'ShopAdmin' || customer?.role === 'SuperAdmin' || (customer?.email || '').toLowerCase().includes('wowlaundry') || (customer?.name || '').toLowerCase().includes('wow laundry');
+            const isBranchOrder = isBranchOrderCheck(order, users);
+
+            const customerName = (order.customerName && order.customerName !== 'Unknown Customer') 
+              ? order.customerName 
+              : (customer?.name || 'Customer');
+            const customerPhone = (order.customerPhone && order.customerPhone !== 'N/A')
+              ? order.customerPhone
+              : (customer?.phone || 'N/A');
             
             return (
               <div key={order._id} className="bg-white border-2 border-black rounded-xl shadow-[4px_4px_0px_rgba(0,0,0,1)] flex overflow-hidden group cursor-pointer hover:translate-y-[-2px] transition-transform" onClick={() => handleOpenModal(order)}>
@@ -491,8 +527,20 @@ export default function OrderBoard({
                         <span className="font-black text-lg">{customerName.charAt(0).toUpperCase()}</span>
                       </div>
                       <div>
-                        <p className="font-black text-xs text-gray-400 uppercase tracking-widest">ORDER #{order._id.slice(-6).toUpperCase()}</p>
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <p className="font-black text-xs text-gray-400 uppercase tracking-widest">ORDER #{order._id.slice(-6).toUpperCase()}</p>
+                          {isBranchOrder && (
+                            <span className="text-[10px] font-black bg-black text-[#9AE600] px-2 py-0.5 rounded border border-black uppercase tracking-wider">
+                              WOW Laundry • Branch Order
+                            </span>
+                          )}
+                        </div>
                         <h3 className="font-black text-xl leading-none mt-1">{customerName}</h3>
+                        {isBranchOrder && customerPhone && customerPhone !== 'N/A' && (
+                          <p className="font-bold text-xs text-gray-600 mt-1">
+                            Walk-in Phone: <span className="text-black font-black">+91 {customerPhone}</span>
+                          </p>
+                        )}
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
@@ -665,66 +713,107 @@ export default function OrderBoard({
                   )}
 
                   <div className="flex gap-2" onClick={e => e.stopPropagation()}>
-                    {(order.status === 'PLACED' || order.status === 'ACCEPTED') && (
+                    {isBranchOrder && ['PLACED', 'ACCEPTED', 'PICKUP_ASSIGNED', 'PICKED_UP'].includes(order.status) ? (
                       <div className="flex gap-2 w-full">
-                        {order.items?.some(it => isKgItem(it)) ? (
-                          <button 
-                            onClick={() => handleOpenWeighModal(order)}
-                            className="flex-1 bg-[#9AE600] text-black border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] py-2 font-black uppercase text-xs sm:text-sm hover:translate-y-[1px] hover:shadow-[1px_1px_0px_rgba(0,0,0,1)] transition-all flex justify-center items-center gap-1.5"
-                          >
-                            <Scale size={15}/> Weigh & Pick Up
-                          </button>
-                        ) : (
-                          <button 
-                            onClick={() => handleStatusUpdate(order._id, 'PICKED_UP')}
-                            className="flex-1 bg-[#9AE600] text-black border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] py-2 font-black uppercase text-xs sm:text-sm hover:translate-y-[1px] hover:shadow-[1px_1px_0px_rgba(0,0,0,1)] transition-all flex justify-center items-center gap-1.5"
-                          >
-                            <CheckCircle2 size={15}/> Mark Picked Up
-                          </button>
-                        )}
                         <button 
-                          onClick={() => handleAssign(order._id)}
-                          className="px-3 bg-white text-black border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] py-2 font-black uppercase text-xs hover:bg-gray-100 transition-all flex items-center gap-1"
+                          onClick={() => handleStatusUpdate(order._id, 'WASHING')}
+                          className="flex-1 bg-[#FDE047] text-black border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] py-2 font-black uppercase text-xs sm:text-sm hover:translate-y-[1px] hover:shadow-[1px_1px_0px_rgba(0,0,0,1)] transition-all flex justify-center items-center gap-1.5"
                         >
-                          <Truck size={14}/> Assign
+                          <Sparkles size={15}/> Start Washing
                         </button>
-                      </div>
-                    )}
-                    {order.status === 'PICKUP_ASSIGNED' && (
-                      <div className="flex gap-2 w-full">
-                        {order.items?.some(it => isKgItem(it)) && !order.kgPriceUpdated ? (
-                          <button 
-                            onClick={() => handleOpenWeighModal(order)}
-                            className="flex-1 bg-[#9AE600] text-black border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] py-2 font-black uppercase text-xs sm:text-sm hover:translate-y-[1px] hover:shadow-[1px_1px_0px_rgba(0,0,0,1)] transition-all flex justify-center items-center gap-1.5"
-                          >
-                            <Scale size={15}/> Weigh & Pick Up
-                          </button>
-                        ) : (
-                          <button 
-                            onClick={() => handleStatusUpdate(order._id, 'PICKED_UP')}
-                            className="flex-1 bg-[#9AE600] text-black border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] py-2 font-black uppercase text-xs sm:text-sm hover:translate-y-[1px] hover:shadow-[1px_1px_0px_rgba(0,0,0,1)] transition-all flex justify-center items-center gap-1.5"
-                          >
-                            Mark Picked Up (To Wash)
-                          </button>
-                        )}
                         {order.items?.some(it => isKgItem(it)) && (
                           <button 
                             onClick={() => handleOpenWeighModal(order)}
-                            className="px-2.5 bg-yellow-200 text-black border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] py-2 font-black uppercase text-xs hover:bg-yellow-300 transition-all flex items-center gap-1"
-                            title="Weigh Clothes"
+                            className="px-3 bg-yellow-200 text-black border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] py-2 font-black uppercase text-xs hover:bg-yellow-300 transition-all flex items-center gap-1"
+                            title="Adjust Weight & Recalculate"
                           >
-                            <Scale size={13}/>
+                            <Scale size={15}/>
                           </button>
                         )}
-                        <button 
-                          onClick={() => handleAssign(order._id)}
-                          className="px-3 bg-white text-black border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] py-2 font-black uppercase text-xs hover:bg-gray-100 transition-all flex items-center gap-1"
-                        >
-                          <Truck size={14} /> Reassign
-                        </button>
                       </div>
+                    ) : (
+                      <>
+                        {(order.status === 'PLACED' || order.status === 'ACCEPTED') && (
+                          <div className="flex gap-2 w-full">
+                            {order.items?.some(it => isKgItem(it)) ? (
+                              <button 
+                                onClick={() => handleOpenWeighModal(order)}
+                                className="flex-1 bg-[#9AE600] text-black border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] py-2 font-black uppercase text-xs sm:text-sm hover:translate-y-[1px] hover:shadow-[1px_1px_0px_rgba(0,0,0,1)] transition-all flex justify-center items-center gap-1.5"
+                              >
+                                <Scale size={15}/> Weigh & Pick Up
+                              </button>
+                            ) : (
+                              <button 
+                                onClick={() => handleStatusUpdate(order._id, 'PICKED_UP')}
+                                className="flex-1 bg-[#9AE600] text-black border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] py-2 font-black uppercase text-xs sm:text-sm hover:translate-y-[1px] hover:shadow-[1px_1px_0px_rgba(0,0,0,1)] transition-all flex justify-center items-center gap-1.5"
+                              >
+                                <CheckCircle2 size={15}/> Mark Picked Up
+                              </button>
+                            )}
+                            <button 
+                              onClick={() => handleAssign(order._id)}
+                              className="px-3 bg-white text-black border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] py-2 font-black uppercase text-xs hover:bg-gray-100 transition-all flex items-center gap-1"
+                            >
+                              <Truck size={14}/> Assign
+                            </button>
+                          </div>
+                        )}
+                        {order.status === 'PICKUP_ASSIGNED' && (
+                          <div className="flex gap-2 w-full">
+                            {order.items?.some(it => isKgItem(it)) && !order.kgPriceUpdated ? (
+                              <button 
+                                onClick={() => handleOpenWeighModal(order)}
+                                className="flex-1 bg-[#9AE600] text-black border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] py-2 font-black uppercase text-xs sm:text-sm hover:translate-y-[1px] hover:shadow-[1px_1px_0px_rgba(0,0,0,1)] transition-all flex justify-center items-center gap-1.5"
+                              >
+                                <Scale size={15}/> Weigh & Pick Up
+                              </button>
+                            ) : (
+                              <button 
+                                onClick={() => handleStatusUpdate(order._id, 'PICKED_UP')}
+                                className="flex-1 bg-[#9AE600] text-black border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] py-2 font-black uppercase text-xs sm:text-sm hover:translate-y-[1px] hover:shadow-[1px_1px_0px_rgba(0,0,0,1)] transition-all flex justify-center items-center gap-1.5"
+                              >
+                                Mark Picked Up (To Wash)
+                              </button>
+                            )}
+                            {order.items?.some(it => isKgItem(it)) && (
+                              <button 
+                                onClick={() => handleOpenWeighModal(order)}
+                                className="px-2.5 bg-yellow-200 text-black border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] py-2 font-black uppercase text-xs hover:bg-yellow-300 transition-all flex items-center gap-1"
+                                title="Weigh Clothes"
+                              >
+                                <Scale size={13}/>
+                              </button>
+                            )}
+                            <button 
+                              onClick={() => handleAssign(order._id)}
+                              className="px-3 bg-white text-black border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] py-2 font-black uppercase text-xs hover:bg-gray-100 transition-all flex items-center gap-1"
+                            >
+                              <Truck size={14} /> Reassign
+                            </button>
+                          </div>
+                        )}
+                        {order.status === 'PICKED_UP' && (
+                          <div className="flex gap-2 w-full">
+                            <button 
+                              onClick={() => handleStatusUpdate(order._id, 'WASHING')}
+                              className="flex-1 bg-[#FDE047] text-black border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] py-2 font-black uppercase text-xs sm:text-sm hover:translate-y-[1px] hover:shadow-[1px_1px_0px_rgba(0,0,0,1)] transition-all flex justify-center items-center gap-1.5"
+                            >
+                              <Sparkles size={15}/> Start Washing
+                            </button>
+                            {order.items?.some(it => isKgItem(it)) && (
+                              <button 
+                                onClick={() => handleOpenWeighModal(order)}
+                                className="px-3 bg-yellow-100 text-black border-2 border-black shadow-[2px_2px_0px_rgba(0,0,0,1)] py-2 font-black uppercase text-xs hover:bg-yellow-200 transition-all flex items-center gap-1"
+                                title="Adjust Weight & Recalculate"
+                              >
+                                <Scale size={13}/> Edit Weight
+                              </button>
+                            )}
+                          </div>
+                        )}
+                      </>
                     )}
-                    {(order.status === 'PICKED_UP' || order.status === 'WASHING') && (
+                    {order.status === 'WASHING' && (
                       <div className="flex gap-2 w-full">
                         <button 
                           onClick={() => handleStatusUpdate(order._id, 'IRONING')}
@@ -1106,33 +1195,71 @@ export default function OrderBoard({
                   <span className="text-[10px] font-black uppercase text-gray-500 tracking-widest block">CONTACT & LOGISTICS</span>
                   <h3 className="text-base font-black uppercase tracking-wide">Customer & Delivery Details</h3>
                 </div>
-
                 {/* Customer Contact Card */}
-                <div className="flex flex-wrap justify-between items-center bg-gray-50 border-2 border-black p-4 rounded-xl gap-3">
-                  <div>
-                    <span className="text-[10px] font-black uppercase text-gray-500 block">Customer Name</span>
-                    <h4 className="font-black text-lg text-black">{users.find(u => u._id === selectedOrder.customerId)?.name || selectedOrder.customerName || 'Customer'}</h4>
-                    <p className="font-bold text-gray-600 text-sm flex items-center gap-1 mt-0.5">
-                      <Phone size={14}/> {users.find(u => u._id === selectedOrder.customerId)?.phone || selectedOrder.customerPhone || 'N/A'}
-                    </p>
-                  </div>
-                  <div className="flex gap-2">
-                    <a 
-                      href={`tel:${users.find(u => u._id === selectedOrder.customerId)?.phone || selectedOrder.customerPhone}`}
-                      className="px-3.5 py-2 bg-white border-2 border-black rounded-lg hover:bg-black hover:text-white transition-colors font-black text-xs uppercase flex items-center gap-1.5 shadow-[2px_2px_0px_rgba(0,0,0,1)]"
-                    >
-                      <Phone size={14}/> Call
-                    </a>
-                    <a 
-                      href={`https://wa.me/${users.find(u => u._id === selectedOrder.customerId)?.phone || selectedOrder.customerPhone}`}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="px-3.5 py-2 bg-[#9AE600] text-black border-2 border-black rounded-lg hover:bg-black hover:text-white transition-colors font-black text-xs uppercase flex items-center gap-1.5 shadow-[2px_2px_0px_rgba(0,0,0,1)]"
-                    >
-                      <MessageCircle size={14}/> WhatsApp
-                    </a>
-                  </div>
-                </div>
+                {(() => {
+                  const modalCustomerUser = users.find(u => u._id === selectedOrder.customerId);
+                  const isModalStaffAccount = modalCustomerUser?.role === 'ShopAdmin' || modalCustomerUser?.role === 'SuperAdmin' || (modalCustomerUser?.email || '').toLowerCase().includes('wowlaundry') || (modalCustomerUser?.name || '').toLowerCase().includes('wow laundry');
+                  const isModalBranchOrder = Boolean(
+                    selectedOrder.isWalkIn ||
+                    selectedOrder.adminNotes?.toLowerCase().includes('branch') ||
+                    selectedOrder.adminNotes?.toLowerCase().includes('walk-in') ||
+                    selectedOrder.deliveryAddress?.toLowerCase().includes('branch') ||
+                    selectedOrder.deliveryAddress?.toLowerCase().includes('walk-in') ||
+                    selectedOrder.deliveryAddress?.toLowerCase().includes('in-store') ||
+                    (isModalStaffAccount && selectedOrder.customerName && selectedOrder.customerName !== modalCustomerUser?.name)
+                  );
+
+                  const modalCustName = (selectedOrder.customerName && selectedOrder.customerName !== 'Unknown Customer')
+                    ? selectedOrder.customerName
+                    : (modalCustomerUser?.name || 'Customer');
+                  const modalCustPhone = (selectedOrder.customerPhone && selectedOrder.customerPhone !== 'N/A')
+                    ? selectedOrder.customerPhone
+                    : (modalCustomerUser?.phone || 'N/A');
+
+                  return (
+                    <div className="flex flex-wrap justify-between items-center bg-gray-50 border-2 border-black p-4 rounded-xl gap-3">
+                      <div>
+                        <div className="flex items-center gap-2 mb-1 flex-wrap">
+                          <span className="text-[10px] font-black uppercase text-gray-500 block">
+                            {isModalBranchOrder ? 'Branch Walk-in Customer' : 'Customer Name'}
+                          </span>
+                          <span className="text-[10px] font-black bg-black text-[#9AE600] px-2 py-0.5 rounded border border-black uppercase tracking-wider">
+                            Main Head: WOW Laundry
+                          </span>
+                        </div>
+                        <h4 className="font-black text-lg text-black uppercase">{modalCustName}</h4>
+                        <p className="font-bold text-gray-600 text-sm flex items-center gap-1 mt-0.5">
+                          <Phone size={14}/> +91 {modalCustPhone}
+                        </p>
+                        {isModalBranchOrder && (
+                          <p className="text-[11px] font-bold text-[#0D8DE3] mt-1">
+                            ✓ On-branch order: Walk-in customer registered at WOW Laundry branch counter
+                          </p>
+                        )}
+                      </div>
+                      <div className="flex gap-2">
+                        {modalCustPhone && modalCustPhone !== 'N/A' && (
+                          <>
+                            <a 
+                              href={`tel:${modalCustPhone}`}
+                              className="px-3.5 py-2 bg-white border-2 border-black rounded-lg hover:bg-black hover:text-white transition-colors font-black text-xs uppercase flex items-center gap-1.5 shadow-[2px_2px_0px_rgba(0,0,0,1)]"
+                            >
+                              <Phone size={14}/> Call
+                            </a>
+                            <a 
+                              href={`https://wa.me/${String(modalCustPhone).replace(/[^0-9]/g, '')}`}
+                              target="_blank" 
+                              rel="noreferrer"
+                              className="px-3.5 py-2 bg-[#9AE600] text-black border-2 border-black rounded-lg hover:bg-black hover:text-white transition-colors font-black text-xs uppercase flex items-center gap-1.5 shadow-[2px_2px_0px_rgba(0,0,0,1)]"
+                            >
+                              <MessageCircle size={14}/> WhatsApp
+                            </a>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })()}
 
                 {/* Addresses */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1179,8 +1306,38 @@ export default function OrderBoard({
                 </div>
               </div>
 
-              {/* Pickup & Wash Cycle Quick Action (Direct Admin Pickup) */}
-              {['PLACED', 'ACCEPTED', 'PICKUP_ASSIGNED'].includes(selectedOrder.status) && (
+              {/* Pickup & Wash Cycle Quick Action */}
+              {isBranchOrderCheck(selectedOrder, users) && ['PLACED', 'ACCEPTED', 'PICKUP_ASSIGNED', 'PICKED_UP'].includes(selectedOrder.status) ? (
+                <div className="border-4 border-black p-5 bg-[#FAF7F2] rounded-2xl shadow-[4px_4px_0px_rgba(0,0,0,1)] flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-[#0D8DE3] block">BRANCH WASH FLOOR</span>
+                    <h4 className="font-black text-lg uppercase">In-Branch Drop-off • Direct Wash Cycle</h4>
+                    <p className="text-xs font-bold text-gray-600">
+                      This order was dropped off directly at the branch. Advance directly to washing.
+                    </p>
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => {
+                        handleStatusUpdate(selectedOrder._id, 'WASHING');
+                        setSelectedOrder(prev => prev ? ({ ...prev, status: 'WASHING' }) : null);
+                      }}
+                      className="bg-[#FDE047] text-black font-black uppercase text-sm px-5 py-3 border-2 border-black shadow-[3px_3px_0px_rgba(0,0,0,1)] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_rgba(0,0,0,1)] transition-all flex items-center gap-2"
+                    >
+                      <Sparkles size={18} /> Start Washing
+                    </button>
+                    {selectedOrder.items?.some(it => isKgItem(it)) && (
+                      <button
+                        onClick={() => handleOpenWeighModal(selectedOrder)}
+                        className="bg-yellow-200 text-black font-black uppercase text-sm px-4 py-3 border-2 border-black shadow-[3px_3px_0px_rgba(0,0,0,1)] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_rgba(0,0,0,1)] transition-all flex items-center gap-1.5"
+                        title="Adjust Weight & Recalculate"
+                      >
+                        <Scale size={18} /> Weigh Garments
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ) : (['PLACED', 'ACCEPTED', 'PICKUP_ASSIGNED'].includes(selectedOrder.status) && (
                 <div className="border-4 border-black p-5 bg-[#FAF7F2] rounded-2xl shadow-[4px_4px_0px_rgba(0,0,0,1)] flex flex-wrap items-center justify-between gap-3">
                   <div>
                     <span className="text-[10px] font-black uppercase tracking-widest text-[#0D8DE3] block">PICKUP WORKFLOW</span>
@@ -1212,7 +1369,7 @@ export default function OrderBoard({
                     )}
                   </div>
                 </div>
-              )}
+              ))}
 
               {/* Admin Note / Adjust Price (In Wash Cycle) */}
               {['WASHING', 'PICKED_UP', 'IRONING'].includes(selectedOrder.status) && (
