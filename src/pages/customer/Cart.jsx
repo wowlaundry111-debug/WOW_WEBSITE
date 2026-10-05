@@ -193,6 +193,7 @@ export default function Cart() {
     setLoading(true);
     setError('');
     
+    const isSpecialBranchUser = currentUser?.email?.toLowerCase().trim() === 'wowlaundry111@gmail.com';
     const res = await placeOrder(
       finalAddress,
       pickupTime,
@@ -201,7 +202,7 @@ export default function Cart() {
         name: walkInName.trim(),
         phone: walkInPhone.replace(/\D/g, ''),
         address: finalAddress,
-        isWalkIn: true,
+        isWalkIn: isSpecialBranchUser,
       } : undefined
     );
     

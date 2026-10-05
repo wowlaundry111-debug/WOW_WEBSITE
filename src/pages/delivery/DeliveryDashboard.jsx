@@ -162,7 +162,7 @@ export default function DeliveryDashboard() {
                     <div>
                       <h3 className="font-black text-2xl uppercase">{customerName}</h3>
                       <p className="font-bold text-gray-500 text-sm uppercase tracking-widest mt-1">Order #{order._id.substring(order._id.length - 6)}</p>
-                      <p className="font-bold text-sm mt-2 flex items-center gap-1"><Clock size={14}/> {new Date(order.createdAt).toLocaleString([], {hour: '2-digit', minute:'2-digit'})}</p>
+                      <p className="font-bold text-sm mt-2 flex items-center gap-1"><Clock size={14}/> Placed: {new Date(order.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })} · {new Date(order.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', hour12: true})}</p>
                       {order.pickupTime && activeTab === 'PICKUP' && (
                         <p className="font-black text-[#0D8DE3] mt-1">Pickup: {order.pickupTime}</p>
                       )}

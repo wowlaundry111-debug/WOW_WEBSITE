@@ -653,7 +653,7 @@ export default function OrderBoard({
                   })()}
 
                   <div className="flex gap-4 mb-4 text-sm font-bold text-gray-600 flex-wrap items-center">
-                    <span className="flex items-center gap-1"><Clock size={16}/> {new Date(order.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                    <span className="flex items-center gap-1"><Clock size={16}/> {new Date(order.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })} · {new Date(order.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', hour12: true})}</span>
                     {(() => {
                       const hasKg = order.items.some(it => it.unit === 'KG');
                       if (hasKg && !order.kgPriceUpdated) {
@@ -966,6 +966,11 @@ export default function OrderBoard({
               <div>
                 <p className="font-black text-xs text-black uppercase tracking-widest">ORDER DETAILS</p>
                 <h2 className="text-2xl font-black uppercase">#{selectedOrder._id.slice(-6).toUpperCase()}</h2>
+                {selectedOrder.createdAt && (
+                  <p className="text-xs font-bold text-black/80 uppercase mt-0.5 flex items-center gap-1">
+                    <Clock size={12} /> Placed: {new Date(selectedOrder.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })} at {new Date(selectedOrder.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', hour12: true})}
+                  </p>
+                )}
               </div>
               <div className="flex items-center gap-2 sm:gap-3">
                 <button 

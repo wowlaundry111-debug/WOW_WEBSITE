@@ -397,7 +397,7 @@ export default function OperatorPortal() {
                       <div className="flex items-center justify-between text-xs font-bold text-gray-600 bg-gray-50 p-2.5 border-2 border-black rounded-xl">
                         <span className="flex items-center gap-1.5">
                           <Clock size={13} className="text-gray-500" />
-                          {new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          {new Date(order.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })} · {new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })}
                         </span>
                         {customerPhone && (
                           <div className="flex items-center gap-2">
